@@ -22,8 +22,6 @@ List listCreate() {
 
     list->first = NULL;
     list->last = NULL;
-    list->first->prev = NULL;
-    list->last->next = NULL;
 
     list->size = 0;
 
@@ -31,11 +29,24 @@ List listCreate() {
 
 }
 
+ListNode listCreateNode(Pointer value) {
+    ListNode new_node = malloc(sizeof(struct list_node));
+
+    new_node->value = value;
+
+    return new_node;
+}
+
 //προσθετουμε εναν κομβο στο τελος της λιστας, δεν μας ενδιαφερει να τον προσθεσουμε σε συγκεκριμενο σημειο
-void listInsert(List list, ListNode node, Pointer value) {
+void listInsert(List list, ListNode node) {
+
+    if(node == NULL) {
+        return;
+    }
     
     if(list->size == 0) { //κενη λιστα
         list->first = node;
+        list->last = node;
         node->next = NULL;
         node->prev = NULL;
     }
@@ -48,34 +59,83 @@ void listInsert(List list, ListNode node, Pointer value) {
         node->next = NULL;
     }
 
+
     list->size++;
 
 }
 
-void listDelete(List list, ListNode node){
+// void listRemove(List list, ListNode node){
 
-    ListNode prev = node->prev;
-    ListNode next = node->next;
+//     ListNode prev = node->prev;
+//     ListNode next = node->next;
 
-    //αν ο node ειναι ο πρωτος της λιστας πρεπει ο επομενος του να γινει πρωτος
-    if (node == list->first) {
-        list->first = next;
-    }
-    //αν ο node ειναι ο τελευταιος της λιστας πρεπει ο προηγουμενος του να γινει τελευταιος
-    else if (node == list->last){
-        list->last = prev;
-    }
+//     //αν ο node ειναι ο πρωτος της λιστας πρεπει ο επομενος του να γινει πρωτος
+//     if (node == list->first) {
+//         list->first = next;
+//     }
+//     //αν ο node ειναι ο τελευταιος της λιστας πρεπει ο προηγουμενος του να γινει τελευταιος
+//     else if (node == list->last){
+//         list->last = prev;
+//     }
 
-    //αν ο node βρισκεται ενδιαμεσα, πρεπει να συνδεσουμε τον προηγουμενο του με τον επομενο του
-    else{
-        prev->next = next;
-        next->prev = prev;
-    }
+//     //αν ο node βρισκεται ενδιαμεσα, πρεπει να συνδεσουμε τον προηγουμενο του με τον επομενο του
+//     else{
+//         prev->next = next;
+//         next->prev = prev;
+//     }
 
-    free(node);
-    list->size--;
+//     free(node);
+//     list->size--;
 
+// }
+
+
+
+
+
+// ListNode findNode(List list, Pointer value){
+
+// }
+
+int listSize(List list){
+    return list->size;
 }
+
+
+Pointer listNodeValue(List list, ListNode node){
+    return node->value;
+}
+
+
+void listDestroyValue(List list, ListNode node){
+    free(node->value);
+}
+
+void listDestroy(List list) {
+      
+    if (list->size != 0){   
+        ListNode node = list->first;
+
+        while(node != NULL) {
+            ListNode next = node->next;
+            listDestroyValue(list, node);
+            free(node);
+            node = next;
+        }
+    }
+
+    free(list);
+}
+
+ListNode listFirst(List list){
+    return list->first;
+}
+
+
+
+
+
+
 
 
 
