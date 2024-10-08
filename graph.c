@@ -31,20 +31,14 @@ Graph graphCreate(){
 }
 
 
-GraphNode graphCreateNode(char* user){
+void graphAdd(Graph graph, char* user){
     GraphNode graph_node = malloc(sizeof(struct graph_node));
 
     graph_node->user = user;
     graph_node->neighbors = listCreate();
-
-
-    return graph_node;
-}
-
-
-void graphAdd(Graph graph, GraphNode graph_node){
+    
     List list_nodes = graph->nodes;
-    listInsert(list_nodes, listCreateNode(graph_node));
+    listInsert(list_nodes, graph_node);
 
     graph->size ++;   
     
@@ -78,7 +72,7 @@ void graphDestroy(Graph graph){
 
     while(node != NULL) {
         GraphNode graph_node = listNodeValue(list, node);
-        node = node->next; 
+        // node = node->next; 
         graphDestroyNode(graph_node);
     }
    
@@ -87,5 +81,23 @@ void graphDestroy(Graph graph){
     free(graph);
 }
 
+bool graphContainsNode(Graph graph, GraphNode node){
+    if(node != NULL) {
+        List list = graph->nodes;
+        
+    }
+}
+
+/////////////// ΑΚΜΕΣ
+void addEdge(Graph graph, int amount, char* date, GraphNode source_node, GraphNode dest_node){
+
+    Edge new_edge = malloc(sizeof(struct edge));
+
+    new_edge->amount = amount;
+    new_edge->date = date;
+    new_edge->dest_node = dest_node;
+
+    List list = source_node->neighbors;
 
 
+}

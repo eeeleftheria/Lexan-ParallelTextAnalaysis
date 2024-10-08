@@ -6,23 +6,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
+#include <stdbool.h>
 
 typedef struct graph* Graph;
 typedef struct graph_node* GraphNode;
 typedef struct edge* Edge;
 
 Graph graphCreate();
-GraphNode graphCreateNode(char* user);
-void graphAdd(Graph graph, GraphNode node);
-
-int graphSize(Graph graph);
+void graphAdd(Graph graph, char* user); //δημιουργια και προσθηκη κομβου
+int graphSize(Graph graph); //επιστρεφει το μεγεθος του γραφου
 
 void graphDestroy(Graph graph);
 void graphDestroyNode(GraphNode graph_node);
 
-/////////////////////
+bool graphContainsNode(Graph graph, GraphNode node); //επιστρεφει true αν υπαρχει ο κομβος μεσα στο γραφο
+
+///////////////////// ΔΕΝ ΕΧΩ ΥΛΟΠΟΙΗΣΕΙ
 void graphPrint(Graph graph);
 void graphRemove(Graph graph, GraphNode node);
+
+//////// ΣΥΝΑΡΤΗΣΕΙΣ ΔΙΑΧΕΙΡΙΣΗΣ ΑΚΜΩΝ
+void addEdge(Graph graph, int amount, char* date, GraphNode source_node, GraphNode dest_node);
 
 
 

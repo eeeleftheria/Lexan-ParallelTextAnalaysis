@@ -7,6 +7,7 @@
 //////////////////////////////////////////
 
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef void* Pointer; //μπορουμε να αποθηκευσουμε οτι τυπο θελουμε αλλα ΟΧΙ να τον χρησιμοποιησουμε(να ορισουμε περιεχομενο)
 
@@ -17,17 +18,16 @@ typedef struct list_node* ListNode;
 
 
 List listCreate(); //δημιουργια κενης λιστας
-void listInsert(List list, ListNode node); //προσθηκη κομβου σε μια λιστα
+void listInsert(List list, Pointer value); //δημιουργια και προσθηκη κομβου σε μια λιστα με τιμη value
 void listRemove(List list, ListNode node); //αφαιρεση κομβου απο μια λιστα 
-ListNode listCreateNode(Pointer value);
-int listSize(List list);
-Pointer listNodeValue(List list, ListNode node);
-ListNode listFirst(List list);
-
+int listSize(List list); //επιστρεφει το μεγεθος της λιστας
+Pointer listNodeValue(List list, ListNode node); //επιστρεφει το value του κομβου
+ListNode listFirst(List list); //επιστρεφει το πρωτο στοιχειο της λιστας
+bool listContainsValue(List list, Pointer value); //επιστρεφει true αν υπαρχει κομβος με αυτο το value 
 
 /////////////
 void listDestroy(List list);
 void listDestroyValue(List list, ListNode node);
-ListNode findNode(List list, Pointer value);
+ListNode findNode(List list, Pointer value); //επιστρεφει αν βρεθει τον κομβο με τιμη value
 
 

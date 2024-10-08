@@ -29,34 +29,30 @@ List listCreate() {
 
 }
 
-ListNode listCreateNode(Pointer value) {
-    ListNode new_node = malloc(sizeof(struct list_node));
-
-    new_node->value = value;
-
-    return new_node;
-}
 
 //προσθετουμε εναν κομβο στο τελος της λιστας, δεν μας ενδιαφερει να τον προσθεσουμε σε συγκεκριμενο σημειο
-void listInsert(List list, ListNode node) {
+void listInsert(List list, Pointer value) {
 
-    if(node == NULL) {
+    ListNode new_node = malloc(sizeof(struct list_node));
+    new_node->value = value;
+
+    if(new_node == NULL) {
         return;
     }
     
     if(list->size == 0) { //κενη λιστα
-        list->first = node;
-        list->last = node;
-        node->next = NULL;
-        node->prev = NULL;
+        list->first = new_node;
+        list->last = new_node;
+        new_node->next = NULL;
+        new_node->prev = NULL;
     }
 
     else { //μη κενη λιστα: προσθετουμε στο τελος και συνδεουμε με τον προηγουμενο κομβο
     //ο prev του node θα ειναι ο παλιος last
-        list->last->next = node;
-        node->prev = list->last;
-        list->last = node;
-        node->next = NULL;
+        list->last->next = new_node;
+        new_node->prev = list->last;
+        list->last = new_node;
+        new_node->next = NULL;
     }
 
 
@@ -130,6 +126,12 @@ void listDestroy(List list) {
 ListNode listFirst(List list){
     return list->first;
 }
+
+
+bool listContainsNode(List list, Pointer value){
+    
+}
+
 
 
 
