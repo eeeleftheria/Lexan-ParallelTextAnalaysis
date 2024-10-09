@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "graph.h"
 #include "list.h"
+#include <string.h>
 
 
 struct graph{
@@ -34,7 +35,10 @@ Graph graphCreate(){
 void graphAdd(Graph graph, char* user){
     GraphNode graph_node = malloc(sizeof(struct graph_node));
 
-    graph_node->user = user;
+    graph_node->user = malloc(strlen(user + 1)); //me to \0
+    strcpy(graph_node->user, user);
+    // graph_node->user = user; oxi etsi!!!!!!!1
+
     graph_node->neighbors = listCreate();
     
     List list_nodes = graph->nodes;
@@ -67,15 +71,6 @@ void graphDestroyNode(GraphNode graph_node){
 
 //καταστροφη του γραφου
 void graphDestroy(Graph graph){
-    List list = graph->nodes;
-    ListNode node = listFirst(list);
-
-    while(node != NULL) {
-        GraphNode graph_node = listNodeValue(list, node);
-        // node = node->next; 
-        graphDestroyNode(graph_node);
-    }
-   
 
     listDestroy(graph->nodes);
     free(graph);

@@ -8,6 +8,7 @@
 #include "list.h"
 #include <stdbool.h>
 
+
 typedef struct graph* Graph;
 typedef struct graph_node* GraphNode;
 typedef struct edge* Edge;

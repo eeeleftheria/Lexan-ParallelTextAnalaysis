@@ -128,6 +128,12 @@ ListNode listFirst(List list){
 }
 
 
+ListNode listGetNext(ListNode node){
+    return node->next;
+
+}
+
+
 bool listContainsNode(List list, Pointer value){
     
 }

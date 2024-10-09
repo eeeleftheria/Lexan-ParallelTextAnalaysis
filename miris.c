@@ -20,6 +20,6 @@ int main() {
 
     printf("size is %d\n", graphSize(graph));
 
-    // graphDestroy(graph);
+    graphDestroy(graph);
 
 }
