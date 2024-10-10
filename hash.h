@@ -1,3 +1,6 @@
+#pragma once
+#include "graph.h"
+
 
 typedef struct hash_node* HashNode;
 typedef struct hash_table* HashTable;
@@ -19,6 +22,8 @@ Pointer hashFindListNodeWithKey(HashTable hash_table, int user);
 
 //αφαιρουμε εναν δεδομενο user απο το hash table
 void hashRemoveNodewithkey(HashTable hash_table, int user);
+
+void hashDestroy(HashTable hash_table);
 
 
 

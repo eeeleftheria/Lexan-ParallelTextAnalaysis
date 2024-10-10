@@ -21,4 +21,4 @@ run: $(EXEC)
 	./$(EXEC) 
 
 valgrind: $(EXEC)
-	valgrind ./$(EXEC)
+	 valgrind --leak-check=full ./$(EXEC)

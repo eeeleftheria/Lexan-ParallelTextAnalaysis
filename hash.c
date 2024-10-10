@@ -26,7 +26,6 @@ struct hash_table {
 
 struct hash_node{
 
-    // int key; ?????????????
     List list; //λιστα με ολα τα graphNodes που εχουν το ιδιο h(k)
 };
 
@@ -132,7 +131,38 @@ void hashRemoveNodewithkey(HashTable hash_table, int user){
 
     listRemove(list, hashFindListNodeWithKey(hash_table, user));
 
+
 }   
+
+//για την καταστροφη του hash table, διατρεχουμε τον πινακα και για καθε θεση του 
+//διατρεχουμε την αντιστοιχη λιστα, αφαιρωντας ολους τους pointers στα nodes
+//ΔΕΝ θελουμε να διαγραψουμε τα ιδια τα nodes, αφου αποτελουν graph nodes και
+//αυτο θα οδηγουσε σε double free!!!!!!!!!!!!
+void hashDestroy(HashTable hash_table){
+   
+    for(int i = 0; i < hash_table->size_of_array; i++) {
+        
+        if(hash_table->array[i] != NULL) {
+            List list = hash_table->array[i]->list;
+
+            if (listSize(list) != 0){
+
+            ListNode node = listFirst(list);
+
+                while(node != NULL) {
+                    ListNode next = listGetNext(node);
+                    free(node);
+                    node = next;
+                }
+            }
+            free(list);
+            free(hash_table->array[i]);
+        }
+    }
+    free(hash_table->array);
+    free(hash_table);
+}
+
 
 
 

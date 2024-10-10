@@ -104,18 +104,23 @@ Pointer listNodeValue(List list, ListNode node){
 }
 
 
-void listDestroyValue(List list, ListNode node){
-    free(node->value);
-}
+//τυπου DestroyFunc
+void listDestroyValue(List list, ListNode node, DestroyValueFunc func){
+    
+    func(node->value); //καταστρεφει μεκαταλληλο τροπο το καθε value
+    //για παραδειγμα αν εχουμε ως value graph nodes πρεπει να αποδεσμευει οτι στοιχειο εχει μεσα
+    //το graph node που πιανει χωρο στη μνημη και μετα να κανει free
+   
+    }
 
-void listDestroy(List list) {
+void listDestroy(List list, DestroyValueFunc func) {
       
     if (list->size != 0){   
         ListNode node = list->first;
 
         while(node != NULL) {
             ListNode next = node->next;
-            listDestroyValue(list, node);
+            listDestroyValue(list, node, func);
             free(node);
             node = next;
         }

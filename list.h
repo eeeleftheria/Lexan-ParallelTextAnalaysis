@@ -6,14 +6,18 @@
 // για την υλοποιηση του γραφου εμας μας ενδιαφερει μονο η εισαγωγη στο ΤΕΛΟΣ της λιστας και η διαγραφη οπουδηποτε
 //////////////////////////////////////////
 
+#pragma once
+
 #include <stdio.h>
 #include <stdbool.h>
 
 typedef void* Pointer; //μπορουμε να αποθηκευσουμε οτι τυπο θελουμε αλλα ΟΧΙ να τον χρησιμοποιησουμε(να ορισουμε περιεχομενο)
 
-
 typedef struct list* List; //List δεικτης σε struct list
 typedef struct list_node* ListNode;
+
+//η DestroyFunc ειναι δεικτης σε συναρτηση που καταστρεφει το value
+typedef void (*DestroyValueFunc)(Pointer value); 
 
 
 
@@ -27,8 +31,8 @@ bool listContainsValue(List list, Pointer value); //επιστρεφει true α
 ListNode listGetNext(ListNode node);
 
 /////////////
-void listDestroy(List list);
-void listDestroyValue(List list, ListNode node);
+void listDestroy(List list, DestroyValueFunc func);
+void listDestroyValue(List list, ListNode node, DestroyValueFunc func);
 ListNode findNodeWithValue(List list, Pointer value); //επιστρεφει αν βρεθει τον κομβο με τιμη value
 
 

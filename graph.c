@@ -22,6 +22,7 @@ struct edge{
     int amount; //το ποσο συναλλαγης
     char* date; //ημερομηνια συναλλαγης (μαζι με το ποσό αποτελουν το βαρος της ακμης)
     GraphNode dest_node; //ο προορισμος της συγκεκριμενης ακμης
+    GraphNode source_node;
 };
 
 
@@ -69,21 +70,27 @@ int graphSize(Graph graph){
     return listSize(list);
 }
 
-//καταστροφη ενος graph node
-void graphDestroyNode(GraphNode graph_node){
+//δεικτης σε συναρτηση που καταστρεφει ενα graph node
+//τυπου DestroyFunc
+void graphDestroyNode(Pointer graph_node){
    
-    listDestroy(graph_node->incoming_edges);
-    listDestroy(graph_node->outgoing_edges);
+    GraphNode node_to_destroy = (GraphNode)graph_node;
+
+    incomingEdgesDestroy(node_to_destroy);
+    outgoingEdgesDestroy(node_to_destroy);
+
     
     free(graph_node);
 }
 
-//καταστροφη του γραφου
-void graphDestroy(Graph graph){
+//κατα την καταστροφη του γραφου θελουμε να καταστρεφουμε καταλληλα
+//το value καθε κομβου
+void graphDestroy(Graph graph, DestroyValueFunc func){
 
-    listDestroy(graph->nodes);
+    listDestroy(graph->nodes, graphDestroyNode);
     free(graph);
 }
+
 
 bool graphContainsNode(Graph graph, GraphNode node){
     if(node != NULL) {
@@ -92,8 +99,16 @@ bool graphContainsNode(Graph graph, GraphNode node){
     }
 }
 
+
+
+int graphGetUser(GraphNode graph_node){
+    return graph_node->user;
+}
+
+
+
 /////////////// ΑΚΜΕΣ
-void addEdge(Graph graph, int amount, char* date, GraphNode source_node, GraphNode dest_node){
+void edgeAdd(Graph graph, int amount, char* date, GraphNode source_node, GraphNode dest_node){
 
     Edge new_edge = malloc(sizeof(struct edge));
 
@@ -106,7 +121,22 @@ void addEdge(Graph graph, int amount, char* date, GraphNode source_node, GraphNo
 
 }
 
-int graphGetUser(GraphNode graph_node){
-    return graph_node->user;
+void incomigEdgeDestroyValue(){
+
 }
+
+
+void outgoingEdgeDestroyValue(){
+
+}
+
+
+void incomingEdgesDestroy(GraphNode node){
+    listDestroy(node->incoming_edges, incomigEdgeDestroyValue);
+}
+
+void outgoingEdgesDestroy(GraphNode node){
+    listDestroy(node->outgoing_edges, outgoingEdgeDestroyValue);
+}
+
 
