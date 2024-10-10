@@ -17,6 +17,7 @@ typedef struct edge* Edge;
 Graph graphCreate();
 void graphAdd(Graph graph, int user, HashTable hash_table); //δημιουργια και προσθηκη κομβου
 int graphSize(Graph graph); //επιστρεφει το μεγεθος του γραφου
+int graphGetUser(GraphNode graph_node);
 
 void graphDestroy(Graph graph);
 void graphDestroyNode(GraphNode graph_node);
@@ -25,7 +26,7 @@ void graphDestroyNode(GraphNode graph_node);
 ///////////////////// ΔΕΝ ΕΧΩ ΥΛΟΠΟΙΗΣΕΙ
 void graphPrint(Graph graph);
 bool graphContainsNode(Graph graph, GraphNode node); //επιστρεφει true αν υπαρχει ο κομβος μεσα στο γραφο
-void graphRemove(Graph graph, GraphNode node);
+void graphRemove(Graph graph, int user);
 
 //////// ΣΥΝΑΡΤΗΣΕΙΣ ΔΙΑΧΕΙΡΙΣΗΣ ΑΚΜΩΝ
 void addEdge(Graph graph, int amount, char* date, GraphNode source_node, GraphNode dest_node);

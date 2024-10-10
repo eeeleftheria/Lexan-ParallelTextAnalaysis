@@ -20,8 +20,13 @@ int main() {
 
 
 
-    printf("size of list is %d\n", graphSize(graph));
-    printf("size of hash is %d\n", hashSize(hash_table));
+    // printf("size of list is %d\n", graphSize(graph));
+    // printf("size of hash is %d\n", hashSize(hash_table));
+
+    // GraphNode node = hashFindNodeWithKey(hash_table, 2);
+    // printf("node with key 2 is : %d\n\n", graphGetUser(node) );
+
+
     // graphDestroy(graph);
 
 }

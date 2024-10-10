@@ -29,6 +29,6 @@ ListNode listGetNext(ListNode node);
 /////////////
 void listDestroy(List list);
 void listDestroyValue(List list, ListNode node);
-ListNode findNode(List list, Pointer value); //επιστρεφει αν βρεθει τον κομβο με τιμη value
+ListNode findNodeWithValue(List list, Pointer value); //επιστρεφει αν βρεθει τον κομβο με τιμη value
 
 

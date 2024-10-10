@@ -13,5 +13,12 @@ HashTable hashCreate(int size);
 void hashAdd(HashTable hash_table, int key, Pointer value);
 int hashSize(HashTable hash_table);
 
+//για εναν δεδομενο user θελουμε να επιστρεψουμε τα στοιχεια του
+Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user);
+Pointer hashFindListNodeWithKey(HashTable hash_table, int user);
+
+//αφαιρουμε εναν δεδομενο user απο το hash table
+void hashRemoveNodewithkey(HashTable hash_table, int user);
+
 
 

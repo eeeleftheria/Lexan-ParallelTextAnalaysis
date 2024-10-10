@@ -53,13 +53,15 @@ void graphAdd(Graph graph, int user, HashTable hash_table){
     
 }
 
-// void graphRemove(Graph graph, GraphNode graph_node){
-//     List list_nodes = graph->nodes;
-//     listRemove(list_nodes, findNode(list_nodes, graph_node));
+void graphRemove(Graph graph, int user){
+   
+    List list_nodes = graph->nodes;
+    int* p = &user;
+    listRemove(list_nodes, findNodeWithValue(list_nodes, p));
 
-//     graph->size--;
+    graph->size--;
 
-// }
+}
 
 int graphSize(Graph graph){
     List list = graph->nodes;
@@ -103,3 +105,8 @@ void addEdge(Graph graph, int amount, char* date, GraphNode source_node, GraphNo
 
 
 }
+
+int graphGetUser(GraphNode graph_node){
+    return graph_node->user;
+}
+

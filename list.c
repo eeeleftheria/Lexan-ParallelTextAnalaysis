@@ -60,38 +60,39 @@ void listInsert(List list, Pointer value) {
 
 }
 
-// void listRemove(List list, ListNode node){
+void listRemove(List list, ListNode node){
 
-//     ListNode prev = node->prev;
-//     ListNode next = node->next;
+    ListNode prev = node->prev;
+    ListNode next = node->next;
 
-//     //αν ο node ειναι ο πρωτος της λιστας πρεπει ο επομενος του να γινει πρωτος
-//     if (node == list->first) {
-//         list->first = next;
-//     }
-//     //αν ο node ειναι ο τελευταιος της λιστας πρεπει ο προηγουμενος του να γινει τελευταιος
-//     else if (node == list->last){
-//         list->last = prev;
-//     }
+    //αν ο node ειναι ο πρωτος της λιστας πρεπει ο επομενος του να γινει πρωτος
+    if (node == list->first) {
+        list->first = next;
+    }
+    //αν ο node ειναι ο τελευταιος της λιστας πρεπει ο προηγουμενος του να γινει τελευταιος
+    else if (node == list->last){
+        list->last = prev;
+    }
 
-//     //αν ο node βρισκεται ενδιαμεσα, πρεπει να συνδεσουμε τον προηγουμενο του με τον επομενο του
-//     else{
-//         prev->next = next;
-//         next->prev = prev;
-//     }
+    //αν ο node βρισκεται ενδιαμεσα, πρεπει να συνδεσουμε τον προηγουμενο του με τον επομενο του
+    else{
+        prev->next = next;
+        next->prev = prev;
+    }
 
-//     free(node);
-//     list->size--;
+    free(node);
+    list->size--;
 
-// }
-
-
+}
 
 
 
-// ListNode findNode(List list, Pointer value){
 
-// }
+
+ListNode findNodeWithValue(List list, Pointer value){
+    
+
+}
 
 int listSize(List list){
     return list->size;

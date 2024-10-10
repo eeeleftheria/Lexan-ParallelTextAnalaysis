@@ -13,6 +13,7 @@
 #include <string.h>
 #include "list.h"
 #include "hash.h"
+#include "graph.h"
 
 
 
@@ -90,6 +91,50 @@ void hashAdd(HashTable hash_table, int key, Pointer value){
 int hashSize(HashTable hash_table){
     return hash_table->occupied_buckets;
 }
+
+//για εναν δεδομενο user θελουμε να επιστρεψουμε τα στοιχεια του
+Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user){
+    int pos = hashFunc(user, hash_table->size_of_array);
+
+    List list = hash_table->array[pos]->list;
+    //τα nodes της λιστας εχουν value graph node
+    //αρα πρεπει να βρουμε τον graph node του αντιστοιχου user
+    for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
+        GraphNode graph_node = listNodeValue(list, node);
+        
+        if(graphGetUser(graph_node) == user) {
+            return graph_node;
+        }
+    }
+}
+
+Pointer hashFindListNodeWithKey(HashTable hash_table, int user){
+    int pos = hashFunc(user, hash_table->size_of_array);
+
+    List list = hash_table->array[pos]->list;
+    //τα nodes της λιστας εχουν value graph node
+    //αρα πρεπει να βρουμε τον graph node του αντιστοιχου user
+    for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
+        GraphNode graph_node = listNodeValue(list, node);
+        
+        if(graphGetUser(graph_node) == user) {
+            return node;
+        }
+    }
+}
+
+
+
+void hashRemoveNodewithkey(HashTable hash_table, int user){
+    int pos = hashFunc(user, hash_table->size_of_array);
+
+    List list = hash_table->array[pos]->list;
+
+    listRemove(list, hashFindListNodeWithKey(hash_table, user));
+
+}   
+
+
 
 
 
