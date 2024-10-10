@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
+#include "hash.h"
 #include <stdbool.h>
 
 
@@ -14,7 +15,7 @@ typedef struct graph_node* GraphNode;
 typedef struct edge* Edge;
 
 Graph graphCreate();
-void graphAdd(Graph graph, int user); //δημιουργια και προσθηκη κομβου
+void graphAdd(Graph graph, int user, HashTable hash_table); //δημιουργια και προσθηκη κομβου
 int graphSize(Graph graph); //επιστρεφει το μεγεθος του γραφου
 
 void graphDestroy(Graph graph);

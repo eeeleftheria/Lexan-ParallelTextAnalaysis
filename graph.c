@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "graph.h"
 #include "list.h"
+#include "hash.h"
 #include <string.h>
 
 
@@ -33,7 +34,7 @@ Graph graphCreate(){
 }
 
 
-void graphAdd(Graph graph, int user){
+void graphAdd(Graph graph, int user, HashTable hash_table){
     GraphNode graph_node = malloc(sizeof(struct graph_node));
 
     graph_node->user = user;
@@ -44,6 +45,9 @@ void graphAdd(Graph graph, int user){
     
     List list_nodes = graph->nodes;
     listInsert(list_nodes, graph_node);
+
+    //θα προσθετουμε τον αντιστοιχο graph node και στο hash_table που μας δινεται
+    hashAdd(hash_table, user, graph_node);
 
     graph->size ++;   
     

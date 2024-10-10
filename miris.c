@@ -2,24 +2,26 @@
 #include <stdlib.h>
 #include "list.h"
 #include "graph.h"
+#include "hash.h"
 
 
 int main() {
+    HashTable hash_table = hashCreate(21);
 
-    char name[] = "eri";
-    char name2[] = "stef";
-    char name3[] = "koala";
+    int name = 1;
+    int name2 = 2;
+    int name3 = 3;
 
     Graph graph = graphCreate();
-    graphAdd(graph, name);
-    graphAdd(graph, name2);
-    graphAdd(graph, name3);
+    graphAdd(graph, name, hash_table);
+    graphAdd(graph, name2, hash_table);
+    graphAdd(graph, name3, hash_table);
 
 
 
 
-    printf("size is %d\n", graphSize(graph));
-
-    graphDestroy(graph);
+    printf("size of list is %d\n", graphSize(graph));
+    printf("size of hash is %d\n", hashSize(hash_table));
+    // graphDestroy(graph);
 
 }

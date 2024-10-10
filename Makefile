@@ -6,7 +6,7 @@ CC = gcc
 # Αρχεία .o
 
 
-OBJS = graph.o list.o miris.o
+OBJS = graph.o list.o miris.o hash.o
 
 # Το εκτελέσιμο πρόγραμμα
 EXEC = miris
