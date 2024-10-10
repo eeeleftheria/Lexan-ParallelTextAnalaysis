@@ -14,16 +14,16 @@ typedef struct graph_node* GraphNode;
 typedef struct edge* Edge;
 
 Graph graphCreate();
-void graphAdd(Graph graph, char* user); //δημιουργια και προσθηκη κομβου
+void graphAdd(Graph graph, int user); //δημιουργια και προσθηκη κομβου
 int graphSize(Graph graph); //επιστρεφει το μεγεθος του γραφου
 
 void graphDestroy(Graph graph);
 void graphDestroyNode(GraphNode graph_node);
 
-bool graphContainsNode(Graph graph, GraphNode node); //επιστρεφει true αν υπαρχει ο κομβος μεσα στο γραφο
 
 ///////////////////// ΔΕΝ ΕΧΩ ΥΛΟΠΟΙΗΣΕΙ
 void graphPrint(Graph graph);
+bool graphContainsNode(Graph graph, GraphNode node); //επιστρεφει true αν υπαρχει ο κομβος μεσα στο γραφο
 void graphRemove(Graph graph, GraphNode node);
 
 //////// ΣΥΝΑΡΤΗΣΕΙΣ ΔΙΑΧΕΙΡΙΣΗΣ ΑΚΜΩΝ

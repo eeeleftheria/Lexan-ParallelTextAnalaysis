@@ -11,14 +11,15 @@ struct graph{
 };
 
 struct graph_node{ 
-    char* user;
-    List neighbors; //η λιστα καθε κορυφης με τις γειτονικες της
+    int user;
+    List outgoing_edges; //αποθηκευει τις εξερχομενες ακμες του κομβου
+    List incoming_edges; //αποθηκευει τις εισερχομενες ακμες του κομβου
 };
 
 
 struct edge{
     int amount; //το ποσο συναλλαγης
-    char* date; //ημερομηνια συναλλαγης (μαζι με το ποσο αποτελουν το βαρος της ακμης)
+    char* date; //ημερομηνια συναλλαγης (μαζι με το ποσό αποτελουν το βαρος της ακμης)
     GraphNode dest_node; //ο προορισμος της συγκεκριμενης ακμης
 };
 
@@ -32,14 +33,14 @@ Graph graphCreate(){
 }
 
 
-void graphAdd(Graph graph, char* user){
+void graphAdd(Graph graph, int user){
     GraphNode graph_node = malloc(sizeof(struct graph_node));
 
-    graph_node->user = malloc(strlen(user + 1)); //me to \0
-    strcpy(graph_node->user, user);
-    // graph_node->user = user; oxi etsi!!!!!!!1
+    graph_node->user = user;
 
-    graph_node->neighbors = listCreate();
+    graph_node->outgoing_edges = listCreate();
+    graph_node->incoming_edges = listCreate();
+
     
     List list_nodes = graph->nodes;
     listInsert(list_nodes, graph_node);
@@ -64,8 +65,10 @@ int graphSize(Graph graph){
 
 //καταστροφη ενος graph node
 void graphDestroyNode(GraphNode graph_node){
-    free(graph_node->user);
-    listDestroy(graph_node->neighbors);
+   
+    listDestroy(graph_node->incoming_edges);
+    listDestroy(graph_node->outgoing_edges);
+    
     free(graph_node);
 }
 
@@ -92,7 +95,7 @@ void addEdge(Graph graph, int amount, char* date, GraphNode source_node, GraphNo
     new_edge->date = date;
     new_edge->dest_node = dest_node;
 
-    List list = source_node->neighbors;
+    // List list = source_node->neighbors;
 
 
 }
