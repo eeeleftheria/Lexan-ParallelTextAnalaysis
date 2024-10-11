@@ -60,7 +60,7 @@ void listInsert(List list, Pointer value) {
 
 }
 
-void listRemove(List list, ListNode node){
+void listRemove(List list, ListNode node, DestroyValueFunc func){
 
     ListNode prev = node->prev;
     ListNode next = node->next;
@@ -68,10 +68,12 @@ void listRemove(List list, ListNode node){
     //αν ο node ειναι ο πρωτος της λιστας πρεπει ο επομενος του να γινει πρωτος
     if (node == list->first) {
         list->first = next;
+        next->prev = NULL;
     }
     //αν ο node ειναι ο τελευταιος της λιστας πρεπει ο προηγουμενος του να γινει τελευταιος
     else if (node == list->last){
         list->last = prev;
+        prev->next = NULL;
     }
 
     //αν ο node βρισκεται ενδιαμεσα, πρεπει να συνδεσουμε τον προηγουμενο του με τον επομενο του
@@ -80,7 +82,10 @@ void listRemove(List list, ListNode node){
         next->prev = prev;
     }
 
+    func(node->value);
+
     free(node);
+    node = NULL;
     list->size--;
 
 }
@@ -89,10 +94,6 @@ void listRemove(List list, ListNode node){
 
 
 
-ListNode findNodeWithValue(List list, Pointer value){
-    
-
-}
 
 int listSize(List list){
     return list->size;
@@ -140,10 +141,20 @@ ListNode listGetNext(ListNode node){
 }
 
 
-bool listContainsNode(List list, Pointer value){
-    
-}
 
+
+
+ListNode findNodeWithValue(List list, Pointer value){
+    ListNode node;
+    
+    for(node = listFirst(list); node != NULL; node = listGetNext(node)){
+        
+        if (listNodeValue(list, node) == value) {
+            return node;
+        }    
+    }
+
+}
 
 
 

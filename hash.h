@@ -19,11 +19,13 @@ int hashSize(HashTable hash_table);
 //για εναν δεδομενο user θελουμε να επιστρεψουμε τα στοιχεια του
 Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user);
 Pointer hashFindListNodeWithKey(HashTable hash_table, int user);
+Pointer hashFindListNodeWithValue(HashTable hash_table, Pointer value);
 
 //αφαιρουμε εναν δεδομενο user απο το hash table
-void hashRemoveNodewithkey(HashTable hash_table, int user);
+void hashRemoveNodewithkey(HashTable hash_table, int user, DestroyValueFunc func);
 
 void hashDestroy(HashTable hash_table);
+void hashDestroyListNode(ListNode node);
 
 
 

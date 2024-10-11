@@ -23,7 +23,7 @@ typedef void (*DestroyValueFunc)(Pointer value);
 
 List listCreate(); //δημιουργια κενης λιστας
 void listInsert(List list, Pointer value); //δημιουργια και προσθηκη κομβου σε μια λιστα με τιμη value
-void listRemove(List list, ListNode node); //αφαιρεση κομβου απο μια λιστα 
+void listRemove(List list, ListNode node, DestroyValueFunc func); //αφαιρεση κομβου απο μια λιστα 
 int listSize(List list); //επιστρεφει το μεγεθος της λιστας
 Pointer listNodeValue(List list, ListNode node); //επιστρεφει το value του κομβου
 ListNode listFirst(List list); //επιστρεφει το πρωτο στοιχειο της λιστας

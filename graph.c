@@ -54,11 +54,18 @@ void graphAdd(Graph graph, int user, HashTable hash_table){
     
 }
 
-void graphRemove(Graph graph, int user){
+void graphRemove(Graph graph, int user, HashTable hash_table){
    
     List list_nodes = graph->nodes;
     int* p = &user;
-    listRemove(list_nodes, findNodeWithValue(list_nodes, p));
+    
+    //ευρεση του graph node μεσω hash για πιο γρηγορη αναζητηση 
+    GraphNode node_to_remove = hashFindGraphNodeWithKey(hash_table, user);
+    ListNode list_node = hashFindListNodeWithValue(hash_table, node_to_remove);
+
+    //πρεπει να διαγραψουμε το value node_to_remove του list node  και να κανουμε free τον κομβο της λιστας
+    listRemove(list_nodes, findNodeWithValue(list_nodes, node_to_remove), graphDestroyNode);
+
 
     graph->size--;
 
@@ -69,6 +76,13 @@ int graphSize(Graph graph){
     
     return listSize(list);
 }
+
+
+int graphGetUser(GraphNode graph_node){
+    return graph_node->user;
+}
+
+
 
 //δεικτης σε συναρτηση που καταστρεφει ενα graph node
 //τυπου DestroyFunc
@@ -92,22 +106,28 @@ void graphDestroy(Graph graph, DestroyValueFunc func){
 }
 
 
-bool graphContainsNode(Graph graph, GraphNode node){
-    if(node != NULL) {
-        List list = graph->nodes;
+
+
+void graphDisplay(Graph graph){
+    ListNode node;
+    List list = graph->nodes;
+    
+    for(node = listFirst(list); node != NULL; node = listGetNext(node)) {
         
+        GraphNode graph_node = listNodeValue(list, node);
+        printf("User with id '%d':\n", graph_node->user);
+
+        //ΠΡΕΠΕΙ ΝΑ ΕΚΤΥΠΩΝΩ ΚΑΙ ΤΙΣ ΑΚΜΕΣ (ΣΥΝΑΛΛΑΓΕΣ ΚΛΠ)
+
     }
 }
 
 
 
-int graphGetUser(GraphNode graph_node){
-    return graph_node->user;
-}
 
 
 
-/////////////// ΑΚΜΕΣ
+/////////////// ΑΚΜΕΣ ///////////////
 void edgeAdd(Graph graph, int amount, char* date, GraphNode source_node, GraphNode dest_node){
 
     Edge new_edge = malloc(sizeof(struct edge));

@@ -91,6 +91,8 @@ int hashSize(HashTable hash_table){
     return hash_table->occupied_buckets;
 }
 
+
+
 //για εναν δεδομενο user θελουμε να επιστρεψουμε τα στοιχεια του
 Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user){
     int pos = hashFunc(user, hash_table->size_of_array);
@@ -106,6 +108,8 @@ Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user){
         }
     }
 }
+
+
 
 Pointer hashFindListNodeWithKey(HashTable hash_table, int user){
     int pos = hashFunc(user, hash_table->size_of_array);
@@ -123,13 +127,18 @@ Pointer hashFindListNodeWithKey(HashTable hash_table, int user){
 }
 
 
+void hashDestroyValue(Pointer value){
 
-void hashRemoveNodewithkey(HashTable hash_table, int user){
+    //δεν θελουμε να καταστρεφει το value!!!!!!!!
+    //το κανει ηδη η graph remove
+}
+
+void hashRemoveNodewithkey(HashTable hash_table, int user, DestroyValueFunc func){
     int pos = hashFunc(user, hash_table->size_of_array);
 
     List list = hash_table->array[pos]->list;
 
-    listRemove(list, hashFindListNodeWithKey(hash_table, user));
+    listRemove(list, hashFindListNodeWithKey(hash_table, user), hashDestroyValue);
 
 
 }   
@@ -162,6 +171,17 @@ void hashDestroy(HashTable hash_table){
     free(hash_table->array);
     free(hash_table);
 }
+
+
+
+
+Pointer hashFindListNodeWithValue(HashTable hash_table, Pointer value){
+    
+    int user = graphGetUser(value);
+    ListNode node = hashFindListNodeWithKey(hash_table, user);
+    return node;
+}
+
 
 
 

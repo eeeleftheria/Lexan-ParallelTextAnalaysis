@@ -29,9 +29,8 @@ void graphDestroyNode(Pointer graph_node);
 
 
 ///////////////////// ΔΕΝ ΕΧΩ ΥΛΟΠΟΙΗΣΕΙ
-void graphPrint(Graph graph);
-bool graphContainsNode(Graph graph, GraphNode node); //επιστρεφει true αν υπαρχει ο κομβος μεσα στο γραφο
-void graphRemove(Graph graph, int user);
+void graphRemove(Graph graph, int user, HashTable hash_table);
+void graphDisplay(Graph graph);
 
 //////// ΣΥΝΑΡΤΗΣΕΙΣ ΔΙΑΧΕΙΡΙΣΗΣ ΑΚΜΩΝ
 void edgeAdd(Graph graph, int amount, char* date, GraphNode source_node, GraphNode dest_node);
