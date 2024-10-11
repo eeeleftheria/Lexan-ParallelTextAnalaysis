@@ -97,14 +97,20 @@ int hashSize(HashTable hash_table){
 Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user){
     int pos = hashFunc(user, hash_table->size_of_array);
 
-    List list = hash_table->array[pos]->list;
-    //τα nodes της λιστας εχουν value graph node
-    //αρα πρεπει να βρουμε τον graph node του αντιστοιχου user
-    for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
-        GraphNode graph_node = listNodeValue(list, node);
-        
-        if(graphGetUser(graph_node) == user) {
-            return graph_node;
+    if (hash_table->array[pos] == NULL) {
+        return NULL;
+    }
+    else{
+
+        List list = hash_table->array[pos]->list;
+        //τα nodes της λιστας εχουν value graph node
+        //αρα πρεπει να βρουμε τον graph node του αντιστοιχου user
+        for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
+            GraphNode graph_node = listNodeValue(list, node);
+            
+            if(graphGetUser(graph_node) == user) {
+                return graph_node;
+            }
         }
     }
 }

@@ -128,15 +128,35 @@ void graphDisplay(Graph graph){
 
 
 /////////////// ΑΚΜΕΣ ///////////////
-void edgeAdd(Graph graph, int amount, char* date, GraphNode source_node, GraphNode dest_node){
+void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user, HashTable hash_table){
 
     Edge new_edge = malloc(sizeof(struct edge));
 
     new_edge->amount = amount;
     new_edge->date = date;
-    new_edge->dest_node = dest_node;
 
-    // List list = source_node->neighbors;
+    //αν οι χρηστες(κορυφες) με ονομα source_user, dest_user αντιστοιχα δεν υπαρχουν,
+    //πρεπει να δημιουργηθουν
+    if(hashFindGraphNodeWithKey(hash_table, source_user) == NULL) {
+        printf("User with id '%d' added\n\n", source_user);
+        graphAdd(graph, source_user, hash_table);
+    }
+
+
+    if(hashFindGraphNodeWithKey(hash_table, dest_user) == NULL) {
+        printf("User with id '%d' added\n\n", dest_user);
+        graphAdd(graph, dest_user, hash_table);
+    }
+
+
+    new_edge->dest_node = hashFindGraphNodeWithKey(hash_table, dest_user);
+    new_edge->source_node = hashFindGraphNodeWithKey(hash_table, source_user);
+
+    listInsert(new_edge->dest_node->incoming_edges, new_edge);
+    listInsert(new_edge->source_node->outgoing_edges, new_edge);
+
+    printf("new transaction: user '%d' -> user '%d', amount = '%d'\n\n", source_user, dest_user, amount);
+
 
 
 }

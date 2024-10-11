@@ -33,7 +33,7 @@ void graphRemove(Graph graph, int user, HashTable hash_table);
 void graphDisplay(Graph graph);
 
 //////// ΣΥΝΑΡΤΗΣΕΙΣ ΔΙΑΧΕΙΡΙΣΗΣ ΑΚΜΩΝ
-void edgeAdd(Graph graph, int amount, char* date, GraphNode source_node, GraphNode dest_node);
+void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user, HashTable hash_table);
 
 ///////////////////// ΔΕΝ ΕΧΩ ΥΛΟΠΟΙΗΣΕΙ
 void edgeValueDestroy();
