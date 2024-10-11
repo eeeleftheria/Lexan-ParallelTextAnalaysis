@@ -131,7 +131,7 @@ void graphDisplay(Graph graph){
 void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user, HashTable hash_table){
 
     Edge new_edge = malloc(sizeof(struct edge));
-
+    
     new_edge->amount = amount;
     new_edge->date = date;
 
@@ -161,22 +161,78 @@ void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user
 
 }
 
-void incomigEdgeDestroyValue(){
+//ευρεση ακμης για συγκεκριμενο source, dest
+//καθως η ιδια ακμη υπαρχει στην λιστα incoming edges της κορυφης προορισμου
+//αλλα και στην λιστα outgoing edges της ακμης πηγης, αρκει η αναζητηση της σε μια μονο λιστα
+Edge edgeFind(Graph graph, int source_user, int dest_user, HashTable hash_table){
+
+    GraphNode source = hashFindGraphNodeWithKey(hash_table, source_user);
+    GraphNode dest = hashFindGraphNodeWithKey(hash_table, dest_user);
+
+    
+    List list = source->outgoing_edges;
+    ListNode node;
+    for(node = listFirst(list); node != NULL; 
+        node = listGetNext(node)){
+
+            Edge edge = listNodeValue(list, node);
+
+            //αν βρουμε την ακμη με τον δοθεν προορισμο, την επιστρεφουμε
+            if(edge->dest_node == dest) {
+                return edge;
+            }
+    }     
+}
+
+
+
+void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_table){
+    
+    GraphNode source = hashFindGraphNodeWithKey(hash_table, source_user);
+    GraphNode dest = hashFindGraphNodeWithKey(hash_table, dest_user);
+    
+    Edge edge;
+    
+    if(source != NULL &&  dest!= NULL){
+         edge = edgeFind(graph, source_user, dest_user, hash_table);
+        
+        ListNode node_to_remove = findNodeWithValue(source->outgoing_edges, edge);
+        if(node_to_remove !=NULL) {
+            listRemove(source->incoming_edges, node_to_remove, edgeDestroyValueForIncoming);
+            listRemove(source->outgoing_edges, node_to_remove, edgeDestroyValueForOutgoing);
+        }
+    }
+    
+    //τωρα πρεπει να αφαιρεθει απο τις δυο λιστες το list node
+    
+
+
 
 }
 
 
-void outgoingEdgeDestroyValue(){
+
+//δεν πρεπει να καταστρεφουμε τα graph nodes source, dest
+//αρκει να κανουμε free την ακμη, αφου δεν δεσμευουμε αλλη μνημη 
+void edgeDestroyValueForOutgoing(Pointer value){
+    // free(value); //οπου value ειναι το edge
+    //πρεπει να γινει μονο σε μια απο τις δυο λιστες!!!!
+}
+
+void edgeDestroyValueForIncoming(Pointer value){
 
 }
+
+
+
 
 
 void incomingEdgesDestroy(GraphNode node){
-    listDestroy(node->incoming_edges, incomigEdgeDestroyValue);
+    listDestroy(node->incoming_edges, edgeDestroyValueForIncoming);
 }
 
 void outgoingEdgesDestroy(GraphNode node){
-    listDestroy(node->outgoing_edges, outgoingEdgeDestroyValue);
+    listDestroy(node->outgoing_edges, edgeDestroyValueForOutgoing);
 }
 
 

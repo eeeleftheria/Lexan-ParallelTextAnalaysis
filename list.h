@@ -27,7 +27,6 @@ void listRemove(List list, ListNode node, DestroyValueFunc func); //αφαιρε
 int listSize(List list); //επιστρεφει το μεγεθος της λιστας
 Pointer listNodeValue(List list, ListNode node); //επιστρεφει το value του κομβου
 ListNode listFirst(List list); //επιστρεφει το πρωτο στοιχειο της λιστας
-bool listContainsValue(List list, Pointer value); //επιστρεφει true αν υπαρχει κομβος με αυτο το value 
 ListNode listGetNext(ListNode node);
 
 /////////////

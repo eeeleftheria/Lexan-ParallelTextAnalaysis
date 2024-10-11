@@ -34,9 +34,15 @@ void graphDisplay(Graph graph);
 
 //////// ΣΥΝΑΡΤΗΣΕΙΣ ΔΙΑΧΕΙΡΙΣΗΣ ΑΚΜΩΝ
 void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user, HashTable hash_table);
+Edge edgeFind(Graph graph, int source_user, int dest_user, HashTable hash_table);
+void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_table);
 
 ///////////////////// ΔΕΝ ΕΧΩ ΥΛΟΠΟΙΗΣΕΙ
 void edgeValueDestroy();
+
+void edgeDestroyValueForIncoming(Pointer value);
+void edgeDestroyValueForOutgoing(Pointer value);
+
 
 void incomingEdgeDestroyValue(Pointer value);
 void outgoingEdgesDestroyValue(Pointer value);
