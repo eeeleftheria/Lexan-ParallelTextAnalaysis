@@ -62,11 +62,20 @@ void listInsert(List list, Pointer value) {
 
 void listRemove(List list, ListNode node, DestroyValueFunc func){
 
+    if(node == NULL) {
+        return;
+    }
+
     ListNode prev = node->prev;
     ListNode next = node->next;
 
+    //αν εχει μεινει μονο ενας κομβος, τοτε η λιστα θα μεινει κενη
+    if(list->size == 1) {
+        list->first = NULL;
+        list->last = NULL;
+    }
     //αν ο node ειναι ο πρωτος της λιστας πρεπει ο επομενος του να γινει πρωτος
-    if (node == list->first) {
+    else if (node == list->first) {
         list->first = next;
         next->prev = NULL;
     }
@@ -77,6 +86,7 @@ void listRemove(List list, ListNode node, DestroyValueFunc func){
     }
 
     //αν ο node βρισκεται ενδιαμεσα, πρεπει να συνδεσουμε τον προηγουμενο του με τον επομενο του
+
     else{
         prev->next = next;
         next->prev = prev;
