@@ -51,6 +51,7 @@ Edge edgeFind(Graph graph, int source_user, int dest_user, HashTable hash_table)
 //aφαιρεση ακμης μεταξυ source_user - dest_user
 void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_table);
 
+void edgesOfNodeDisplay(Graph graph, int user, HashTable table);
 
 //ΣΥΝΑΡΤΗΣΕΙΣ DESTROY ΑΚΜΩΝ
 

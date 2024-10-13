@@ -149,13 +149,13 @@ void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user
     //αν οι χρηστες(κορυφες) με ονομα source_user, dest_user αντιστοιχα, δεν υπαρχουν
     //πρεπει να δημιουργηθουν
     if(hashFindGraphNodeWithKey(hash_table, source_user) == NULL) {
-        printf("User with id '%d' added\n\n", source_user);
+        // printf("User with id '%d' added\n\n", source_user);
         graphAdd(graph, source_user, hash_table);
     }
 
 
     if(hashFindGraphNodeWithKey(hash_table, dest_user) == NULL) {
-        printf("User with id '%d' added\n\n", dest_user);
+        // printf("User with id '%d' added\n\n", dest_user);
         graphAdd(graph, dest_user, hash_table);
     }
 
@@ -166,7 +166,7 @@ void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user
     listInsert(new_edge->dest_node->incoming_edges, new_edge);
     listInsert(new_edge->source_node->outgoing_edges, new_edge);
 
-    printf("new transaction: user '%d' -> user '%d', amount = '%d'\n\n", source_user, dest_user, amount);
+    // printf("new transaction: user '%d' -> user '%d', amount = '%d'\n\n", source_user, dest_user, amount);
 
 
 
@@ -256,3 +256,40 @@ void outgoingEdgesDestroy(GraphNode node){
 }
 
 
+
+
+void edgesOfNodeDisplay(Graph graph, int user, HashTable table){
+    GraphNode graph_node = hashFindGraphNodeWithKey(table, user);
+    List list_inc = graph_node->incoming_edges;
+    List list_out = graph_node->outgoing_edges;
+
+    printf("Transactions of user '%d' are: \n", user);
+    printf("from   to    amount    date\n");
+
+    ListNode node;
+
+    for (node = listFirst(list_out); node != NULL; node = listGetNext(node)){
+        
+        Edge edge = listNodeValue(list_out, node);
+        int source = edge->source_node->user;
+        int dest = edge->dest_node->user;
+
+        printf("  %d    %d      %d      %s\n", source, dest, edge->amount, edge->date);
+    }
+
+    printf("\n");
+    printf("Incoming transactions:\n");
+    printf("from   to    amount    date\n");
+
+
+
+    for (node = listFirst(list_inc); node != NULL; node = listGetNext(node)){
+        
+        Edge edge = listNodeValue(list_inc, node);
+        int source = edge->source_node->user;
+        int dest = edge->dest_node->user;
+
+        printf("  %d     %d     %d       %s\n", source, dest, edge->amount, edge->date);
+    }
+
+}
