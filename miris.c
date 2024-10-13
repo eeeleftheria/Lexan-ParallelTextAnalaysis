@@ -32,15 +32,17 @@ int main() {
 
 
 
-    edgeAdd(graph, 45, date, 4, 2, hash_table);
-    // edgeAdd(graph, 100, date, 4, 3, hash_table);
-    // edgeAdd(graph, 87, date, 2, 1, hash_table);
+    edgeAdd(graph, 45, date, 1, 2, hash_table);
+    edgeAdd(graph, 100, date, 1, 3, hash_table);
+    edgeAdd(graph, 87, date, 2, 1, hash_table);
+    edgeAdd(graph, 67, date, 1, 10, hash_table);
+
 
 
     printf("\nGRAPH AFTER DELETION OF NODE: \n");
     graphDisplay(graph);
 
-    // edgeRemove(graph, 2, 1, hash_table);
+    // edgeRemove(graph, 1, 2, hash_table);
 
 
 

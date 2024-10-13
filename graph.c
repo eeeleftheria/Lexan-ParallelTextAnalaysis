@@ -36,6 +36,12 @@ Graph graphCreate(){
 
 
 void graphAdd(Graph graph, int user, HashTable hash_table){
+    
+    if(hashFindGraphNodeWithKey(hash_table, user) != NULL) {
+        printf("User with id '%d' already exists\n", user);
+        return;
+    }
+    
     GraphNode graph_node = malloc(sizeof(struct graph_node));
 
     graph_node->user = user;
@@ -92,9 +98,8 @@ void graphDestroyNode(Pointer graph_node){
    
     GraphNode node_to_destroy = (GraphNode)graph_node;
 
-    incomingEdgesDestroy(node_to_destroy);
-    outgoingEdgesDestroy(node_to_destroy);
-
+    listDestroy(node_to_destroy->incoming_edges, edgeDestroyValueForIncoming);
+    listDestroy(node_to_destroy->outgoing_edges, edgeDestroyValueForOutgoing);
     
     free(graph_node);
 }
@@ -198,18 +203,26 @@ void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_tabl
     
     if(source != NULL &&  dest!= NULL){
          edge = edgeFind(graph, source_user, dest_user, hash_table);
+
+         if(edge == NULL) {
+            printf("transaction from user '%d' -> user '%d' not found\n", source_user, dest_user);
+            return;
+         }
         
-        ListNode node_to_remove = findNodeWithValue(source->outgoing_edges, edge);
-        if(node_to_remove !=NULL) {
-            listRemove(source->incoming_edges, node_to_remove, edgeDestroyValueForIncoming);
-            listRemove(source->outgoing_edges, node_to_remove, edgeDestroyValueForOutgoing);
+        ListNode node_to_remove_incoming = findNodeWithValue(dest->incoming_edges, edge);
+        if(node_to_remove_incoming != NULL) {
+            printf("\nIN1\n\n");
+            listRemove(dest->incoming_edges, node_to_remove_incoming, edgeDestroyValueForIncoming);
         }
-    }
-    
-    //τωρα πρεπει να αφαιρεθει απο τις δυο λιστες το list node
-    
 
+        ListNode node_to_remove_outgoing = findNodeWithValue(source->outgoing_edges, edge);
+        if(node_to_remove_outgoing != NULL) {
+            printf("\nIN2\n\n");
 
+            listRemove(source->outgoing_edges, node_to_remove_outgoing, edgeDestroyValueForOutgoing);
+        }
+    } 
+            
 
 }
 
@@ -218,7 +231,7 @@ void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_tabl
 //δεν πρεπει να καταστρεφουμε τα graph nodes source, dest
 //αρκει να κανουμε free την ακμη, αφου δεν δεσμευουμε αλλη μνημη 
 void edgeDestroyValueForOutgoing(Pointer value){
-    // free(value); //οπου value ειναι το edge
+    free(value); //οπου value ειναι το edge
     //πρεπει να γινει μονο σε μια απο τις δυο λιστες!!!!
 }
 
