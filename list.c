@@ -17,6 +17,7 @@ struct list_node{
     ListNode prev;
 };
 
+
 List listCreate() {
     List list = malloc(sizeof(struct list)); // ή malloc(sizeof(*list))
 
@@ -40,7 +41,7 @@ void listInsert(List list, Pointer value) {
         return;
     }
     
-    if(list->size == 0) { //κενη λιστα
+    if(list->size == 0) { //κενη λιστα-> first και last ταυτιζονται
         list->first = new_node;
         list->last = new_node;
         new_node->next = NULL;
@@ -59,6 +60,7 @@ void listInsert(List list, Pointer value) {
     list->size++;
 
 }
+
 
 void listRemove(List list, ListNode node, DestroyValueFunc func){
 
@@ -91,18 +93,18 @@ void listRemove(List list, ListNode node, DestroyValueFunc func){
         prev->next = next;
         next->prev = prev;
     }
+    
+    //καλουμε την destroy value -> διαφορετικη για καθε τυπο value
+    func(node->value);  
 
-    func(node->value);
-
+    //αποδεσμευση μνημης κομβου 
     free(node);
     node = NULL;
+
+    //ενημερωση size
     list->size--;
 
 }
-
-
-
-
 
 
 int listSize(List list){
@@ -118,12 +120,14 @@ Pointer listNodeValue(List list, ListNode node){
 //τυπου DestroyFunc
 void listDestroyValue(List list, ListNode node, DestroyValueFunc func){
     
-    func(node->value); //καταστρεφει μεκαταλληλο τροπο το καθε value
+    func(node->value); //καταστρεφει με καταλληλο τροπο το καθε value
     //για παραδειγμα αν εχουμε ως value graph nodes πρεπει να αποδεσμευει οτι στοιχειο εχει μεσα
     //το graph node που πιανει χωρο στη μνημη και μετα να κανει free
    
     }
 
+
+//διατρεχει ολη τη λιστα και καταστρεφει ενα ενα τα στοιχεια
 void listDestroy(List list, DestroyValueFunc func) {
       
     if (list->size != 0){   
@@ -137,7 +141,7 @@ void listDestroy(List list, DestroyValueFunc func) {
         }
     }
 
-    free(list);
+    free(list); //αποδεσμευση μνημης απο λιστα
 }
 
 ListNode listFirst(List list){
@@ -151,12 +155,11 @@ ListNode listGetNext(ListNode node){
 }
 
 
-
-
-
+//ευρεση κομβου με τιμη value
 ListNode findNodeWithValue(List list, Pointer value){
     ListNode node;
-    
+
+    //διατρεχουμε ολη τη λιστα μεχρι να βρουμε τον κομβο με αυτη την τιμη    
     for(node = listFirst(list); node != NULL; node = listGetNext(node)){
         
         if (listNodeValue(list, node) == value) {
@@ -165,9 +168,6 @@ ListNode findNodeWithValue(List list, Pointer value){
     }
 
 }
-
-
-
 
 
 

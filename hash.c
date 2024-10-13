@@ -1,11 +1,11 @@
 ////////////////////////////////////////////
-// ΥΛΟΠΟΙΗΣΗ HASHTABLE ΜΕΣΩ HASH TABLE ΜΕ SEPERATE CHAINING
+// ΥΛΟΠΟΙΗΣΗ HASHTABLE ΜΕ SEPERATE CHAINING
 // 
 //  Για μεγεθος πινακα M και κλειδι k, η hush function μας θα ειναι
 // h(k) = k mod Μ οπου ο M πρεπει να ειναι πρωτος αριθμος
 //
 // Για load factor a πρεπει να ισχυει α < 0.9
-/////////////////////////////////////////
+////////////////////////////////////////////
 
 
 #include <stdio.h>
@@ -80,9 +80,7 @@ void hashAdd(HashTable hash_table, int key, Pointer value){
         
         listInsert(hash_table->array[pos]->list, value);
        
-    }
-
-    
+    }   
 }
 
 
@@ -116,7 +114,7 @@ Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user){
 }
 
 
-
+//επιστροφη κομβου λιστας που περιεχει τον user
 Pointer hashFindListNodeWithKey(HashTable hash_table, int user){
     int pos = hashFunc(user, hash_table->size_of_array);
 
@@ -140,6 +138,7 @@ void hashDestroyValue(Pointer value){
     //το κανει ηδη η graph remove
 }
 
+//αφαιρει μια κορυφη απο το hash_table
 void hashRemove(HashTable hash_table, int user, DestroyValueFunc func){
     int pos = hashFunc(user, hash_table->size_of_array);
 
@@ -147,13 +146,16 @@ void hashRemove(HashTable hash_table, int user, DestroyValueFunc func){
 
     listRemove(list, hashFindListNodeWithKey(hash_table, user), hashDestroyValue);
 
+    hash_table->occupied_buckets--; 
+
+
 
 }   
 
 //για την καταστροφη του hash table, διατρεχουμε τον πινακα και για καθε θεση του 
 //διατρεχουμε την αντιστοιχη λιστα, αφαιρωντας ολους τους pointers στα nodes
 //ΔΕΝ θελουμε να διαγραψουμε τα ιδια τα nodes, αφου αποτελουν graph nodes και
-//αυτο θα οδηγουσε σε double free!!!!!!!!!!!!
+//αυτο θα οδηγουσε σε double free
 void hashDestroy(HashTable hash_table){
    
     for(int i = 0; i < hash_table->size_of_array; i++) {

@@ -37,6 +37,7 @@ Graph graphCreate(){
 
 void graphAdd(Graph graph, int user, HashTable hash_table){
     
+    //δεν μπορουμε να προσθεσουμε user με ιδιο id
     if(hashFindGraphNodeWithKey(hash_table, user) != NULL) {
         printf("User with id '%d' already exists\n", user);
         return;
@@ -60,6 +61,7 @@ void graphAdd(Graph graph, int user, HashTable hash_table){
     
 }
 
+
 void graphRemove(Graph graph, int user, HashTable hash_table){
    
     List list_nodes = graph->nodes;
@@ -68,6 +70,7 @@ void graphRemove(Graph graph, int user, HashTable hash_table){
     //ευρεση του graph node μεσω hash για πιο γρηγορη αναζητηση 
     GraphNode node_to_remove = hashFindGraphNodeWithKey(hash_table, user);
     ListNode list_node = hashFindListNodeWithValue(hash_table, node_to_remove);
+
 
     hashRemove(hash_table, user, hashDestroyValue);
 
@@ -143,7 +146,7 @@ void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user
     new_edge->amount = amount;
     new_edge->date = date;
 
-    //αν οι χρηστες(κορυφες) με ονομα source_user, dest_user αντιστοιχα δεν υπαρχουν,
+    //αν οι χρηστες(κορυφες) με ονομα source_user, dest_user αντιστοιχα, δεν υπαρχουν
     //πρεπει να δημιουργηθουν
     if(hashFindGraphNodeWithKey(hash_table, source_user) == NULL) {
         printf("User with id '%d' added\n\n", source_user);
@@ -209,12 +212,14 @@ void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_tabl
             return;
          }
         
+        //αφαιρεση κομβου λιστας που εμπεριεχει τη συγκεκριμενη ακμη
         ListNode node_to_remove_incoming = findNodeWithValue(dest->incoming_edges, edge);
         if(node_to_remove_incoming != NULL) {
            
             listRemove(dest->incoming_edges, node_to_remove_incoming, edgeDestroyValueForIncoming);
         }
 
+        //διαγραφη ακμης και αφαιρεση κομβου λιστας με τη συγκεκριμενη ακμη
         ListNode node_to_remove_outgoing = findNodeWithValue(source->outgoing_edges, edge);
         if(node_to_remove_outgoing != NULL) {
 
