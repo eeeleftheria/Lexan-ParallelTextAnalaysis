@@ -16,16 +16,18 @@ HashTable hashCreate(int size);
 void hashAdd(HashTable hash_table, int key, Pointer value);
 int hashSize(HashTable hash_table);
 
+//αφαιρουμε εναν δεδομενο user απο το hash table
+void hashRemove(HashTable hash_table, int user, DestroyValueFunc func);
+
 //για εναν δεδομενο user θελουμε να επιστρεψουμε τα στοιχεια του
 Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user);
 Pointer hashFindListNodeWithKey(HashTable hash_table, int user);
 Pointer hashFindListNodeWithValue(HashTable hash_table, Pointer value);
 
-//αφαιρουμε εναν δεδομενο user απο το hash table
-void hashRemoveNodewithkey(HashTable hash_table, int user, DestroyValueFunc func);
+
 
 void hashDestroy(HashTable hash_table);
-void hashDestroyListNode(ListNode node);
+void hashDestroyValue(Pointer value);
 
 
 

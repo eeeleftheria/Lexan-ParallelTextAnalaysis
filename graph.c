@@ -63,6 +63,8 @@ void graphRemove(Graph graph, int user, HashTable hash_table){
     GraphNode node_to_remove = hashFindGraphNodeWithKey(hash_table, user);
     ListNode list_node = hashFindListNodeWithValue(hash_table, node_to_remove);
 
+    hashRemove(hash_table, user, hashDestroyValue);
+
     //πρεπει να διαγραψουμε το value node_to_remove του list node  και να κανουμε free τον κομβο της λιστας
     listRemove(list_nodes, findNodeWithValue(list_nodes, node_to_remove), graphDestroyNode);
 
@@ -99,8 +101,9 @@ void graphDestroyNode(Pointer graph_node){
 
 //κατα την καταστροφη του γραφου θελουμε να καταστρεφουμε καταλληλα
 //το value καθε κομβου
-void graphDestroy(Graph graph, DestroyValueFunc func){
+void graphDestroy(Graph graph, DestroyValueFunc func, HashTable table){
 
+    hashDestroy(table);
     listDestroy(graph->nodes, graphDestroyNode);
     free(graph);
 }

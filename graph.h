@@ -24,7 +24,7 @@ void graphAdd(Graph graph, int user, HashTable hash_table); //δημιουργι
 int graphSize(Graph graph); //επιστρεφει το μεγεθος του γραφου
 int graphGetUser(GraphNode graph_node);
 
-void graphDestroy(Graph graph, DestroyValueFunc func);
+void graphDestroy(Graph graph, DestroyValueFunc func, HashTable table);
 void graphDestroyNode(Pointer graph_node);
 
 

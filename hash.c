@@ -77,7 +77,7 @@ void hashAdd(HashTable hash_table, int key, Pointer value){
     //αν δεν ειναι NULL σημαινει οτι εχει δημιουργηθει ηδη και υπαρχει η λιστα
     // οποτε αρκει να προσθεσουμε σε αυτην
     else if(hash_table->array[pos] != NULL){
-        printf("IN HASH existing node\n\n");
+        
         listInsert(hash_table->array[pos]->list, value);
        
     }
@@ -133,13 +133,14 @@ Pointer hashFindListNodeWithKey(HashTable hash_table, int user){
 }
 
 
+
 void hashDestroyValue(Pointer value){
 
     //δεν θελουμε να καταστρεφει το value!!!!!!!!
     //το κανει ηδη η graph remove
 }
 
-void hashRemoveNodewithkey(HashTable hash_table, int user, DestroyValueFunc func){
+void hashRemove(HashTable hash_table, int user, DestroyValueFunc func){
     int pos = hashFunc(user, hash_table->size_of_array);
 
     List list = hash_table->array[pos]->list;

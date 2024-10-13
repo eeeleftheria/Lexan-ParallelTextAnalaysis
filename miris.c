@@ -25,27 +25,26 @@ int main() {
     graphDisplay(graph);
 
 
-    // printf("size of list is %d\n", graphSize(graph));
-    // printf("size of hash is %d\n", hashSize(hash_table));
+    graphRemove(graph, 1, hash_table);
+    graphRemove(graph, 2, hash_table);
+    graphRemove(graph, 3, hash_table);
+    graphRemove(graph, 6, hash_table);
 
 
-    // graphRemove(graph, 2, hash_table);
-    
-    // edgeAdd(graph, 45, date, 4, 2, hash_table);
+
+    edgeAdd(graph, 45, date, 4, 2, hash_table);
     // edgeAdd(graph, 100, date, 4, 3, hash_table);
     // edgeAdd(graph, 87, date, 2, 1, hash_table);
 
 
-
-    // edgeRemove(graph, 2, 1, hash_table);
     printf("\nGRAPH AFTER DELETION OF NODE: \n");
     graphDisplay(graph);
 
-    // edgeRemove(graph, 4, 3, hash_table);
-    // edgeRemove(graph, 4, 2, hash_table);
+    // edgeRemove(graph, 2, 1, hash_table);
 
 
-    graphDestroy(graph, graphDestroyNode);
-    hashDestroy(hash_table);
+
+    graphDestroy(graph, graphDestroyNode, hash_table);
+
 
 }
