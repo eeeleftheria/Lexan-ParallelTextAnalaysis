@@ -42,8 +42,10 @@ int main() {
     printf("\nGRAPH AFTER DELETION OF NODE: \n");
     graphDisplay(graph);
 
-    // edgeRemove(graph, 1, 2, hash_table);
-
+    edgeRemove(graph, 1, 2, hash_table);
+    edgeRemove(graph, 1, 3, hash_table);
+    edgeRemove(graph, 2, 1, hash_table);
+    edgeRemove(graph, 1, 10, hash_table);
 
 
     graphDestroy(graph, graphDestroyNode, hash_table);

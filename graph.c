@@ -211,13 +211,12 @@ void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_tabl
         
         ListNode node_to_remove_incoming = findNodeWithValue(dest->incoming_edges, edge);
         if(node_to_remove_incoming != NULL) {
-            printf("\nIN1\n\n");
+           
             listRemove(dest->incoming_edges, node_to_remove_incoming, edgeDestroyValueForIncoming);
         }
 
         ListNode node_to_remove_outgoing = findNodeWithValue(source->outgoing_edges, edge);
         if(node_to_remove_outgoing != NULL) {
-            printf("\nIN2\n\n");
 
             listRemove(source->outgoing_edges, node_to_remove_outgoing, edgeDestroyValueForOutgoing);
         }
