@@ -50,10 +50,15 @@ void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user
 //ευρεση συναλλαγης μεταξυ source_user - dest_user
 Edge edgeFind(Graph graph, int source_user, int dest_user, HashTable hash_table);
 
+//ευρεση ακμης με ποσο sum
+Edge edgeFindWithAmount(Graph graph, int source_user, int dest_user, int sum, HashTable hash_table);
+
 //aφαιρεση ακμης μεταξυ source_user - dest_user
 void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_table);
 
 void edgesOfNodeDisplay(Graph graph, int user, HashTable table, FILE* output);
+
+void edgeModify(Graph graph, HashTable table, int source, int dest, int new_sum, char* new_date);
 
 //ΣΥΝΑΡΤΗΣΕΙΣ DESTROY ΑΚΜΩΝ
 

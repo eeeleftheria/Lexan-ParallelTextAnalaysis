@@ -198,6 +198,25 @@ Edge edgeFind(Graph graph, int source_user, int dest_user, HashTable hash_table)
     }     
 }
 
+Edge edgeFindWithAmount(Graph graph, int source_user, int dest_user, int sum, HashTable hash_table){
+    GraphNode source = hashFindGraphNodeWithKey(hash_table, source_user);
+    GraphNode dest = hashFindGraphNodeWithKey(hash_table, dest_user);
+
+    List list = source->outgoing_edges;
+    ListNode node;
+    for(node = listFirst(list); node != NULL; 
+        node = listGetNext(node)){
+
+            Edge edge = listNodeValue(list, node);
+
+            //αν βρουμε την ακμη με τον δοθεν προορισμο, την επιστρεφουμε
+            if(edge->dest_node == dest && edge->amount == sum) {
+                return edge;
+            }
+    }   
+}
+
+
 
 
 void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_table){
@@ -296,3 +315,21 @@ void edgesOfNodeDisplay(Graph graph, int user, HashTable table, FILE* output){
     }
 
 }
+
+
+void edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum, int new_sum, char* new_date){
+    
+    //ευρεση πρωτης ακμης με το συγκεκριμενο ποσο συναλλαγης
+    Edge edge = edgeFindWithAmount(graph, source, dest, old_sum, table);    
+
+    if(edge != NULL) {
+        edge->amount = new_sum;
+        edge->date = new_date;
+    }
+
+    return;
+    
+}
+
+
+
