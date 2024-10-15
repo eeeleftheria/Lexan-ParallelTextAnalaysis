@@ -58,7 +58,7 @@ void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_tabl
 
 void edgesOfNodeDisplay(Graph graph, int user, HashTable table, FILE* output);
 
-void edgeModify(Graph graph, HashTable table, int source, int dest, int new_sum, char* new_date);
+void edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum, int new_sum, char* new_date);
 
 //ΣΥΝΑΡΤΗΣΕΙΣ DESTROY ΑΚΜΩΝ
 
