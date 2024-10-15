@@ -3,54 +3,78 @@
 #include "list.h"
 #include "graph.h"
 #include "hash.h"
+#include <unistd.h>
+#include <getopt.h>
 
 
-int main() {
-    HashTable hash_table = hashCreate(21);
+//argc αριθμος παραμετρων συμπεριλαμβανομενου του ονοματος του προγραμματος
+//αν argc = 1 τοτε δεν εχουμε καμια παραμετρο
+//argv[0] = ονομα προγραμματος
+int main(int argc, char* argv[]) {
+   
+    FILE* file;
+   
+    char* input_file = NULL;
+    char* output_file = NULL;
 
-    int name = 1;
-    int name2 = 2;
-    int name3 = 3;
-    int name4 = 6;
+    int opt;
 
-    char date[] = "7/7/2024";
+    while((opt = getopt(argc, argv, "i:o:")) != -1){
+
+        if(opt == 'i') {
+            input_file = optarg;
+        }
+        
+        else if(opt == 'o'){
+            output_file = optarg;
+        }
+        else{
+            fprintf(stderr, "Correct format is: %s -i inputfile -o outputfile\n", argv[0]);
+            return -1;
+        }
+    }
+
+    file = fopen(input_file, "r");
+
 
     Graph graph = graphCreate();
-    graphAdd(graph, name, hash_table);
-    graphAdd(graph, name2, hash_table);
-    graphAdd(graph, name3, hash_table);
-    graphAdd(graph, name4, hash_table);
-
-
-    // graphDisplay(graph);
-
-
-    graphRemove(graph, 1, hash_table);
-    graphRemove(graph, 2, hash_table);
-    graphRemove(graph, 3, hash_table);
-    graphRemove(graph, 6, hash_table);
-
-
-    // printf("\nGRAPH AFTER DELETION OF NODE: \n");
-    // graphDisplay(graph);
-
-    edgeAdd(graph, 45, date, 1, 2, hash_table);
-    edgeAdd(graph, 100, date, 1, 3, hash_table);
-    edgeAdd(graph, 87, date, 2, 1, hash_table);
-    edgeAdd(graph, 67, date, 1, 10, hash_table);
-    edgeAdd(graph, 78, date, 7, 9, hash_table);
-
+    HashTable table = hashCreate(21);
     
-    edgesOfNodeDisplay(graph, 1, hash_table);
+    int user1;
+    int user2;
+    int amount;
+    char* date = malloc(11*sizeof(char));
 
-    // edgeRemove(graph, 1, 3, hash_table);
-    // edgeRemove(graph, 2, 1, hash_table);
-    // edgeRemove(graph, 1, 10, hash_table);
-    // edgeRemove(graph, 1, 2, hash_table);
+    char content[200];
+
+    //αναγνωση περιεχομενου κ αποθηκευση μεσα στο content
+    //η fget σταματαει να διαβαζει οταν συναντησει α΄΄λλαγη γραμμης ή EOF
+    while(fgets(content, 200, file) != NULL){
+        sscanf(content, "%d %d %d %s", &user1, &user2, &amount, date);
+        
+        edgeAdd(graph, amount, date, user1, user2, table);
+    }
+
+    fclose(file);
+
+
+    file = fopen(output_file, "w");
+
+    graphDisplay(graph, file, table);
+
+    fclose(file);
+
+    graphDestroy(graph, graphDestroyNode, table);
+
+    free(date);
 
 
 
-    graphDestroy(graph, graphDestroyNode, hash_table);
+
+
+
+
+
 
 
 }

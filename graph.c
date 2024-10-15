@@ -119,16 +119,19 @@ void graphDestroy(Graph graph, DestroyValueFunc func, HashTable table){
 
 
 
-void graphDisplay(Graph graph){
+void graphDisplay(Graph graph, FILE* output, HashTable table){
     ListNode node;
     List list = graph->nodes;
     
     for(node = listFirst(list); node != NULL; node = listGetNext(node)) {
         
         GraphNode graph_node = listNodeValue(list, node);
-        printf("User with id '%d':\n", graph_node->user);
+        fprintf(output, "User with id '%d'\n", (graph_node->user));
 
-        //ΠΡΕΠΕΙ ΝΑ ΕΚΤΥΠΩΝΩ ΚΑΙ ΤΙΣ ΑΚΜΕΣ (ΣΥΝΑΛΛΑΓΕΣ ΚΛΠ)
+        //εκτυπωση συναλλαγων/ακμων κλπ
+        edgesOfNodeDisplay(graph, graph_node->user, table, output);
+        
+        fprintf(output, "\n\n");
 
     }
 }
@@ -258,13 +261,13 @@ void outgoingEdgesDestroy(GraphNode node){
 
 
 
-void edgesOfNodeDisplay(Graph graph, int user, HashTable table){
+void edgesOfNodeDisplay(Graph graph, int user, HashTable table, FILE* output){
     GraphNode graph_node = hashFindGraphNodeWithKey(table, user);
     List list_inc = graph_node->incoming_edges;
     List list_out = graph_node->outgoing_edges;
 
-    printf("Transactions of user '%d' are: \n", user);
-    printf("from   to    amount    date\n");
+    fprintf(output, "Transactions of user '%d' are: \n", user);
+    fprintf(output, "from   to    amount       date\n");
 
     ListNode node;
 
@@ -274,12 +277,12 @@ void edgesOfNodeDisplay(Graph graph, int user, HashTable table){
         int source = edge->source_node->user;
         int dest = edge->dest_node->user;
 
-        printf("  %d    %d      %d      %s\n", source, dest, edge->amount, edge->date);
+        fprintf(output, "  %d    %d      %d      %s\n", source, dest, edge->amount, edge->date);
     }
 
-    printf("\n");
-    printf("Incoming transactions:\n");
-    printf("from   to    amount    date\n");
+    fprintf(output, "\n");
+    fprintf(output, "Incoming transactions:\n");
+    fprintf(output, "from   to    amount       date\n");
 
 
 
@@ -289,7 +292,7 @@ void edgesOfNodeDisplay(Graph graph, int user, HashTable table){
         int source = edge->source_node->user;
         int dest = edge->dest_node->user;
 
-        printf("  %d     %d     %d       %s\n", source, dest, edge->amount, edge->date);
+        fprintf(output, "  %d     %d     %d       %s\n", source, dest, edge->amount, edge->date);
     }
 
 }
