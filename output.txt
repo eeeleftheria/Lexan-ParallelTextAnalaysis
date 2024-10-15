@@ -1,104 +1,1076 @@
-User with id '2'
-Transactions of user '2' are: 
+User with id '1'
+Transactions of user '1' are: 
 from   to    amount       date
-  2    3      3900      2024-08-16
-  2    9      2900      2024-08-16
-  2    5      2700      2024-08-16
-  2    6      2700      2024-08-16
+  1    18      4000      2024-10-08
+  1    71      2900      2024-10-08
+  1    38      3800      2024-10-08
+  1    2      4600      2024-10-08
 
 Incoming transactions:
 from   to    amount       date
-  3     2     2000       2024-08-16
-  5     2     2000       2024-08-16
+  22     1     3600       2024-10-08
+
+
+User with id '18'
+Transactions of user '18' are: 
+from   to    amount       date
+  18    20      2400      2024-10-08
+  18    46      1000      2024-10-08
+  18    79      2900      2024-10-08
+  18    82      1700      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  1     18     4000       2024-10-08
+  26     18     4400       2024-10-08
+  54     18     3700       2024-10-08
+  68     18     3700       2024-10-08
+  74     18     4600       2024-10-08
+
+
+User with id '71'
+Transactions of user '71' are: 
+from   to    amount       date
+  71    67      1500      2024-10-08
+  71    36      1900      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  1     71     2900       2024-10-08
+  93     71     900       2024-10-08
+
+
+User with id '38'
+Transactions of user '38' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  1     38     3800       2024-10-08
+
+
+User with id '2'
+Transactions of user '2' are: 
+from   to    amount       date
+  2    94      1600      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  1     2     4600       2024-10-08
+  30     2     1900       2024-10-08
+  56     2     1200       2024-10-08
+
+
+User with id '94'
+Transactions of user '94' are: 
+from   to    amount       date
+  94    99      1400      2024-10-08
+  94    43      2600      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  2     94     1600       2024-10-08
 
 
 User with id '3'
 Transactions of user '3' are: 
 from   to    amount       date
-  3    2      2000      2024-08-16
+  3    62      3600      2024-10-08
+  3    96      900      2024-10-08
 
 Incoming transactions:
 from   to    amount       date
-  2     3     3900       2024-08-16
-  4     3     3400       2024-08-16
-  8     3     4200       2024-08-16
+  48     3     2300       2024-10-08
 
 
-User with id '9'
-Transactions of user '9' are: 
+User with id '62'
+Transactions of user '62' are: 
 from   to    amount       date
+  62    40      4200      2024-10-08
 
 Incoming transactions:
 from   to    amount       date
-  2     9     2900       2024-08-16
-  7     9     3400       2024-08-16
+  3     62     3600       2024-10-08
+  97     62     1200       2024-10-08
 
 
-User with id '5'
-Transactions of user '5' are: 
+User with id '96'
+Transactions of user '96' are: 
 from   to    amount       date
-  5    1      1600      2024-08-16
-  5    2      2000      2024-08-16
-  5    1      300      2024-08-16
+  96    69      400      2024-10-08
+  96    99      3900      2024-10-08
 
 Incoming transactions:
 from   to    amount       date
-  2     5     2700       2024-08-16
-  6     5     2200       2024-08-16
-
-
-User with id '6'
-Transactions of user '6' are: 
-from   to    amount       date
-  6    4      4100      2024-08-16
-  6    8      4500      2024-08-16
-  6    5      2200      2024-08-16
-
-Incoming transactions:
-from   to    amount       date
-  2     6     2700       2024-08-16
-  7     6     1300       2024-08-16
+  3     96     900       2024-10-08
+  48     96     3100       2024-10-08
+  63     96     500       2024-10-08
+  87     96     4600       2024-10-08
 
 
 User with id '4'
 Transactions of user '4' are: 
 from   to    amount       date
-  4    3      3400      2024-08-16
+  4    95      2400      2024-10-08
+  4    56      3800      2024-10-08
 
 Incoming transactions:
 from   to    amount       date
-  6     4     4100       2024-08-16
-  8     4     4000       2024-08-16
+  35     4     1800       2024-10-08
+  46     4     4300       2024-10-08
 
 
-User with id '1'
-Transactions of user '1' are: 
+User with id '95'
+Transactions of user '95' are: 
+from   to    amount       date
+  95    92      1700      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  4     95     2400       2024-10-08
+  6     95     2500       2024-10-08
+
+
+User with id '56'
+Transactions of user '56' are: 
+from   to    amount       date
+  56    52      700      2024-10-08
+  56    60      3700      2024-10-08
+  56    2      1200      2024-10-08
+  56    77      1500      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  4     56     3800       2024-10-08
+  19     56     2900       2024-10-08
+  32     56     4500       2024-10-08
+  53     56     500       2024-10-08
+
+
+User with id '6'
+Transactions of user '6' are: 
+from   to    amount       date
+  6    51      1900      2024-10-08
+  6    32      4800      2024-10-08
+  6    95      2500      2024-10-08
+  6    15      1500      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  97     6     3500       2024-10-08
+
+
+User with id '51'
+Transactions of user '51' are: 
 from   to    amount       date
 
 Incoming transactions:
 from   to    amount       date
-  5     1     1600       2024-08-16
-  5     1     300       2024-08-16
-  7     1     1400       2024-08-16
+  6     51     1900       2024-10-08
+  61     51     2200       2024-10-08
+
+
+User with id '32'
+Transactions of user '32' are: 
+from   to    amount       date
+  32    56      4500      2024-10-08
+  32    52      4100      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  6     32     4800       2024-10-08
+
+
+User with id '15'
+Transactions of user '15' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  6     15     1500       2024-10-08
+  11     15     2900       2024-10-08
 
 
 User with id '8'
 Transactions of user '8' are: 
 from   to    amount       date
-  8    4      4000      2024-08-16
-  8    3      4200      2024-08-16
+  8    73      2400      2024-10-08
+  8    90      4700      2024-10-08
+  8    48      3300      2024-10-08
+  8    89      3100      2024-10-08
 
 Incoming transactions:
 from   to    amount       date
-  6     8     4500       2024-08-16
+  70     8     4400       2024-10-08
+
+
+User with id '73'
+Transactions of user '73' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  8     73     2400       2024-10-08
+  98     73     2700       2024-10-08
+  100     73     3900       2024-10-08
+
+
+User with id '90'
+Transactions of user '90' are: 
+from   to    amount       date
+  90    99      3600      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  8     90     4700       2024-10-08
+  17     90     3200       2024-10-08
+
+
+User with id '48'
+Transactions of user '48' are: 
+from   to    amount       date
+  48    100      4300      2024-10-08
+  48    82      4500      2024-10-08
+  48    96      3100      2024-10-08
+  48    3      2300      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  8     48     3300       2024-10-08
+  60     48     2800       2024-10-08
+
+
+User with id '89'
+Transactions of user '89' are: 
+from   to    amount       date
+  89    92      1300      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  8     89     3100       2024-10-08
+
+
+User with id '9'
+Transactions of user '9' are: 
+from   to    amount       date
+  9    72      2100      2024-10-08
+  9    65      3900      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  72     9     300       2024-10-08
+  79     9     2000       2024-10-08
+
+
+User with id '72'
+Transactions of user '72' are: 
+from   to    amount       date
+  72    9      300      2024-10-08
+  72    28      2400      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  9     72     2100       2024-10-08
+  30     72     2100       2024-10-08
+  77     72     1900       2024-10-08
+  83     72     100       2024-10-08
+
+
+User with id '65'
+Transactions of user '65' are: 
+from   to    amount       date
+  65    76      2900      2024-10-08
+  65    25      700      2024-10-08
+  65    99      3500      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  9     65     3900       2024-10-08
+  28     65     4400       2024-10-08
+  29     65     4200       2024-10-08
+  66     65     400       2024-10-08
+
+
+User with id '10'
+Transactions of user '10' are: 
+from   to    amount       date
+  10    31      3800      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  22     10     1500       2024-10-08
+  100     10     4800       2024-10-08
+
+
+User with id '31'
+Transactions of user '31' are: 
+from   to    amount       date
+  31    84      2800      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  10     31     3800       2024-10-08
+
+
+User with id '11'
+Transactions of user '11' are: 
+from   to    amount       date
+  11    70      3300      2024-10-08
+  11    15      2900      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  25     11     2100       2024-10-08
+
+
+User with id '70'
+Transactions of user '70' are: 
+from   to    amount       date
+  70    8      4400      2024-10-08
+  70    77      3500      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  11     70     3300       2024-10-08
+  26     70     700       2024-10-08
+  35     70     2000       2024-10-08
+
+
+User with id '12'
+Transactions of user '12' are: 
+from   to    amount       date
+  12    87      1900      2024-10-08
+  12    92      3400      2024-10-08
+  12    33      2400      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+
+
+User with id '87'
+Transactions of user '87' are: 
+from   to    amount       date
+  87    22      1600      2024-10-08
+  87    23      800      2024-10-08
+  87    96      4600      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  12     87     1900       2024-10-08
+  47     87     4700       2024-10-08
+
+
+User with id '92'
+Transactions of user '92' are: 
+from   to    amount       date
+  92    52      2200      2024-10-08
+  92    53      4900      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  12     92     3400       2024-10-08
+  26     92     4300       2024-10-08
+  89     92     1300       2024-10-08
+  95     92     1700       2024-10-08
+
+
+User with id '33'
+Transactions of user '33' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  12     33     2400       2024-10-08
+  39     33     2200       2024-10-08
+
+
+User with id '14'
+Transactions of user '14' are: 
+from   to    amount       date
+  14    17      500      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  19     14     2500       2024-10-08
+  93     14     200       2024-10-08
+
+
+User with id '17'
+Transactions of user '17' are: 
+from   to    amount       date
+  17    49      2000      2024-10-08
+  17    90      3200      2024-10-08
+  17    21      3500      2024-10-08
+  17    83      3700      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  14     17     500       2024-10-08
+
+
+User with id '49'
+Transactions of user '49' are: 
+from   to    amount       date
+  49    79      4200      2024-10-08
+  49    36      300      2024-10-08
+  49    13      4300      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  17     49     2000       2024-10-08
+  19     49     2900       2024-10-08
+  52     49     3400       2024-10-08
+  79     49     2300       2024-10-08
+
+
+User with id '21'
+Transactions of user '21' are: 
+from   to    amount       date
+  21    46      1100      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  17     21     3500       2024-10-08
+  100     21     3300       2024-10-08
+
+
+User with id '83'
+Transactions of user '83' are: 
+from   to    amount       date
+  83    72      100      2024-10-08
+  83    41      4700      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  17     83     3700       2024-10-08
+  53     83     2900       2024-10-08
+  85     83     400       2024-10-08
+
+
+User with id '20'
+Transactions of user '20' are: 
+from   to    amount       date
+  20    23      2500      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  18     20     2400       2024-10-08
+  23     20     2400       2024-10-08
+  68     20     2000       2024-10-08
+
+
+User with id '46'
+Transactions of user '46' are: 
+from   to    amount       date
+  46    54      3200      2024-10-08
+  46    4      4300      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  18     46     1000       2024-10-08
+  21     46     1100       2024-10-08
+
+
+User with id '79'
+Transactions of user '79' are: 
+from   to    amount       date
+  79    24      3400      2024-10-08
+  79    49      2300      2024-10-08
+  79    9      2000      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  18     79     2900       2024-10-08
+  44     79     4900       2024-10-08
+  49     79     4200       2024-10-08
+  76     79     400       2024-10-08
+
+
+User with id '82'
+Transactions of user '82' are: 
+from   to    amount       date
+  82    28      3600      2024-10-08
+  82    36      4400      2024-10-08
+  82    85      2900      2024-10-08
+  82    63      3700      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  18     82     1700       2024-10-08
+  27     82     400       2024-10-08
+  48     82     4500       2024-10-08
+  52     82     2300       2024-10-08
+  52     82     4300       2024-10-08
+
+
+User with id '19'
+Transactions of user '19' are: 
+from   to    amount       date
+  19    14      2500      2024-10-08
+  19    56      2900      2024-10-08
+  19    49      2900      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+
+
+User with id '23'
+Transactions of user '23' are: 
+from   to    amount       date
+  23    20      2400      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  20     23     2500       2024-10-08
+  87     23     800       2024-10-08
+
+
+User with id '22'
+Transactions of user '22' are: 
+from   to    amount       date
+  22    10      1500      2024-10-08
+  22    1      3600      2024-10-08
+  22    44      4600      2024-10-08
+  22    88      2800      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  87     22     1600       2024-10-08
+
+
+User with id '44'
+Transactions of user '44' are: 
+from   to    amount       date
+  44    79      4900      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  22     44     4600       2024-10-08
+  29     44     500       2024-10-08
+
+
+User with id '88'
+Transactions of user '88' are: 
+from   to    amount       date
+  88    30      200      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  22     88     2800       2024-10-08
+
+
+User with id '25'
+Transactions of user '25' are: 
+from   to    amount       date
+  25    11      2100      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  65     25     700       2024-10-08
+
+
+User with id '26'
+Transactions of user '26' are: 
+from   to    amount       date
+  26    70      700      2024-10-08
+  26    18      4400      2024-10-08
+  26    92      4300      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+
+
+User with id '27'
+Transactions of user '27' are: 
+from   to    amount       date
+  27    39      1300      2024-10-08
+  27    74      4700      2024-10-08
+  27    82      400      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  41     27     3000       2024-10-08
+  78     27     400       2024-10-08
+
+
+User with id '39'
+Transactions of user '39' are: 
+from   to    amount       date
+  39    33      2200      2024-10-08
+  39    86      3700      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  27     39     1300       2024-10-08
+
+
+User with id '74'
+Transactions of user '74' are: 
+from   to    amount       date
+  74    18      4600      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  27     74     4700       2024-10-08
+  81     74     3400       2024-10-08
+
+
+User with id '28'
+Transactions of user '28' are: 
+from   to    amount       date
+  28    65      4400      2024-10-08
+  28    30      4300      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  72     28     2400       2024-10-08
+  82     28     3600       2024-10-08
+
+
+User with id '30'
+Transactions of user '30' are: 
+from   to    amount       date
+  30    2      1900      2024-10-08
+  30    77      4000      2024-10-08
+  30    16      2000      2024-10-08
+  30    72      2100      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  28     30     4300       2024-10-08
+  75     30     4400       2024-10-08
+  88     30     200       2024-10-08
+
+
+User with id '29'
+Transactions of user '29' are: 
+from   to    amount       date
+  29    65      4200      2024-10-08
+  29    44      500      2024-10-08
+  29    43      2100      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+
+
+User with id '43'
+Transactions of user '43' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  29     43     2100       2024-10-08
+  41     43     200       2024-10-08
+  68     43     4700       2024-10-08
+  94     43     2600       2024-10-08
+
+
+User with id '77'
+Transactions of user '77' are: 
+from   to    amount       date
+  77    69      800      2024-10-08
+  77    52      200      2024-10-08
+  77    42      400      2024-10-08
+  77    72      1900      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  30     77     4000       2024-10-08
+  56     77     1500       2024-10-08
+  70     77     3500       2024-10-08
+  93     77     3600       2024-10-08
+
+
+User with id '16'
+Transactions of user '16' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  30     16     2000       2024-10-08
+  42     16     200       2024-10-08
+  66     16     4700       2024-10-08
+
+
+User with id '84'
+Transactions of user '84' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  31     84     2800       2024-10-08
+  85     84     2700       2024-10-08
+
+
+User with id '52'
+Transactions of user '52' are: 
+from   to    amount       date
+  52    82      2300      2024-10-08
+  52    49      3400      2024-10-08
+  52    82      4300      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  32     52     4100       2024-10-08
+  56     52     700       2024-10-08
+  77     52     200       2024-10-08
+  92     52     2200       2024-10-08
+
+
+User with id '35'
+Transactions of user '35' are: 
+from   to    amount       date
+  35    85      3700      2024-10-08
+  35    4      1800      2024-10-08
+  35    70      2000      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+
+
+User with id '85'
+Transactions of user '85' are: 
+from   to    amount       date
+  85    84      2700      2024-10-08
+  85    83      400      2024-10-08
+  85    55      4900      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  35     85     3700       2024-10-08
+  54     85     3100       2024-10-08
+  82     85     2900       2024-10-08
+  98     85     600       2024-10-08
+
+
+User with id '86'
+Transactions of user '86' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  39     86     3700       2024-10-08
+
+
+User with id '41'
+Transactions of user '41' are: 
+from   to    amount       date
+  41    27      3000      2024-10-08
+  41    7      4600      2024-10-08
+  41    43      200      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  83     41     4700       2024-10-08
 
 
 User with id '7'
 Transactions of user '7' are: 
 from   to    amount       date
-  7    6      1300      2024-08-16
-  7    1      1400      2024-08-16
-  7    9      3400      2024-08-16
+
+Incoming transactions:
+from   to    amount       date
+  41     7     4600       2024-10-08
+
+
+User with id '42'
+Transactions of user '42' are: 
+from   to    amount       date
+  42    16      200      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  77     42     400       2024-10-08
+
+
+User with id '54'
+Transactions of user '54' are: 
+from   to    amount       date
+  54    69      1900      2024-10-08
+  54    85      3100      2024-10-08
+  54    18      3700      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  46     54     3200       2024-10-08
+
+
+User with id '47'
+Transactions of user '47' are: 
+from   to    amount       date
+  47    87      4700      2024-10-08
+  47    81      4300      2024-10-08
+  47    63      300      2024-10-08
+  47    66      3000      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  97     47     3400       2024-10-08
+
+
+User with id '81'
+Transactions of user '81' are: 
+from   to    amount       date
+  81    75      2400      2024-10-08
+  81    74      3400      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  47     81     4300       2024-10-08
+  91     81     2900       2024-10-08
+
+
+User with id '63'
+Transactions of user '63' are: 
+from   to    amount       date
+  63    91      4000      2024-10-08
+  63    96      500      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  47     63     300       2024-10-08
+  82     63     3700       2024-10-08
+
+
+User with id '66'
+Transactions of user '66' are: 
+from   to    amount       date
+  66    16      4700      2024-10-08
+  66    65      400      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  47     66     3000       2024-10-08
+  68     66     2800       2024-10-08
+  93     66     2900       2024-10-08
+
+
+User with id '100'
+Transactions of user '100' are: 
+from   to    amount       date
+  100    10      4800      2024-10-08
+  100    73      3900      2024-10-08
+  100    21      3300      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  48     100     4300       2024-10-08
+
+
+User with id '36'
+Transactions of user '36' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  49     36     300       2024-10-08
+  71     36     1900       2024-10-08
+  82     36     4400       2024-10-08
+
+
+User with id '13'
+Transactions of user '13' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  49     13     4300       2024-10-08
+
+
+User with id '53'
+Transactions of user '53' are: 
+from   to    amount       date
+  53    56      500      2024-10-08
+  53    83      2900      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  92     53     4900       2024-10-08
+
+
+User with id '69'
+Transactions of user '69' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  54     69     1900       2024-10-08
+  77     69     800       2024-10-08
+  96     69     400       2024-10-08
+
+
+User with id '55'
+Transactions of user '55' are: 
+from   to    amount       date
+  55    99      4000      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  85     55     4900       2024-10-08
+
+
+User with id '99'
+Transactions of user '99' are: 
+from   to    amount       date
+  99    91      2900      2024-10-08
+  99    67      300      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  55     99     4000       2024-10-08
+  65     99     3500       2024-10-08
+  90     99     3600       2024-10-08
+  94     99     1400       2024-10-08
+  96     99     3900       2024-10-08
+
+
+User with id '60'
+Transactions of user '60' are: 
+from   to    amount       date
+  60    61      700      2024-10-08
+  60    48      2800      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  56     60     3700       2024-10-08
+
+
+User with id '59'
+Transactions of user '59' are: 
+from   to    amount       date
+  59    64      4200      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+
+
+User with id '64'
+Transactions of user '64' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  59     64     4200       2024-10-08
+
+
+User with id '61'
+Transactions of user '61' are: 
+from   to    amount       date
+  61    51      2200      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  60     61     700       2024-10-08
+
+
+User with id '40'
+Transactions of user '40' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  62     40     4200       2024-10-08
+
+
+User with id '91'
+Transactions of user '91' are: 
+from   to    amount       date
+  91    81      2900      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  63     91     4000       2024-10-08
+  99     91     2900       2024-10-08
+
+
+User with id '76'
+Transactions of user '76' are: 
+from   to    amount       date
+  76    79      400      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  65     76     2900       2024-10-08
+
+
+User with id '68'
+Transactions of user '68' are: 
+from   to    amount       date
+  68    18      3700      2024-10-08
+  68    20      2000      2024-10-08
+  68    43      4700      2024-10-08
+  68    66      2800      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+
+
+User with id '67'
+Transactions of user '67' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  71     67     1500       2024-10-08
+  99     67     300       2024-10-08
+
+
+User with id '75'
+Transactions of user '75' are: 
+from   to    amount       date
+  75    30      4400      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+  81     75     2400       2024-10-08
+
+
+User with id '78'
+Transactions of user '78' are: 
+from   to    amount       date
+  78    27      400      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+
+
+User with id '24'
+Transactions of user '24' are: 
+from   to    amount       date
+
+Incoming transactions:
+from   to    amount       date
+  79     24     3400       2024-10-08
+
+
+User with id '93'
+Transactions of user '93' are: 
+from   to    amount       date
+  93    77      3600      2024-10-08
+  93    66      2900      2024-10-08
+  93    71      900      2024-10-08
+  93    14      200      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+
+
+User with id '97'
+Transactions of user '97' are: 
+from   to    amount       date
+  97    6      3500      2024-10-08
+  97    47      3400      2024-10-08
+  97    62      1200      2024-10-08
+
+Incoming transactions:
+from   to    amount       date
+
+
+User with id '98'
+Transactions of user '98' are: 
+from   to    amount       date
+  98    85      600      2024-10-08
+  98    73      2700      2024-10-08
 
 Incoming transactions:
 from   to    amount       date

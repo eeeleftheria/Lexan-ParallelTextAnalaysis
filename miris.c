@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 
 
     Graph graph = graphCreate();
-    HashTable table = hashCreate(21);
+    HashTable table = hashCreate(103);
     
     int user1;
     int user2;
@@ -63,7 +63,15 @@ int main(int argc, char* argv[]) {
     graphDisplay(graph, file, table);
 
     fclose(file);
+    
+    /////////////////////////////
+    ///////// PROMPT ///////////
+    ////////////////////////////
 
+     
+    
+
+    
     graphDestroy(graph, graphDestroyNode, table);
 
     free(date);
