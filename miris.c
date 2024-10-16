@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     while((opt = getopt(argc, argv, "i:o:")) != -1){
 
         if(opt == 'i') {
-            input_file = optarg;
+            input_file = optarg; 
         }
         
         else if(opt == 'o'){
@@ -38,7 +38,6 @@ int main(int argc, char* argv[]) {
 
 
     Graph graph = graphCreate();
-    HashTable table = hashCreate(103);
     
     int user1;
     int user2;
@@ -47,8 +46,20 @@ int main(int argc, char* argv[]) {
 
     char content[200];
 
+    int count = 0;
     //αναγνωση περιεχομενου κ αποθηκευση μεσα στο content
     //η fget σταματαει να διαβαζει οταν συναντησει α΄΄λλαγη γραμμης ή EOF
+
+    while(fgets(content, 200, file) != NULL) {
+        count++;
+    }
+
+    //επαναφορα δεικτη στην αρχη του αρχειου
+    fseek(file, 0, SEEK_SET);
+
+    //μεγεθος hash table οσο 2 φορες τις γραμμες του αρχειου
+    HashTable table = hashCreate(2*count);
+    
     while(fgets(content, 200, file) != NULL){
         sscanf(content, "%d %d %d %s", &user1, &user2, &amount, date);
         
