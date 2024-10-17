@@ -5,6 +5,7 @@
 #include "hash.h"
 #include <unistd.h>
 #include <getopt.h>
+#include <string.h>
 
 
 //argc αριθμος παραμετρων συμπεριλαμβανομενου του ονοματος του προγραμματος
@@ -78,22 +79,173 @@ int main(int argc, char* argv[]) {
     /////////////////////////////
     ///////// PROMPT ///////////
     ////////////////////////////
-
-     
+    char buffer[200];
+    char* token;
     
+    char command[20];
+
+    while(1) {
+
+        //διαβαζουμε ξεχωριστα την εντολη για να μην εχουμε θεμα με την αλλαγη γραμμης
+        if(scanf("%s", command) == EOF){ //EOF
+            break;
+        }
+
+        //αναγνωση υπολοιπης γραμμης
+        fgets(buffer, 200, stdin);
+        token = strtok(buffer, " ");
+
+        //########### 1 ##########//
+        // i Ni [Nj Nk ...] - εισαγωγη κομβων
+        if(strcmp(command, "insert") == 0 || strcmp(command, "i") == 0){
+            
+            printf("Succ: ");
+
+            while(token!= NULL){
+
+                int user = atoi(token); //string to int
+                if (hashFindGraphNodeWithKey(table, user) == NULL){
+                    printf("%d ", user);
+                    graphAdd(graph, user, table);
+                }
+                else{
+                    printf("Issue with: %d (already exists)\n", user);
+                    break;
+                }
+                token = strtok(NULL, " "); //επομενο δεδομενο
+            }
+            printf("\n");
+        }
+
+        //########### 2 ##########//
+        //n Ni Nj sum date - εισαγωγη ακμων
+        else if(strcmp(command, "insert2") == 0 || strcmp(command, "n") == 0){
+            int source = atoi(token);
+            
+            token = strtok(NULL, " ");
+            int dest = atoi(token);
+
+            token = strtok(NULL, " ");
+            int sum = atoi(token);
+
+            token = strtok(NULL, " ");
+            char* date = token;
+
+            edgeAdd(graph, sum, date, source, dest, table);
+            printf("Added edge from '%d' to '%d'\n", source, dest);
+            token = strtok(NULL, " "); //επομενο δεδομενο
+
+        }
+        
+        //########### 3 ##########//
+        //d Ni [Nj Nk ...] - διαγραφη κομβων
+        else if(strcmp(command, "delete") == 0 || strcmp(command, "d") == 0){
+            
+            while(token!= NULL){
+
+                int user = atoi(token); //string to int
+                if (hashFindGraphNodeWithKey(table, user) != NULL){
+                    printf("Successful deletion of node: %d\n ", user);
+                    graphRemove(graph, user, table);
+                }
+                else{
+                    printf("Non existing node(s): %d\n", user);
+                }
+                token = strtok(NULL, " "); //επομενο δεδομενο
+            }
+
+        }
+
+        //########### 4 ##########//
+        //l Ni Nj - διαγραφη ακμης
+        else if(strcmp(command, "delete2") == 0 || strcmp(command, "l") == 0){
+            int source = atoi(token);
+            
+            token = strtok(NULL, " ");
+            int dest = atoi(token);
+
+            Edge edge = edgeFind(graph, source, dest, table);
+            if(edge != NULL){
+                edgeRemove(graph, source, dest, table);
+            }
+
+            printf("Removed edge from '%d' to '%d'\n", source, dest);
+            token = strtok(NULL, " "); //επομενο δεδομενο
+
+        }
+
+        //########### 5 ##########//
+        //m Ni Nj sum sum1 date date1 - τροποποιηση βαρους ακμης
+        else if(strcmp(command, "modify") == 0 || strcmp(command, "m") == 0){
+            int source = atoi(token);
+            int dest = atoi(strtok(NULL, " "));
+            int old_sum = atoi(strtok(NULL, " "));
+            int new_sum = atoi(strtok(NULL, " "));
+            char* old_date = strtok(NULL, " ");
+            char* new_date = strtok(NULL, " ");
+
+            if((hashFindGraphNodeWithKey(table, source) == NULL) || (hashFindGraphNodeWithKey(table, dest)) == NULL){
+                printf("Non-existing node(s): ");
+
+                if(hashFindGraphNodeWithKey(table, source) == NULL){
+                    printf("%d ", source);
+                }
+                if(hashFindGraphNodeWithKey(table, dest) == NULL) {
+                    printf("%d\n", dest);
+                }
+                // break;
+            }
+            else if(edgeFind(graph, source, dest, table) == NULL){
+                printf("Non-existing edge: %d %d %d %s", source, dest, old_sum, old_date);
+                // break;
+            }
+            else{
+                edgeModify(graph, table, source, dest, old_sum, new_sum, old_date, new_date);
+                printf("Successful modification edge %d to %d\n", source, dest);
+            }
+
+            token = strtok(NULL, " ");
+        }
+
+
+        //########### 6 ##########//
+        //f Ni - ευρεση ολων των εξερχομενων ακμων του Ni
+        else if(strcmp(command, "find") == 0 || strcmp(command, "f") == 0){
+            int user = atoi(token);
+            
+            if(hashFindGraphNodeWithKey(table, user) == NULL){
+                printf("Non-existing node: %d\n", user);
+            }
+            else{
+                edgesOutgoingOfNodeDisplay(graph, user, table);
+            }
+            strtok(NULL, " ");
+
+        }
+
+        //########### 7 ##########//
+        //r Ni - ευρεση ολων των εισερχομενων ακμων του Ni
+        else if(strcmp(command, "receiving") == 0 || strcmp(command, "r") == 0){
+            int user = atoi(token);
+            
+            if(hashFindGraphNodeWithKey(table, user) == NULL){
+                printf("Non-existing node: %d\n", user);
+            }
+            else{
+                edgesIncomingOfNodeDisplay(graph, user, table);
+            }
+            strtok(NULL, " ");
+        }
+
+
+        //########### 12 ##########//
+        //αποδεσμευση μνημης και τερματισμος προγραμματος
+        else if(strcmp(command, "e") == 0 || strcmp(command, "exit") == 0){
+            graphDestroy(graph, graphDestroyNode, table);
+            free(date);
+            return 0;
+        }
+    }
 
     
-    graphDestroy(graph, graphDestroyNode, table);
-
-    free(date);
-
-
-
-
-
-
-
-
-
-
 }

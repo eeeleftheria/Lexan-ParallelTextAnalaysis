@@ -198,7 +198,7 @@ Edge edgeFind(Graph graph, int source_user, int dest_user, HashTable hash_table)
     }     
 }
 
-Edge edgeFindWithAmount(Graph graph, int source_user, int dest_user, int sum, HashTable hash_table){
+Edge edgeFindWithAmountAndDate(Graph graph, int source_user, int dest_user, int sum, char* date,  HashTable hash_table){
     GraphNode source = hashFindGraphNodeWithKey(hash_table, source_user);
     GraphNode dest = hashFindGraphNodeWithKey(hash_table, dest_user);
 
@@ -210,7 +210,7 @@ Edge edgeFindWithAmount(Graph graph, int source_user, int dest_user, int sum, Ha
             Edge edge = listNodeValue(list, node);
 
             //αν βρουμε την ακμη με τον δοθεν προορισμο, την επιστρεφουμε
-            if(edge->dest_node == dest && edge->amount == sum) {
+            if(edge->dest_node == dest && edge->amount == sum && (strcmp(date, edge->date) == 0)) {
                 return edge;
             }
     }   
@@ -317,10 +317,53 @@ void edgesOfNodeDisplay(Graph graph, int user, HashTable table, FILE* output){
 }
 
 
-void edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum, int new_sum, char* new_date){
+void edgesOutgoingOfNodeDisplay(Graph graph, int user, HashTable table){
+    
+    GraphNode graph_node = hashFindGraphNodeWithKey(table, user);
+    List list_out = graph_node->outgoing_edges;
+
+    printf("Outgoing edges of user '%d' are: \n", user);
+    printf("from   to    amount       date\n");
+
+    ListNode node;
+
+    for (node = listFirst(list_out); node != NULL; node = listGetNext(node)){
+        
+        Edge edge = listNodeValue(list_out, node);
+        int source = edge->source_node->user;
+        int dest = edge->dest_node->user;
+
+        printf("  %d    %d      %d      %s\n", source, dest, edge->amount, edge->date);
+    }
+
+}
+
+void edgesIncomingOfNodeDisplay(Graph graph, int user, HashTable table){
+    
+    GraphNode graph_node = hashFindGraphNodeWithKey(table, user);
+    List list_out = graph_node->incoming_edges;
+
+    printf("Incoming edges of user '%d' are: \n", user);
+    printf("from   to    amount       date\n");
+
+    ListNode node;
+
+    for (node = listFirst(list_out); node != NULL; node = listGetNext(node)){
+        
+        Edge edge = listNodeValue(list_out, node);
+        int source = edge->source_node->user;
+        int dest = edge->dest_node->user;
+
+        printf("  %d    %d      %d      %s\n", source, dest, edge->amount, edge->date);
+    }
+
+}
+
+
+void edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum, int new_sum, char* old_date, char* new_date){
     
     //ευρεση πρωτης ακμης με το συγκεκριμενο ποσο συναλλαγης
-    Edge edge = edgeFindWithAmount(graph, source, dest, old_sum, table);    
+    Edge edge = edgeFindWithAmountAndDate(graph, source, dest, old_sum, old_date, table);    
 
     if(edge != NULL) {
         edge->amount = new_sum;
