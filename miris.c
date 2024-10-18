@@ -20,6 +20,8 @@ int main(int argc, char* argv[]) {
 
     int opt;
 
+    //επιλογες που δεχεται: i μαζι με καποιο ορισμα, o μαζι με καποιο ορισμα
+    //-1 οταν διαβασει ολα τα ορισματα γραμμης
     while((opt = getopt(argc, argv, "i:o:")) != -1){
 
         if(opt == 'i') {
@@ -47,10 +49,11 @@ int main(int argc, char* argv[]) {
 
     char content[200];
 
-    int count = 0;
-    //αναγνωση περιεχομενου κ αποθηκευση μεσα στο content
-    //η fget σταματαει να διαβαζει οταν συναντησει α΄΄λλαγη γραμμης ή EOF
+    int count = 0;//κραταμε τον αριθμο γραμμων του αρχειου
+    //για να δημιουργησουμε ενα hash table με καταλληλο μεγεθος
 
+    //αναγνωση περιεχομενου κ αποθηκευση μεσα στο content
+    //η fgets σταματαει να διαβαζει οταν συναντησει α΄΄λλαγη γραμμης ή EOF
     while(fgets(content, 200, file) != NULL) {
         count++;
     }
@@ -99,19 +102,23 @@ int main(int argc, char* argv[]) {
         // i Ni [Nj Nk ...] - εισαγωγη κομβων
         if(strcmp(command, "insert") == 0 || strcmp(command, "i") == 0){
             
-            printf("Succ: ");
 
             while(token!= NULL){
+                bool succ = false;
 
                 int user = atoi(token); //string to int
                 if (hashFindGraphNodeWithKey(table, user) == NULL){
-                    printf("%d ", user);
+                    succ = true;
                     graphAdd(graph, user, table);
                 }
                 else{
                     printf("Issue with: %d (already exists)\n", user);
-                    break;
                 }
+                if(succ == true){
+                    printf("Succ: ");
+                    printf("%d\n", user);
+                }
+
                 token = strtok(NULL, " "); //επομενο δεδομενο
             }
             printf("\n");
@@ -167,9 +174,12 @@ int main(int argc, char* argv[]) {
             Edge edge = edgeFind(graph, source, dest, table);
             if(edge != NULL){
                 edgeRemove(graph, source, dest, table);
+                printf("Removed edge from '%d' to '%d'\n", source, dest);
+            }
+            else{
+                printf("Non-existing edge from '%d' to '%d'\n", source, dest);
             }
 
-            printf("Removed edge from '%d' to '%d'\n", source, dest);
             token = strtok(NULL, " "); //επομενο δεδομενο
 
         }
@@ -246,6 +256,9 @@ int main(int argc, char* argv[]) {
             return 0;
         }
     }
+
+    graphDestroy(graph, graphDestroyNode, table);
+    free(date);
 
     
 }
