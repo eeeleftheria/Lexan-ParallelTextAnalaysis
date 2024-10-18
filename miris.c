@@ -255,6 +255,17 @@ int main(int argc, char* argv[]) {
             free(date);
             return 0;
         }
+        else{
+            printf("Format error - Command options:\n");
+            printf("Insert node(s):\ni Ni [Nj Nk ...] or insert\n\n");
+            printf("Insert an edge:\nn Ni Nj sum date or insert2\n\n");
+            printf("Remove node(s):\nd Ni [Nj Nk ...] or delete\n\n");
+            printf("Remove edge:\nl Ni Nj or delete2\n\n");
+            printf("Modify edge:\nm Ni Nj sum sum1 date date1 or modify\n\n");
+            printf("Find all outgoing edges from Ni:\nf Ni or find\n\n");
+            printf("Find all incoming to Ni edges:\nr Ni or receiving\n\n");
+            printf("Exit program:\ne or exit\n\n");
+        }
     }
 
     graphDestroy(graph, graphDestroyNode, table);

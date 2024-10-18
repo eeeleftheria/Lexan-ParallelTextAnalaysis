@@ -5,7 +5,6 @@ CC = gcc
 #CFLAGS = -Wall  -g -I$(INCLUDE)
 # Αρχεία .o
 
-
 OBJS = graph.o list.o miris.o hash.o
 
 # Το εκτελέσιμο πρόγραμμα
@@ -21,4 +20,4 @@ run: $(EXEC)
 	./$(EXEC) 
 
 valgrind: $(EXEC)
-	 valgrind --leak-check=full ./$(EXEC)
+	 valgrind --leak-check=full ./$(EXEC) -i data8-3.txt -o output.txt
