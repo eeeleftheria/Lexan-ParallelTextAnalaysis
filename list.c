@@ -166,6 +166,7 @@ ListNode findNodeWithValue(List list, Pointer value){
             return node;
         }    
     }
+    return NULL;
 
 }
 

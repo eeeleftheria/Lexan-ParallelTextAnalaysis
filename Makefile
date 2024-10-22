@@ -2,7 +2,7 @@
 CC = gcc
 
 # Compile options. Το -I<dir> λέει στον compiler να αναζητήσει εκεί include files
-#CFLAGS = -Wall  -g -I$(INCLUDE)
+CFLAGS = -Wall  -g -I ./Include
 # Αρχεία .o
 
 OBJS = graph.o list.o miris.o hash.o
@@ -11,13 +11,13 @@ OBJS = graph.o list.o miris.o hash.o
 EXEC = miris
 
 $(EXEC): $(OBJS)
-	$(CC) $(OBJS) -o $(EXEC) 
+	$(CC) $(OBJS) -o $(EXEC) $(LDFLAGS)
 
 clean:
 	rm -f $(OBJS) $(EXEC)
 
 run: $(EXEC)
-	./$(EXEC) 
+	./$(EXEC)
 
 valgrind: $(EXEC)
-	 valgrind --leak-check=full ./$(EXEC) -i data8-3.txt -o output.txt
+	 valgrind --leak-check=full ./$(EXEC)

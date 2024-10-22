@@ -50,13 +50,14 @@ void graphAdd(Graph graph, int user, HashTable hash_table){
     graph_node->outgoing_edges = listCreate();
     graph_node->incoming_edges = listCreate();
 
-    
+    //προσθηκη κομβου στη λιστα με τις κορυφες
     List list_nodes = graph->nodes;
     listInsert(list_nodes, graph_node);
 
     //θα προσθετουμε τον αντιστοιχο graph node και στο hash_table που μας δινεται
     hashAdd(hash_table, user, graph_node);
 
+    //ενημερωση μεγεθους γραφου
     graph->size ++;   
     
 }
@@ -65,19 +66,17 @@ void graphAdd(Graph graph, int user, HashTable hash_table){
 void graphRemove(Graph graph, int user, HashTable hash_table){
    
     List list_nodes = graph->nodes;
-    int* p = &user;
     
     //ευρεση του graph node μεσω hash για πιο γρηγορη αναζητηση 
     GraphNode node_to_remove = hashFindGraphNodeWithKey(hash_table, user);
-    ListNode list_node = hashFindListNodeWithValue(hash_table, node_to_remove);
 
-
+    //αφαιρεση πρωτα απο το hash table, χωρις να κανουμε free τον graph node
     hashRemove(hash_table, user, hashDestroyValue);
 
     //πρεπει να διαγραψουμε το value node_to_remove του list node  και να κανουμε free τον κομβο της λιστας
     listRemove(list_nodes, findNodeWithValue(list_nodes, node_to_remove), graphDestroyNode);
 
-
+    //ενημερωση του μεγεθους του γραφου
     graph->size--;
 
 }
@@ -101,6 +100,7 @@ void graphDestroyNode(Pointer graph_node){
    
     GraphNode node_to_destroy = (GraphNode)graph_node;
 
+    //πρεπει να καταστρεψουμε κ τις δυο λιστες με τις ακμες του
     listDestroy(node_to_destroy->incoming_edges, edgeDestroyValueForIncoming);
     listDestroy(node_to_destroy->outgoing_edges, edgeDestroyValueForOutgoing);
     
@@ -137,11 +137,9 @@ void graphDisplay(Graph graph, FILE* output, HashTable table){
 }
 
 
-
-
-
-
-/////////////// ΑΚΜΕΣ ///////////////
+//#################################//
+//############# ΑΚΜΕΣ #############//
+//#################################//
 void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user, HashTable hash_table){
 
     Edge new_edge = malloc(sizeof(struct edge));
@@ -152,26 +150,21 @@ void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user
     //αν οι χρηστες(κορυφες) με ονομα source_user, dest_user αντιστοιχα, δεν υπαρχουν
     //πρεπει να δημιουργηθουν
     if(hashFindGraphNodeWithKey(hash_table, source_user) == NULL) {
-        // printf("User with id '%d' added\n\n", source_user);
         graphAdd(graph, source_user, hash_table);
     }
 
 
     if(hashFindGraphNodeWithKey(hash_table, dest_user) == NULL) {
-        // printf("User with id '%d' added\n\n", dest_user);
         graphAdd(graph, dest_user, hash_table);
     }
 
-
+    //αναθεση source graph node και dest graph node της ακμης
     new_edge->dest_node = hashFindGraphNodeWithKey(hash_table, dest_user);
     new_edge->source_node = hashFindGraphNodeWithKey(hash_table, source_user);
 
+    //προσθηκη στην αντιστοιχη λιστα
     listInsert(new_edge->dest_node->incoming_edges, new_edge);
     listInsert(new_edge->source_node->outgoing_edges, new_edge);
-
-    // printf("new transaction: user '%d' -> user '%d', amount = '%d'\n\n", source_user, dest_user, amount);
-
-
 
 }
 
@@ -195,9 +188,11 @@ Edge edgeFind(Graph graph, int source_user, int dest_user, HashTable hash_table)
             if(edge->dest_node == dest) {
                 return edge;
             }
-    }     
+    }   
+    return NULL;  
 }
 
+//ευρεση ακμης με συγκεκριμενο source, dest, sum, date
 Edge edgeFindWithAmountAndDate(Graph graph, int source_user, int dest_user, int sum, char* date,  HashTable hash_table){
     GraphNode source = hashFindGraphNodeWithKey(hash_table, source_user);
     GraphNode dest = hashFindGraphNodeWithKey(hash_table, dest_user);
@@ -214,19 +209,22 @@ Edge edgeFindWithAmountAndDate(Graph graph, int source_user, int dest_user, int 
                 return edge;
             }
     }   
+    return NULL;
 }
 
 
 
-
+//αφαιρεση ακμης μεταξυ δυο κορυφων
 void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_table){
     
+    //ευρεση των δυο κορυφων με βαση το id τους
     GraphNode source = hashFindGraphNodeWithKey(hash_table, source_user);
     GraphNode dest = hashFindGraphNodeWithKey(hash_table, dest_user);
     
     Edge edge;
     
     if(source != NULL &&  dest!= NULL){
+        //ευρεση μιας μεταξυς τους ακμης
          edge = edgeFind(graph, source_user, dest_user, hash_table);
 
          if(edge == NULL) {
@@ -268,18 +266,18 @@ void edgeDestroyValueForIncoming(Pointer value){
 
 
 
-
+//καταστροφη λιστας με εισερχομενες ακμες
 void incomingEdgesDestroy(GraphNode node){
     listDestroy(node->incoming_edges, edgeDestroyValueForIncoming);
 }
 
+//καταστροφη λιστας με εξερχομενες ακμες
 void outgoingEdgesDestroy(GraphNode node){
     listDestroy(node->outgoing_edges, edgeDestroyValueForOutgoing);
 }
 
 
-
-
+//εκτυπωση ακμων μιας κορυφης
 void edgesOfNodeDisplay(Graph graph, int user, HashTable table, FILE* output){
     GraphNode graph_node = hashFindGraphNodeWithKey(table, user);
     List list_inc = graph_node->incoming_edges;
@@ -317,6 +315,7 @@ void edgesOfNodeDisplay(Graph graph, int user, HashTable table, FILE* output){
 }
 
 
+//εκτυπωση εξερχομενων ακμων μιας κορυφης
 void edgesOutgoingOfNodeDisplay(Graph graph, int user, HashTable table){
     
     GraphNode graph_node = hashFindGraphNodeWithKey(table, user);
@@ -327,6 +326,8 @@ void edgesOutgoingOfNodeDisplay(Graph graph, int user, HashTable table){
 
     ListNode node;
 
+    //διατρεχουμε τη λιστα με τις εξερχομενες ακμες του κομβου και εκτυπωνουμε
+    //ολες τις πληροφοριες των ακμων του
     for (node = listFirst(list_out); node != NULL; node = listGetNext(node)){
         
         Edge edge = listNodeValue(list_out, node);
@@ -338,6 +339,7 @@ void edgesOutgoingOfNodeDisplay(Graph graph, int user, HashTable table){
 
 }
 
+//εκτυπωση εισερχομενων ακμων κορυφης
 void edgesIncomingOfNodeDisplay(Graph graph, int user, HashTable table){
     
     GraphNode graph_node = hashFindGraphNodeWithKey(table, user);
@@ -348,6 +350,8 @@ void edgesIncomingOfNodeDisplay(Graph graph, int user, HashTable table){
 
     ListNode node;
 
+    //διατρεχουμε τη λιστα με τις εισερχομενες ακμες του κομβου και εκτυπωνουμε
+    //ολες τις πληροφοριες των ακμων του
     for (node = listFirst(list_out); node != NULL; node = listGetNext(node)){
         
         Edge edge = listNodeValue(list_out, node);
@@ -360,6 +364,7 @@ void edgesIncomingOfNodeDisplay(Graph graph, int user, HashTable table){
 }
 
 
+//τροποποιηση ακμης
 void edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum, int new_sum, char* old_date, char* new_date){
     
     //ευρεση πρωτης ακμης με το συγκεκριμενο ποσο συναλλαγης

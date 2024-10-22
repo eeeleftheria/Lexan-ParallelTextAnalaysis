@@ -18,22 +18,18 @@ int main(int argc, char* argv[]) {
     char* input_file = NULL;
     char* output_file = NULL;
 
-    int opt;
+    if(argc != 5) {
+        fprintf(stderr, "Not enough arguments\n");
+    }
 
-    //επιλογες που δεχεται: i μαζι με καποιο ορισμα, o μαζι με καποιο ορισμα
-    //-1 οταν διαβασει ολα τα ορισματα γραμμης
-    while((opt = getopt(argc, argv, "i:o:")) != -1){
-
-        if(opt == 'i') {
-            input_file = optarg; 
-        }
+    for(int i = 0; i < argc; i++){
         
-        else if(opt == 'o'){
-            output_file = optarg;
+        //της μορφης ./miris -i inputfile -o outputfile
+        if(strcmp(argv[i], "-i") == 0 && (i == 1)){
+            input_file = argv[i+1];
         }
-        else{
-            fprintf(stderr, "Correct format is: %s -i inputfile -o outputfile\n", argv[0]);
-            return -1;
+        if(strcmp(argv[i], "-o") == 0 && (i == 3)){
+            output_file = argv[i+1];
         }
     }
 
@@ -54,7 +50,7 @@ int main(int argc, char* argv[]) {
 
     //αναγνωση περιεχομενου κ αποθηκευση μεσα στο content
     //η fgets σταματαει να διαβαζει οταν συναντησει α΄΄λλαγη γραμμης ή EOF
-    while(fgets(content, 200, file) != NULL) {
+    while(fgets(content, 200, file) != NULL) { 
         count++;
     }
 
@@ -64,7 +60,7 @@ int main(int argc, char* argv[]) {
     //μεγεθος hash table οσο 2 φορες τις γραμμες του αρχειου
     HashTable table = hashCreate(2*count);
     
-    while(fgets(content, 200, file) != NULL){
+    while(fgets(content, 200, file) != NULL){ //αναγνωση γραμμης
         sscanf(content, "%d %d %d %s", &user1, &user2, &amount, date);
         
         edgeAdd(graph, amount, date, user1, user2, table);
@@ -96,7 +92,8 @@ int main(int argc, char* argv[]) {
 
         //αναγνωση υπολοιπης γραμμης
         fgets(buffer, 200, stdin);
-        token = strtok(buffer, " ");
+        token = strtok(buffer, " "); //οι λεξεις χωριζονται μεταξυ τους με κενο
+
 
         //########### 1 ##########//
         // i Ni [Nj Nk ...] - εισαγωγη κομβων
@@ -151,9 +148,10 @@ int main(int argc, char* argv[]) {
             while(token!= NULL){
 
                 int user = atoi(token); //string to int
+
                 if (hashFindGraphNodeWithKey(table, user) != NULL){
-                    printf("Successful deletion of node: %d\n ", user);
                     graphRemove(graph, user, table);
+                    printf("Successful deletion of node: %d\n ", user);
                 }
                 else{
                     printf("Non existing node(s): %d\n", user);
@@ -194,6 +192,7 @@ int main(int argc, char* argv[]) {
             char* old_date = strtok(NULL, " ");
             char* new_date = strtok(NULL, " ");
 
+            //αν τουλαχιστον ενας απο τους 2 κομβους δεν υπαρχει
             if((hashFindGraphNodeWithKey(table, source) == NULL) || (hashFindGraphNodeWithKey(table, dest)) == NULL){
                 printf("Non-existing node(s): ");
 
@@ -205,6 +204,7 @@ int main(int argc, char* argv[]) {
                 }
                 // break;
             }
+            //αν δεν συνδεονται με ακμη
             else if(edgeFind(graph, source, dest, table) == NULL){
                 printf("Non-existing edge: %d %d %d %s", source, dest, old_sum, old_date);
                 // break;

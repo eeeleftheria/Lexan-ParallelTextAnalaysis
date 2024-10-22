@@ -4,7 +4,6 @@
 //  Για μεγεθος πινακα M και κλειδι k, η hαsh function μας θα ειναι
 // h(k) = k mod Μ οπου ο M πρεπει να ειναι πρωτος αριθμος
 //
-// Για load factor a πρεπει να ισχυει α < 0.9
 ////////////////////////////////////////////
 
 
@@ -111,6 +110,7 @@ Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user){
             }
         }
     }
+    return NULL;
 }
 
 
@@ -128,6 +128,7 @@ Pointer hashFindListNodeWithKey(HashTable hash_table, int user){
             return node;
         }
     }
+    return NULL;
 }
 
 
