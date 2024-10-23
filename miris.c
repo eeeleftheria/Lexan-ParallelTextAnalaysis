@@ -135,8 +135,14 @@ int main(int argc, char* argv[]) {
             token = strtok(NULL, " ");
             char* date = token;
 
-            edgeAdd(graph, sum, date, source, dest, table);
-            printf("Added edge from '%d' to '%d'\n", source, dest);
+            if(dest == source){
+                printf("Issue with: %d %d\n", source, dest);
+            }
+            else{
+                edgeAdd(graph, sum, date, source, dest, table);
+                printf("Added edge from '%d' to '%d'\n", source, dest); 
+            }
+            
             token = strtok(NULL, " "); //επομενο δεδομενο
 
         }
