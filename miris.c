@@ -157,7 +157,7 @@ int main(int argc, char* argv[]) {
 
                 if (hashFindGraphNodeWithKey(table, user) != NULL){
                     graphRemove(graph, user, table);
-                    printf("Successful deletion of node: %d\n ", user);
+                    printf("Successful deletion of node: %d\n", user);
                 }
                 else{
                     printf("Non existing node(s): %d\n", user);
@@ -174,6 +174,15 @@ int main(int argc, char* argv[]) {
             
             token = strtok(NULL, " ");
             int dest = atoi(token);
+            
+            if(hashFindGraphNodeWithKey(table, source) == NULL){
+                printf("Non-existing node(s): %d", source);
+            }
+
+            if(hashFindGraphNodeWithKey(table, dest) == NULL){
+                printf("Non-existing node(s): %d", dest);
+            }
+
 
             Edge edge = edgeFind(graph, source, dest, table);
             if(edge != NULL){
@@ -208,16 +217,16 @@ int main(int argc, char* argv[]) {
                 if(hashFindGraphNodeWithKey(table, dest) == NULL) {
                     printf("%d\n", dest);
                 }
-                // break;
+    
             }
             //αν δεν συνδεονται με ακμη
             else if(edgeFind(graph, source, dest, table) == NULL){
                 printf("Non-existing edge: %d %d %d %s", source, dest, old_sum, old_date);
-                // break;
+
             }
             else{
                 edgeModify(graph, table, source, dest, old_sum, new_sum, old_date, new_date);
-                printf("Successful modification edge %d to %d\n", source, dest);
+                printf("Successful modification of edge %d to %d\n", source, dest);
             }
 
             token = strtok(NULL, " ");
@@ -251,6 +260,17 @@ int main(int argc, char* argv[]) {
                 edgesIncomingOfNodeDisplay(graph, user, table);
             }
             strtok(NULL, " ");
+        }
+
+        //########### 8 ##########//
+        //c Ni - ευρεση κυκλων του Ni
+        else if((strcmp(command, "circlefind") == 0) || (strcmp(command, "c") == 0)){
+            int user = atoi(token);
+
+            if(hashFindGraphNodeWithKey(table, user) == NULL){
+                printf("Non-existing node: %d\n", user);
+            }
+            
         }
 
 

@@ -380,4 +380,29 @@ void edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum,
 }
 
 
+void graphFindCircle(Graph graph, int user, HashTable table, List visited){
+    GraphNode node = hashFindGraphNodeWithKey(table, user);
+    List list = node->outgoing_edges;
+
+    for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
+        Edge edge = listNodeValue(list, node);
+        GraphNode neighbor = edge->dest_node;
+
+        //αν δεν εχει επισκεφθει ο κομβος
+        if(findNodeWithValue(visited, neighbor) == NULL){
+            listInsert(visited, neighbor);
+            graphFindCircle(graph, neighbor->user, table, visited);
+        }
+
+        if(neighbor->user == user){
+            printf("Circle found:\n");
+
+            for(ListNode node = listFirst(visited); node != NULL; node = listGetNext(node)){
+                
+            }
+        }
+    }
+}
+
+
 
