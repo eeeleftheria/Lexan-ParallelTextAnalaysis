@@ -29,14 +29,14 @@ int main() {
        for(;;); /* loop for ever */
      }
   else /* parent */
-     {  /* pid hold id of child */
+     {  /* pid holds id of child */
        printf("\nPARENT: I am in parent process now...\n");
        sleep(3);
        printf("\nPARENT: sending SIGUSR1\n\n");
-       kill(pid,SIGUSR1);
+       kill(pid, SIGUSR1); //αποστολη του σηματος στο παιδι
        sleep(3); /* pause for 3 secs */
        printf("\nPARENT: sending SIGQUIT\n\n");
-       kill(pid,SIGQUIT);
+       kill(pid, SIGQUIT);
        sleep(3);
      }
 }

@@ -63,6 +63,7 @@ clean:
 	rm -f 	\
 		0-busy\
 		1a-fork \
+		1b-fork \
 		1-heehaho \
 		2-ParentChild \
 		3-ParentChild2 \

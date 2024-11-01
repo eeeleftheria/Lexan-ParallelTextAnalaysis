@@ -69,11 +69,6 @@ int main(int argc, char* argv[]) {
     fclose(file);
 
 
-    file = fopen(output_file, "w");
-
-    graphDisplay(graph, file, table);
-
-    fclose(file);
     
     /////////////////////////////
     ///////// PROMPT ///////////
@@ -260,6 +255,7 @@ int main(int argc, char* argv[]) {
                 edgesIncomingOfNodeDisplay(graph, user, table);
             }
             strtok(NULL, " ");
+ 
         }
 
         //########### 8 ##########//
@@ -277,8 +273,15 @@ int main(int argc, char* argv[]) {
         //########### 12 ##########//
         //αποδεσμευση μνημης και τερματισμος προγραμματος
         else if(strcmp(command, "e") == 0 || strcmp(command, "exit") == 0){
+            file = fopen(output_file, "w");
+            graphDisplay(graph, file, table);
+            fclose(file);
+
+
             graphDestroy(graph, graphDestroyNode, table);
             free(date);
+
+
             return 0;
         }
         else{

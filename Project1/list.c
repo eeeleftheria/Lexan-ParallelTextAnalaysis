@@ -144,6 +144,10 @@ void listDestroy(List list, DestroyValueFunc func) {
     free(list); //αποδεσμευση μνημης απο λιστα
 }
 
+void listDestroyNode(Pointer node){
+    free(node);
+}
+
 ListNode listFirst(List list){
     return list->first;
 }

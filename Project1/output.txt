@@ -34,19 +34,6 @@ from   to    amount       date
   7     9     3400       2024-08-16
 
 
-User with id '5'
-Transactions of user '5' are: 
-from   to    amount       date
-  5    1      1600      2024-08-16
-  5    2      2000      2024-08-16
-  5    1      300      2024-08-16
-
-Incoming transactions:
-from   to    amount       date
-  2     5     2700       2024-08-16
-  6     5     2200       2024-08-16
-
-
 User with id '6'
 Transactions of user '6' are: 
 from   to    amount       date

@@ -3,12 +3,14 @@
 #include <unistd.h>
 
 
-void f(int), f1(int);
+void f(int);
 
 int main (){
 	int i;
 
-	signal(SIGINT , f); // ???
+	//καθε φορα που δεχεται ενα τετοιο signal που στη συγκεκριμενη περιπτωση ειναι ενα 
+	//interrupt, θα εκτελει τον κωδικα της f
+	signal(SIGINT , f); // οριζει τον handler του σηματος SIGINT
 
 	for (i=0; i <5;i ++){
 		printf(" hello \n");

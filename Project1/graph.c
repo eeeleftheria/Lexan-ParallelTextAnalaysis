@@ -74,6 +74,7 @@ void graphRemove(Graph graph, int user, HashTable hash_table){
     hashRemove(hash_table, user, hashDestroyValue);
 
     //πρεπει να διαγραψουμε το value node_to_remove του list node  και να κανουμε free τον κομβο της λιστας
+
     listRemove(list_nodes, findNodeWithValue(list_nodes, node_to_remove), graphDestroyNode);
 
     //ενημερωση του μεγεθους του γραφου
