@@ -11,14 +11,16 @@
 #include <sys/types.h>
 
 
-FILE* file;
-   
-char* input_file = NULL;
-char* output_file = NULL;
-char* exclusion_list_file = NULL;
-int num_of_splitter, num_of_builders, num_of_top_popular;
 
 int main(int argc, char* argv[]){
+
+    char buffer[200];
+    FILE* file;
+    
+    char* input_file = NULL;
+    char* output_file = NULL;
+    char* exclusion_list_file = NULL;
+    int num_of_splitter, num_of_builders, num_of_top_popular;
     if(argc != 13){
         printf("Error\nUsage is: ./lexan -i TextFile -l numOfSplitter -m numOfBuilders -t TopPopular -e ExclusionList -o OutputFile\n");
         return -1;
@@ -66,7 +68,7 @@ int main(int argc, char* argv[]){
     pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
 
     for(int i = 0; i < num_of_splitter; i++){
-        pid_t child_pid = fork();
+        pid_t child_pid = fork(); //δημιουργια splitter processes
         
         if(child_pid == -1){
             perror("error with fork\n");
@@ -74,9 +76,21 @@ int main(int argc, char* argv[]){
         }
         
         splitter[i] = child_pid; //αποθηκευση του pid του splitter i
+        
+        int pipefd[2]; //pipefd[0] = read end & pipefd[1] = write end
+        if(pipe(pipefd) == -1){ //δημιουργια pipe για καθε ζευγος parent-child
+            perror("error creating pipe\n");
+            exit(1);
+        }
+
+        if(child_pid != 0){ //εντος parent process
+            close(pipefd[0]); //μονο γραψιμο
+            write(pipefd[1], buffer, sizeof(buffer));
+        }
 
         if(child_pid == 0){ //εντος child process
-
+            close(pipefd[1]); //μονο αναγνωση 
+            read(pipefd[0], buffer, sizeof(buffer));
         }
     }
 
