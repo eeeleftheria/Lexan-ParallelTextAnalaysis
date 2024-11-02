@@ -14,8 +14,6 @@
 
 int main(int argc, char* argv[]){
 
-    char buffer[200];
-    FILE* file;
     
     char* input_file = NULL;
     char* output_file = NULL;
@@ -53,21 +51,35 @@ int main(int argc, char* argv[]){
         fprintf(stderr, "Failure opening input file\n");
     }
 
-    char buffer[200];
-    int count = 0;//κραταμε τον αριθμο γραμμων του αρχειου
+    int lines = 0;//κραταμε τον αριθμο γραμμων του αρχειου
+    char c = 0;
 
-    //αναγνωση περιεχομενου κ αποθηκευση μεσα στο buffer
-    //η fgets σταματαει να διαβαζει οταν συναντησει α΄΄λλαγη γραμμης ή EOF
-    while(fgets(buffer, 200, file) != NULL) { 
-        count++;
+    //διαβασμα αρχειου ανα χαρακτηρα, ωστε να μετρησουμε το πληθος γραμμων
+    while(read(fd, &c, sizeof(c)) > 0) {  //για EOF επιστρεφει 0
+        if(c == '\n'){
+            lines++;
+        }
     }
 
-    //ποσες γραμμες μπορει να διαβασει καθε splitter
-    int input_of_splitter = count / num_of_splitter;
+    lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
 
-    pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
+    //ποσες γραμμες μπορει να διαβασει καθε splitter
+    int input_of_splitter = lines / num_of_splitter;
+
+    // pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
+    char buffer[1024];
+
+    //θελουμε ενα pipe για καθε ζευγος parent-child, 
+    //δηλ num_of_splitter pipes με 2 θεσεις το καθενα για τον pipefd
+    int pipes[num_of_splitter][2]; //pipe[i][0] = read end of pipe i & pipe[i][1] = write end of pipe i
 
     for(int i = 0; i < num_of_splitter; i++){
+    
+        if(pipe(pipes[i]) == -1){ //δημιουργια pipe i 
+            perror("error creating pipe\n");
+            exit(1);
+        } 
+
         pid_t child_pid = fork(); //δημιουργια splitter processes
         
         if(child_pid == -1){
@@ -75,22 +87,18 @@ int main(int argc, char* argv[]){
             return -1;
         }
         
-        splitter[i] = child_pid; //αποθηκευση του pid του splitter i
-        
-        int pipefd[2]; //pipefd[0] = read end & pipefd[1] = write end
-        if(pipe(pipefd) == -1){ //δημιουργια pipe για καθε ζευγος parent-child
-            perror("error creating pipe\n");
-            exit(1);
-        }
+        // splitter[i] = child_pid; //αποθηκευση του pid του splitter i   
 
         if(child_pid != 0){ //εντος parent process
-            close(pipefd[0]); //μονο γραψιμο
-            write(pipefd[1], buffer, sizeof(buffer));
+            close(pipes[i][0]); //μονο γραψιμο
+
         }
 
         if(child_pid == 0){ //εντος child process
-            close(pipefd[1]); //μονο αναγνωση 
-            read(pipefd[0], buffer, sizeof(buffer));
+            close(pipes[i][1]); //μονο αναγνωση 
+            execlp("./splitter", "splitter", NULL); //εκτελεση του splitter που βρισκεται στο ιδιο directory
+		    perror("exec failure\n");
+
         }
     }
 
