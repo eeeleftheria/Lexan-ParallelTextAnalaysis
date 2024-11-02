@@ -51,7 +51,8 @@ int main(int argc, char* argv[]){
         fprintf(stderr, "Failure opening input file\n");
     }
 
-    int lines = 0;//κραταμε τον αριθμο γραμμων του αρχειου
+    //1 για την πρωτη γραμμη
+    int lines = 1;//κραταμε τον αριθμο γραμμων του αρχειου
     char c = 0;
 
     //διαβασμα αρχειου ανα χαρακτηρα, ωστε να μετρησουμε το πληθος γραμμων
@@ -67,7 +68,6 @@ int main(int argc, char* argv[]){
     int input_of_splitter = lines / num_of_splitter;
 
     // pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
-    char buffer[1024];
 
     //θελουμε ενα pipe για καθε ζευγος parent-child, 
     //δηλ num_of_splitter pipes με 2 θεσεις το καθενα για τον pipefd
@@ -100,6 +100,30 @@ int main(int argc, char* argv[]){
 		    perror("exec failure\n");
 
         }
+    }
+
+    char buffer[1024];
+    for(int i = 0; i < num_of_splitter; i++){
+        int count = 0;
+        printf("IN SPLITTER %d\n", i);
+            printf("Starting splitter %d, expected lines: %d\n", i, input_of_splitter);
+        while(read(fd, &c, sizeof(c)) > 0){
+            if(c == '\n'){
+                count++;
+            }
+            printf("%c", c);
+
+            write(buffer, &c, sizeof(c));
+            
+            //αν διαβασαμε οσες γραμμες πρεπει, βγαινουμε απο το while
+            //και συνεχιζει το διαβασμα ο επομενος
+            if(count == input_of_splitter){
+                write(pipes[i][1], buffer, sizeof(buffer));
+                close(pipes[i][1]); //αφου δεν το χρειαζομαστε αλλο το write end
+                break;
+            }
+        }
+
     }
 
 }
