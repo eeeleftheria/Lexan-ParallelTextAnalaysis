@@ -146,7 +146,6 @@ int main(int argc, char* argv[]){
     //######### ΔΗΜΙΟΥΡΓΙΑ BUILDERS #########//
     int pipes_builder[num_of_builders][2];
    
-   
     // for(int i = 0; i < num_of_builders; i++){
         
     //     if(pipe(pipes_builder[i]) == -1){ //δημιουργια pipe i 
@@ -169,5 +168,6 @@ int main(int argc, char* argv[]){
     //         close(pipes_builder[i][0]); //μονο εγγραφη στον root
     //     }
     // }
+   
 
 }
