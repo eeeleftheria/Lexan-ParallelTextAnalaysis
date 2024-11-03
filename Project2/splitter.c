@@ -7,14 +7,15 @@
 
 int main(){
 
+    char buffer[1024];
     int bytes_to_read;
-    char c = 0;
-    while((bytes_to_read = read(STDIN_FILENO, &c, sizeof(c))) > 0){
+    char c;
+    while(bytes_to_read = read(STDIN_FILENO, &c, sizeof(c)) > 0){
 
         if(bytes_to_read < 0){
             perror("error reading from pipe in splitter\n");
         }
-        // printf("%c", c);
+        printf("%c", c);
     }
     
 }
