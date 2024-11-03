@@ -90,12 +90,20 @@ int main(int argc, char* argv[]){
         // splitter[i] = child_pid; //αποθηκευση του pid του splitter i   
 
         if(child_pid != 0){ //εντος parent process
+            // char* buffer = "hello";
             close(pipes[i][0]); //μονο γραψιμο
+            // write(pipes[i][1], buffer, strlen(buffer));
 
         }
 
         if(child_pid == 0){ //εντος child process
+            //πρεπει να ανακατευθυνουμε το read end του pipe στο std input, ωστε το παιδι
+            //να μην χρειαζεται να γνωριζει τον fd του pipe για να διαβασει
+            //Ετσι, καθε φορα που θα διαβαζει απο το std input θα διαβαζει στην πραγματικοτητα
+            //απο το read end του pipe. Δηλ, δειχνει στο ιδιο αρχειο με το pipe[i][0].
             close(pipes[i][1]); //μονο αναγνωση 
+            dup2(pipes[i][0], STDIN_FILENO); 
+            close(pipes[i][0]);
             execlp("./splitter", "splitter", NULL); //εκτελεση του splitter που βρισκεται στο ιδιο directory
 		    perror("exec failure\n");
 
@@ -104,26 +112,23 @@ int main(int argc, char* argv[]){
 
     char buffer[1024];
     for(int i = 0; i < num_of_splitter; i++){
+  
         int count = 0;
-        printf("IN SPLITTER %d\n", i);
-            printf("Starting splitter %d, expected lines: %d\n", i, input_of_splitter);
         while(read(fd, &c, sizeof(c)) > 0){
             if(c == '\n'){
-                count++;
+                count++; //μετρητης γραμμων, ωστε να ξερει μεχρι που πρεπει
+                //να διαβασει απο το αρχειο για το συγκεκριμενο child
             }
-            printf("%c", c);
-
-            write(buffer, &c, sizeof(c));
             
+            write(pipes[i][1], &c, sizeof(c)); //εγγραφη καθε χαρακτηρα στο pipe
+
             //αν διαβασαμε οσες γραμμες πρεπει, βγαινουμε απο το while
-            //και συνεχιζει το διαβασμα ο επομενος
+            //και συνεχιζει το διαβασμα ο επομενος απο το σημειο αυτο
             if(count == input_of_splitter){
-                write(pipes[i][1], buffer, sizeof(buffer));
                 close(pipes[i][1]); //αφου δεν το χρειαζομαστε αλλο το write end
                 break;
             }
         }
-
     }
 
 }
