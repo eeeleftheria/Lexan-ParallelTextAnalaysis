@@ -36,21 +36,26 @@ int main(int argc, char* argv[]){
 
     int bytes_to_read;
     char c;
-    int lines = 0;
+    int lines = 1;
 
-    printf("\nIN SPLITTER %d %d\n", start_line, end_line);
+    // printf("\nIN SPLITTER %d %d\n", start_line, end_line);
+
+    lseek(fd, start_line, SEEK_SET);
     while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
 
-        if(bytes_to_read < 0){
+        if(bytes_to_read < 0) {
             perror("error reading from pipe in splitter\n");
         }
         if(c == '\n'){
             lines++;
         }
+        // printf("%c", c);
 
-        if(lines >= start_line && lines < end_line){
-            printf("%c", c);
-        }
+       if(lines == end_line){
+           break;
+       }
     }
+
+    // printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
     
 }

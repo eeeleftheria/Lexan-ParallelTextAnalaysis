@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
     }
 
 
-    int lines = 0;//κραταμε τον αριθμο γραμμων του αρχειου
+    int lines = 1;//κραταμε τον αριθμο γραμμων του αρχειου
     char c = 0;
 
     //διαβασμα αρχειου ανα χαρακτηρα, ωστε να μετρησουμε το πληθος γραμμων
@@ -62,9 +62,32 @@ int main(int argc, char* argv[]){
             lines++;
         }
     }
+
+    //κραταμε εναν πινακα με τα offset των γραμμων
+    int* offset_of_line = malloc((lines + 1) * sizeof(int)); //πινακας με τα offset των γραμμων
+    lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
+    int count = 1;
+    int bytes = 0;
+    offset_of_line[0] = 0;
+    
+    while(read(fd, &c, sizeof(c)) > 0) {  
+        bytes += sizeof(c);
+        
+        if(c == '\n'){ 
+            offset_of_line[count] = offset_of_line[count-1] + bytes;
+            printf("LINE %d %d\n", count, offset_of_line[count]);
+            count++;
+            bytes = 0;
+        }
+        //αν ειναι η τελευταια γραμμη μπορει να μην τελειωνει με \n
+        if(count == lines){
+            offset_of_line[count] = offset_of_line[count-1] + bytes;
+        }
+            
+    }
+
     // printf("LINES %d\n", lines);
 
-    lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
 
     close(fd); //κλεισιμο του αρχειου, θα το ξαναανοιξουμε μεσω των pipes
 
@@ -120,13 +143,13 @@ int main(int argc, char* argv[]){
             //αν ειναι ο 1ος splitter διαβαζει απο την αρχη του αρχειου 
             //μεχρι το input_of_splitter
             if(i == 0){
-                start_line = 0;
+                start_line = 1;
                 end_line = input_of_splitter;
             }
             //διαβαζει απο εκει που σταματησε ο προηγουμενος
             else if((i != 0) && (i != num_of_splitter - 1)){
                 start_line = i * input_of_splitter + 1;
-                end_line = start_line + input_of_splitter;
+                end_line = start_line + input_of_splitter - 1;
             }
             //αν ειναι ο τελευταιος splitter διαβαζει μεχρι το τελος του αρχειου
             //γιατι αν δεν διαιρειται ακριβως, θα περισσεψουν γραμμες. 
