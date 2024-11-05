@@ -21,8 +21,8 @@ int main(int argc, char* argv[]){
     int num_of_splitter, num_of_builders, num_of_top_popular;
     
     if(argc != 13){
-        printf("Error\nUsage is: ./lexan -i TextFile -l numOfSplitter -m numOfBuilders -t TopPopular -e ExclusionList -o OutputFile\n");
-        return -1;
+        perror("Error\nUsage is: ./lexan -i TextFile -l numOfSplitter -m numOfBuilders -t TopPopular -e ExclusionList -o OutputFile\n");
+        exit(1);
     }
 
     for(int i = 0; i < argc; i++){
@@ -62,15 +62,17 @@ int main(int argc, char* argv[]){
             lines++;
         }
     }
-    printf("LINES %d\n", lines);
+    // printf("LINES %d\n", lines);
 
     lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
 
+    close(fd); //κλεισιμο του αρχειου, θα το ξαναανοιξουμε μεσω των pipes
+
     //ποσες γραμμες μπορει να διαβασει καθε splitter
     int input_of_splitter = lines / num_of_splitter;
-    printf("INPUT %d\n",input_of_splitter);
+    // printf("INPUT %d\n",input_of_splitter);
 
-    // pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
+    pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
 
 
     //######### ΔΗΜΙΟΥΡΓΙΑ SPLITTERS #########//
@@ -93,7 +95,7 @@ int main(int argc, char* argv[]){
             return -1;
         }
         
-        // splitter[i] = child_pid; //αποθηκευση του pid του splitter i   
+        splitter[i] = splitter_pid; //αποθηκευση του pid του splitter i   
 
         if(splitter_pid != 0){ //εντος parent process
             close(pipes_splitter[i][0]); //μονο γραψιμο
@@ -110,41 +112,45 @@ int main(int argc, char* argv[]){
             dup2(pipes_splitter[i][0], STDIN_FILENO); 
             
             close(pipes_splitter[i][0]);
-            execlp("./splitter", "splitter", NULL); //εκτελεση του splitter που βρισκεται στο ιδιο directory
+
+            //για τον υπολογισμο του ευρους γραμμων καθε splitter
+            int start_line = 0;
+            int end_line = 0;
+
+            //αν ειναι ο 1ος splitter διαβαζει απο την αρχη του αρχειου 
+            //μεχρι το input_of_splitter
+            if(i == 0){
+                start_line = 0;
+                end_line = input_of_splitter;
+            }
+            //διαβαζει απο εκει που σταματησε ο προηγουμενος
+            else if((i != 0) && (i != num_of_splitter - 1)){
+                start_line = i * input_of_splitter + 1;
+                end_line = start_line + input_of_splitter;
+            }
+            //αν ειναι ο τελευταιος splitter διαβαζει μεχρι το τελος του αρχειου
+            //γιατι αν δεν διαιρειται ακριβως, θα περισσεψουν γραμμες. 
+            else if(i == num_of_splitter - 1){
+                start_line = i * input_of_splitter + 1;
+                end_line = lines;
+            }   
+
+            // printf("start %d end %d\n", start_line, end_line);
+
+            char start_line_str[10];
+            char end_line_str[10]; 
+            
+            //μετατροπη των ακεραιων σε string για την exec
+            snprintf(start_line_str, sizeof(start_line_str), "%d", start_line);
+            snprintf(end_line_str, sizeof(end_line_str), "%d", end_line);  
+
+            execlp("./splitter", "splitter", input_file, start_line_str, end_line_str, NULL); //εκτελεση του splitter που βρισκεται στο ιδιο directory
 		    perror("exec failure\n");
 
+            exit(1);
+
         }
     }
-
-    //#### ΕΓΓΡΑΦΗ 1/L ΓΡΑΜΜΩΝ ΑΡΧΕΙΟΥ ΣΕ ΚΑΘΕ SPLITTER ####//
-    int lines_per_splitter = input_of_splitter;
-    for(int i = 0; i < num_of_splitter; i++){
-     
-        int count = 0;
-
-        //στον τελευταιο splitter πρεπει να γραψουμε οσες
-        //γραμμες εχουν απομεινει
-        if(i == num_of_splitter - 1){
-            lines_per_splitter = lines - ((num_of_splitter - 1) * input_of_splitter);
-        }
-
-        while(read(fd, &c, sizeof(c)) > 0){
-            if(c == '\n'){
-                count++; //μετρητης γραμμων, ωστε να ξερει μεχρι που πρεπει
-                //να διαβασει απο το αρχειο για το συγκεκριμενο child
-            }
-            
-            write(pipes_splitter[i][1], &c, sizeof(c)); //εγγραφη καθε χαρακτηρα στο pipe
-
-            //αν διαβασαμε οσες γραμμες πρεπει, βγαινουμε απο το while
-            //και συνεχιζει το διαβασμα ο επομενος απο το σημειο αυτο
-            if(count == lines_per_splitter){
-                close(pipes_splitter[i][1]); //αφου δεν το χρειαζομαστε αλλο το write end
-                break;
-            }
-        }
-    }
-
-   
+  
 
 }
