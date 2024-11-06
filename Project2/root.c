@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
     int num_of_splitter, num_of_builders, num_of_top_popular;
     
     if(argc != 13){
-        perror("Error\nUsage is: ./lexan -i TextFile -l numOfSplitter -m numOfBuilders -t TopPopular -e ExclusionList -o OutputFile\n");
+        printf("Error\nUsage is: ./lexan -i TextFile -l numOfSplitter -m numOfBuilders -t TopPopular -e ExclusionList -o OutputFile\n");
         exit(1);
     }
 
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]){
     }
 
     //κραταμε εναν πινακα με τα offset των γραμμων
-    int* offset_of_line = malloc((lines + 1) * sizeof(int)); //πινακας με τα offset των γραμμων
+    long int* offset_of_line = malloc((lines + 1) * sizeof(long int)); //πινακας με τα offset των γραμμων
     lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
     int count = 1;
     int bytes = 0;
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]){
         
         if(c == '\n'){ 
             offset_of_line[count] = offset_of_line[count-1] + bytes;
-            printf("LINE %d %d\n", count, offset_of_line[count]);
+            // printf("LINE %d %ld\n", count, offset_of_line[count]);
             count++;
             bytes = 0;
         }
@@ -122,6 +122,12 @@ int main(int argc, char* argv[]){
 
         if(splitter_pid != 0){ //εντος parent process
             close(pipes_splitter[i][0]); //μονο γραψιμο
+            
+            int status;
+            if(waitpid(splitter_pid, &status, 0) == -1){
+                perror("error with waitpid splitter\n");
+                exit(1);
+            }
         }
 
         if(splitter_pid == 0){ //εντος child process
@@ -160,14 +166,18 @@ int main(int argc, char* argv[]){
 
             // printf("start %d end %d\n", start_line, end_line);
 
+            long int offset_start_line = offset_of_line[start_line - 1]; //ta bytes mexri kai prin thn grammh start_line
+
+            char offset_start_line_str[10]; 
             char start_line_str[10];
             char end_line_str[10]; 
             
             //μετατροπη των ακεραιων σε string για την exec
             snprintf(start_line_str, sizeof(start_line_str), "%d", start_line);
             snprintf(end_line_str, sizeof(end_line_str), "%d", end_line);  
+            snprintf(offset_start_line_str, sizeof(offset_start_line_str), "%ld", offset_start_line);
 
-            execlp("./splitter", "splitter", input_file, start_line_str, end_line_str, NULL); //εκτελεση του splitter που βρισκεται στο ιδιο directory
+            execlp("./splitter", "splitter", input_file, start_line_str, end_line_str, offset_start_line_str, NULL); //εκτελεση του splitter που βρισκεται στο ιδιο directory
 		    perror("exec failure\n");
 
             exit(1);
