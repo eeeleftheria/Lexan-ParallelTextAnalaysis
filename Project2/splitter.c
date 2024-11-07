@@ -5,6 +5,8 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <sys/types.h>
+#include "splitter.h"
+
 
 int main(int argc, char* argv[]){
 
@@ -40,6 +42,25 @@ int main(int argc, char* argv[]){
         fprintf(stderr, "Failure opening input file\n");
     }
 
+    printf("\nIN SPLITTER %d %d\n", start_line, end_line);
+    
+    //πηγαινουμε τον δεικτη διαβασματος στη γραμμη start_line
+    //απο την οποια πρεπει να διαβασει ο splitter
+    lseek(fd, offset__of_start_line, SEEK_SET);
+
+    //παραγωγη λεξεων, αγνοωντας σημεια στιξης, συμβολα κλπ
+    splitterCreateWords(fd, end_line, start_line);
+
+    printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
+
+    close(fd);
+    
+    exit(1);
+    
+}
+
+
+void splitterCreateWords(int fd, int end_line, int start_line){
     int bytes_to_read;
     char c;
     int w_index = 0;
@@ -49,12 +70,6 @@ int main(int argc, char* argv[]){
     char* buffer = malloc(buffer_size); //αρχικα δεσμεουμε 50 Bytes για το buffer
     char* word = malloc(word_size); //αρχικα δεσμεουμε 10 Bytes για μια λεξη
     int lines = start_line;
-
-    printf("\nIN SPLITTER %d %d\n", start_line, end_line);
-
-    //πηγαινουμε τον δεικτη διαβασματος στη γραμμη start_line
-    //απο την οποια πρεπει να διαβασει ο splitter
-    lseek(fd, offset__of_start_line, SEEK_SET);
 
     while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
 
@@ -115,11 +130,4 @@ int main(int argc, char* argv[]){
         printf("%s\n", word);
 
     }
-
-    printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
-
-    close(fd);
-    
-    exit(1);
-    
 }
