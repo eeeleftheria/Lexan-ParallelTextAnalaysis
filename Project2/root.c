@@ -65,9 +65,10 @@ int main(int argc, char* argv[]){
         }
     }
 
+    lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
+    
     //κραταμε εναν πινακα με τα offset των γραμμων
     long int* offset_of_line = malloc((lines + 1) * sizeof(long int)); //πινακας με τα offset των γραμμων
-    lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
     int count = 1;
     int bytes = 0;
     offset_of_line[0] = 0;
@@ -87,12 +88,9 @@ int main(int argc, char* argv[]){
         }
             
     }
-
-
     close(fd); //κλεισιμο του αρχειου, θα το ξαναανοιξουμε μεσω των pipes
 
     int input_of_splitter = lines / num_of_splitter; //γραμμες ανα splitter
-
     pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
 
 
@@ -157,7 +155,7 @@ int main(int argc, char* argv[]){
 
             //εκτελεση του splitter που βρισκεται στο ιδιο directory
             execlp("./splitter", "splitter", input_file, start_line_str, end_line_str, 
-                offset_start_line_str, NULL); 
+                offset_start_line_str, exclusion_list_file, NULL); 
 		    perror("exec failure\n");       
             exit(1);         
 

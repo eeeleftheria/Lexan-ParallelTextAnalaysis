@@ -17,7 +17,7 @@ struct list_node{
 
 
 List listCreate() {
-    List list = malloc(sizeof(struct list)); // ή malloc(sizeof(*list))
+    List list = (List)malloc(sizeof(struct list)); // ή malloc(sizeof(*list))
 
     list->first = NULL;
     list->last = NULL;
@@ -32,7 +32,7 @@ List listCreate() {
 //προσθετουμε εναν κομβο στο τελος της λιστας, δεν μας ενδιαφερει να τον προσθεσουμε σε συγκεκριμενο σημειο
 void listInsert(List list, Pointer value) {
 
-    ListNode new_node = malloc(sizeof(struct list_node));
+    ListNode new_node = (ListNode)malloc(sizeof(struct list_node));
     new_node->value = value;
 
     if(new_node == NULL) {
@@ -155,13 +155,13 @@ ListNode listGetNext(ListNode node){
 
 
 //ευρεση κομβου με τιμη value
-ListNode findNodeWithValue(List list, Pointer value){
+ListNode listfindNodeWithValue(List list, Pointer value, CompareFunc compare){
     ListNode node;
 
     //διατρεχουμε ολη τη λιστα μεχρι να βρουμε τον κομβο με αυτη την τιμη    
     for(node = listFirst(list); node != NULL; node = listGetNext(node)){
         
-        if (listNodeValue(list, node) == value) {
+        if ((compare(listNodeValue(list, node), value)) == 0) {
             return node;
         }    
     }

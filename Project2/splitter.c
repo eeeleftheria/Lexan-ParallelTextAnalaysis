@@ -11,12 +11,13 @@
 int main(int argc, char* argv[]){
 
     char* input_file = NULL;
+    List exclusion_list = NULL;
     int start_line = 0;
     int end_line = 0;
     long int offset__of_start_line = 0;
 
-    if(argc != 5){
-        char* message = "Error\nUsage is: ./splitter input_file start_line end_line offset\n";
+    if(argc != 6){
+        char* message = "Error\nUsage is: ./splitter inputFile startLine endLine offset exclusionList\n";
         write(STDOUT_FILENO, message, strlen(message));
         exit(1);
     }
@@ -35,11 +36,17 @@ int main(int argc, char* argv[]){
        if(i == 4){
             offset__of_start_line = atol(argv[i]); //atol: string to long int
        }
+       if(i == 5){
+           exclusion_list = splitterCreateExclusionList(argv[i]);
+       }
     }
+
 
     int fd = open(input_file, O_RDONLY);
     if(fd < 0){
-        fprintf(stderr, "Failure opening input file\n");
+        char* message = "Failure opening input file\n";
+        write(STDOUT_FILENO, message, strlen(message));
+        exit(1);
     }
 
     printf("\nIN SPLITTER %d %d\n", start_line, end_line);
@@ -49,7 +56,7 @@ int main(int argc, char* argv[]){
     lseek(fd, offset__of_start_line, SEEK_SET);
 
     //παραγωγη λεξεων, αγνοωντας σημεια στιξης, συμβολα κλπ
-    splitterCreateWords(fd, end_line, start_line);
+    splitterCreateWords(fd, end_line, start_line, exclusion_list);
 
     printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
 
@@ -60,7 +67,8 @@ int main(int argc, char* argv[]){
 }
 
 
-void splitterCreateWords(int fd, int end_line, int start_line){
+void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_list){
+
     int bytes_to_read;
     char c;
     int w_index = 0;
@@ -103,7 +111,13 @@ void splitterCreateWords(int fd, int end_line, int start_line){
             if(isalpha( buffer[b_index - 1] )){
                 word[w_index] = '\0';
                 w_index = 0;
-                printf("%s\n", word);
+                
+                if(listfindNodeWithValue(exclusion_list, word, compareWords) == NULL){  
+                    printf("%s\n", word);
+                }
+                else{
+                    // printf("Excluded: %s\n", word);
+                }
 
                 for(int i = 0; i < w_index; i++){
                     word[i] = '\0';
@@ -120,14 +134,79 @@ void splitterCreateWords(int fd, int end_line, int start_line){
             word[w_index] = '\0';
             w_index = 0;
         }
-
-        b_index++;
-             
+        b_index++;       
     }
 
     if(bytes_to_read == 0){
         word[w_index] = '\0';
-        printf("%s\n", word);
+
+        if(listfindNodeWithValue(exclusion_list, word, compareWords) == NULL){
+            printf("%s\n", word);
+        }
+        else{
+            // printf("Excluded: %s\n", word);
+        }
 
     }
+}
+
+
+
+List splitterCreateExclusionList(char* exclusion_list){
+    int fd = open(exclusion_list, O_RDONLY);
+    if(fd < 0){
+        char* message = "Failure opening exclusion list\n";
+        write(STDOUT_FILENO, message, strlen(message));
+        exit(1);
+    }
+
+    List list = listCreate();
+
+    int bytes_to_read;
+    char c;
+    int word_size = 20;
+    char* word = malloc(word_size);
+    int count = 0;
+
+    while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
+        if(bytes_to_read < 0) {
+            perror("error reading from exclusion list\n");
+            close(fd);
+            return NULL;
+        }
+
+        if(count >= word_size - 1){
+            word_size = 2 * word_size;
+            word = realloc(word, word_size);
+        }
+
+        if(c != '\n'){
+            word[count] = c;
+            count++;
+        }
+        
+        else if(c == '\n'){
+            word[count] = '\0';
+            char* value = malloc(strlen(word) + 1);
+            strcpy(value, word);
+            listInsert(list, value);
+            count = 0;
+        }
+
+    }
+    if(bytes_to_read == 0){
+        word[count] = '\0';
+        char* value = malloc(strlen(word) + 1);
+        strcpy(value, word);
+        listInsert(list, value);
+    }
+
+    close(fd); //δεν χρειαζομαστε αλλο το αρχειο
+    free(word);
+    return list;
+
+}
+
+int compareWords(Pointer a, Pointer b){
+    return strcmp((char*)a, (char*)b);
 }

@@ -1,5 +1,5 @@
-aa aaaa aaa
-bb bbbb bbb
+a7a  6 7 - =  aaaa   aaa
+bb3 bbbb bbb
 cc cccc ccc
 dd dddd ddd
 ee eeee eee
@@ -12,4 +12,4 @@ kk kkkk kkk
 ll llll lll
 mm mmmm mmm
 nn nnnn nnn
-oo oooo ooo
+Foo   foo_bar bar "barfoo" 5 barfoo3   greek 5foo
