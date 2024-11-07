@@ -9,6 +9,6 @@
 - Splitters:
 
 
-- Builders: Όμοια με την επικοινωνία splitters-root, για την επικοινωνία builders-root χρειαζομαστε m pipes οσοι ειναι οι builders. Ο πίνακας pipes_builder αποθηκευει τα pipes αυτα, απο τα οποία ο root μπορεί να διαβάσει μόνο τα αποτελέσματα των builder, ενώ οι τελευταίοι να τα γράψουν στο write-end pipes_builder[i][1]. 
+- Builders: 
 
-- Επικοινωνία splittes-builders: Καθώς, οι δυο αυτές κατηγορίες process δεν έχουν σχέση parent-child θα χρειαστεί η δημιουργία named pipes.
+- Επικοινωνία splittes-builders: 

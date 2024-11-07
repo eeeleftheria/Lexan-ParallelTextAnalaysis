@@ -2,7 +2,8 @@
     "files.associations": {
         "stdio.h": "c",
         "graph.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "LIST.C": "cpp"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }

@@ -13,7 +13,8 @@ int main(int argc, char* argv[]){
     long int offset__of_start_line = 0;
 
     if(argc != 5){
-        perror("Error\nUsage is: ./splitter input_file start_line end_line offset\n");
+        char* message = "Error\nUsage is: ./splitter input_file start_line end_line offset\n";
+        write(STDOUT_FILENO, message, strlen(message));
         exit(1);
     }
     
@@ -44,6 +45,8 @@ int main(int argc, char* argv[]){
 
     printf("\nIN SPLITTER %d %d\n", start_line, end_line);
 
+    //πηγαινουμε τον δεικτη διαβασματος στη γραμμη start_line
+    //απο την οποια πρεπει να διαβασει ο splitter
     lseek(fd, offset__of_start_line, SEEK_SET);
     while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
 
