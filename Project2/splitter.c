@@ -14,10 +14,11 @@ int main(int argc, char* argv[]){
     List exclusion_list = NULL;
     int start_line = 0;
     int end_line = 0;
+    int num_of_builders = 0;
     long int offset__of_start_line = 0;
 
-    if(argc != 6){
-        char* message = "Error\nUsage is: ./splitter inputFile startLine endLine offset exclusionList\n";
+    if(argc != 7){
+        char* message = "Error\nUsage is: ./splitter inputFile startLine endLine offset exclusionList numOfBuilders\n";
         write(STDOUT_FILENO, message, strlen(message));
         exit(1);
     }
@@ -39,6 +40,9 @@ int main(int argc, char* argv[]){
        if(i == 5){
            exclusion_list = splitterCreateExclusionList(argv[i]);
        }
+       if(i == 6){
+           num_of_builders = atoi(argv[i]);
+       }
     }
 
     //Ανοιγμα input file
@@ -56,7 +60,7 @@ int main(int argc, char* argv[]){
     lseek(fd, offset__of_start_line, SEEK_SET);
 
     //παραγωγη λεξεων, αγνοωντας σημεια στιξης, συμβολα κλπ
-    splitterCreateWords(fd, end_line, start_line, exclusion_list);
+    splitterCreateWords(fd, end_line, start_line, exclusion_list, num_of_builders);
 
     printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
 
@@ -67,9 +71,20 @@ int main(int argc, char* argv[]){
 }
 
 
+int splitterHashFunc(char* word, int num_of_builders){
+    int key = 0;
+    //καθως οι λεξεις μας δεν περιλαμβανουν αριθμους, δεν μπορουμε να κανουμε atoi
+    //οποτε προσθετουμε τους αριθμους ascii του καθε χαρακτηρα
+    for(int i = 0; i < strlen(word); i++){
+        key += word[i];
+    }
+
+    int pos = key % num_of_builders;
+    return pos;
+}
 
 
-void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_list){
+void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_list, int num_of_builders){
 
     int bytes_to_read;
     char c;
@@ -118,7 +133,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
                 
                 //ελεγχος αν ανηκει στο exclusion list
                 if(listfindNodeWithValue(exclusion_list, word, compareWords) == NULL){  
-                    printf("%s\n", word);
+                    splitterSendToBuilder(word, num_of_builders);
                 }
                 else{
                     // printf("Excluded: %s\n", word);
@@ -147,7 +162,8 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
         word[w_index] = '\0';
 
         if(listfindNodeWithValue(exclusion_list, word, compareWords) == NULL){
-            printf("%s\n", word);
+        
+            splitterSendToBuilder(word, num_of_builders);
         }
         else{
             // printf("Excluded: %s\n", word);
@@ -215,4 +231,26 @@ List splitterCreateExclusionList(char* exclusion_list){
 
 int compareWords(Pointer a, Pointer b){
     return strcmp((char*)a, (char*)b);
+}
+
+
+void splitterSendToBuilder(char* word, int num_of_builders){
+    int builder = splitterHashFunc(word, num_of_builders);
+    int size = strlen(word) + 1; //for \0
+    int buffer_size = sizeof(int) + size;
+    
+    char* buffer = malloc(buffer_size);
+    if (buffer == NULL) {
+        perror("Memory allocation failed");
+        exit(1);
+    }
+
+    memcpy(buffer, &size, sizeof(int));  //σαν header για να ξερει ο builder ποσο πρεπει να διαβασει
+    memcpy(buffer + sizeof(int), word, size); //αντιγραφεται στη θεση μνημης μετα το header
+    
+    printf("splitter sent to builder %d word: %s\n", builder, buffer + sizeof(int));
+    write(builder + 10, buffer, buffer_size);
+
+    free(buffer);
+
 }

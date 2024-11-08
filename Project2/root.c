@@ -149,15 +149,17 @@ int main(int argc, char* argv[]){
             char offset_start_line_str[10]; 
             char start_line_str[10];
             char end_line_str[10]; 
+            char num_of_builders_str[10];
             
             //μετατροπη των ακεραιων σε string για την exec
             snprintf(start_line_str, sizeof(start_line_str), "%d", start_line);
             snprintf(end_line_str, sizeof(end_line_str), "%d", end_line);  
             snprintf(offset_start_line_str, sizeof(offset_start_line_str), "%ld", offset_start_line);
+            snprintf(num_of_builders_str, sizeof(num_of_builders_str), "%d", num_of_builders);
 
             //εκτελεση του splitter που βρισκεται στο ιδιο directory
             execlp("./splitter", "splitter", input_file, start_line_str, end_line_str, 
-                offset_start_line_str, exclusion_list_file, NULL); 
+                offset_start_line_str, exclusion_list_file, num_of_builders_str, NULL); 
 		    perror("exec failure\n");       
             exit(1);         
 
@@ -198,6 +200,9 @@ int main(int argc, char* argv[]){
                 }
             }
             if(builder_pid == 0){ //εντος child process
+
+                dup2(pipes_builder[i][1], i + 10); //το +10 γιατι οι fd 0, 1, 2 ειναι προκαθορισμενοι(stdin, stdout, stderror)
+
                 close(pipes_builder[i][1]); //κλεισιμο του write end του pipe,
                 // θελουμε μονο διαβασμα απο τους splitters
 
@@ -210,11 +215,15 @@ int main(int argc, char* argv[]){
                     }
                 }
 
-                char num_of_builders_str[10];
-                snprintf(num_of_builders_str, sizeof(num_of_builders_str), "%d", num_of_builders);
+                int fd_read = pipes_builder[i][0]; //το read end fd του pipe
+                char fd_read_str[10];
+                snprintf(fd_read_str, sizeof(fd_read_str), "%d", fd_read);
+
+                char num_of_builder_str[10];
+                snprintf(num_of_builder_str, sizeof(num_of_builder_str), "%d", i);
 
                 //εκτελεση του builder που βρισκεται στο ιδιο directory
-                execlp("./builder", "builder", num_of_builders_str, NULL);
+                execlp("./builder", "builder", num_of_builder_str, fd_read_str, NULL);
                 perror("exec failure\n");
                 exit(1);
             }              
