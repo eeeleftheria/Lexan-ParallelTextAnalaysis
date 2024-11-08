@@ -105,9 +105,10 @@ int main(int argc, char* argv[]){
             return -1;
         }
         
-        splitter[i] = splitter_pid; //αποθηκευση του pid του splitter i   
 
         if(splitter_pid != 0){ //εντος parent process
+            
+            splitter[i] = splitter_pid; //αποθηκευση του pid του splitter i   
             
             int status;
             if(waitpid(splitter_pid, &status, 0) == -1){
@@ -117,6 +118,7 @@ int main(int argc, char* argv[]){
         }
 
         if(splitter_pid == 0){ //εντος child process
+            
 
             //για τον υπολογισμο του ευρους γραμμων καθε splitter
             int start_line = 0;
@@ -166,11 +168,14 @@ int main(int argc, char* argv[]){
     //######### ΔΗΜΙΟΥΡΓΙΑ BUILDERS #########//
 
 
-    //θελουμε ενα pipe για καθε builder, 
+    //θελουμε ενα pipe για καθε builder για επικοινωνια splitters-builders, 
     //δηλ num_of_builder pipes με 2 θεσεις το καθενα για τον pipefd
     int pipes_builder[num_of_builders][2]; //pipe[i][0] = read end of pipe i & pipe[i][1] = write end of pipe i
-
+    
+    pid_t builder[num_of_builders];
+    
     for(int i = 0; i < num_of_builders; i++){
+            
             if(pipe(pipes_builder[i]) == -1){
                 perror("error with pipe builder\n");
                 return -1;
@@ -182,15 +187,34 @@ int main(int argc, char* argv[]){
                 perror("error with fork builder\n");
                 return -1;
             }
-            if(builder_pid != 0){
+            if(builder_pid != 0){ //εντος parent process
+
+                builder[i] = builder_pid; //αποθηκευση του pid του παιδιου i
+
                 int status;
                 if(waitpid(builder_pid, &status, 0) == -1){
                     perror("error with waitpid builder\n");
                     exit(1);
                 }
             }
-            if(builder_pid == 0){
-                execlp("./builder", "builder", NULL); //εκτελεση του builder που βρισκεται στο ιδιο directory
+            if(builder_pid == 0){ //εντος child process
+                close(pipes_builder[i][1]); //κλεισιμο του write end του pipe,
+                // θελουμε μονο διαβασμα απο τους splitters
+
+                //θελουμε επισης να κλεισουμε ολα τα read & write end των pipes 
+                //που δεν απασχολουν τον συγκεκριμενο builder
+                for(int j = 0; j < num_of_builders; j++){
+                    if(j != i){
+                        close(pipes_builder[j][0]);
+                        close(pipes_builder[j][1]);
+                    }
+                }
+
+                char num_of_builders_str[10];
+                snprintf(num_of_builders_str, sizeof(num_of_builders_str), "%d", num_of_builders);
+
+                //εκτελεση του builder που βρισκεται στο ιδιο directory
+                execlp("./builder", "builder", num_of_builders_str, NULL);
                 perror("exec failure\n");
                 exit(1);
             }              

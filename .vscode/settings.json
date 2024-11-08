@@ -3,7 +3,8 @@
         "stdio.h": "c",
         "graph.h": "c",
         "string.h": "c",
-        "LIST.C": "cpp"
+        "LIST.C": "cpp",
+        "random": "c"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }
