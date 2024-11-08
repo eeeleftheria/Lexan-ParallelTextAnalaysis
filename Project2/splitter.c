@@ -41,7 +41,7 @@ int main(int argc, char* argv[]){
        }
     }
 
-
+    //Ανοιγμα input file
     int fd = open(input_file, O_RDONLY);
     if(fd < 0){
         char* message = "Failure opening input file\n";
@@ -65,6 +65,8 @@ int main(int argc, char* argv[]){
     exit(1);
     
 }
+
+
 
 
 void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_list){
@@ -96,9 +98,10 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
             buffer = realloc(buffer, buffer_size);
         }
 
+        //αποθηκευση καθε χαρακτρα στον buffer
         buffer[b_index] = c;
 
-        if(isalpha(c)){
+        if(isalpha(c)){ //αν ειναι αλφαβητικος χαρακτηρας μπορει να αποτελει μερος λεξης
             word[w_index] = c;
             w_index++;
         }
@@ -108,10 +111,12 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
                 lines++;
             }
             
+            //αν ο προηγουμενος ειναι αλφαβητικος, εχουμε λεξη
             if(isalpha( buffer[b_index - 1] )){
                 word[w_index] = '\0';
                 w_index = 0;
                 
+                //ελεγχος αν ανηκει στο exclusion list
                 if(listfindNodeWithValue(exclusion_list, word, compareWords) == NULL){  
                     printf("%s\n", word);
                 }
@@ -119,6 +124,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
                     // printf("Excluded: %s\n", word);
                 }
 
+                //επαναφορα του word σε κενη λεξη
                 for(int i = 0; i < w_index; i++){
                     word[i] = '\0';
                 }
