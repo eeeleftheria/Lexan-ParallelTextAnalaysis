@@ -12,7 +12,7 @@
 int main(int argc, char* argv[]){
 
     if(argc != 3){
-        char* message = "Error\nUsage is: ./builder numOfBuilders fdReadEnd\n";
+        char* message = "Error\nUsage is: ./builder numOfBuilder fdReadEnd\n";
         write(STDOUT_FILENO, message, strlen(message));
         exit(1);
     }

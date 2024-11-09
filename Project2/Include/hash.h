@@ -20,7 +20,7 @@ void hashRemove(HashTable hash_table, int key, DestroyValueFunc func, CompareFun
 int hashSize(HashTable hash_table);
 
 //για εναν δεδομενο key επιστρεφουμε το list node στο οποιο ανηκει 
-Pointer hashFindListNodeWithKey(HashTable hash_table, int key, CompareFunc compare);
+// Pointer hashFindListNodeWithKey(HashTable hash_table, int key, CompareFunc compare);
 
 //για εναν δεδομενο graph node επιστρεφουμε τον list node στον οποιο ανηκει
 Pointer hashFindListNodeWithValue(HashTable hash_table, Pointer value, CompareFunc compare);

@@ -1,17 +1,17 @@
-// ////////////////////////////////////////////
-// // ΥΛΟΠΟΙΗΣΗ HASHTABLE ΜΕ SEPERATE CHAINING
-// // 
-// //  Για μεγεθος πινακα M και κλειδι k, η hαsh function μας θα ειναι
-// // h(k) = k mod Μ οπου ο M πρεπει να ειναι πρωτος αριθμος
-// //
-// ////////////////////////////////////////////
+////////////////////////////////////////////
+// ΥΛΟΠΟΙΗΣΗ HASHTABLE ΜΕ SEPERATE CHAINING
+// 
+//  Για μεγεθος πινακα M και κλειδι k, η hαsh function μας θα ειναι
+// h(k) = k mod Μ οπου ο M πρεπει να ειναι πρωτος αριθμος
+//
+////////////////////////////////////////////
 
 
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <string.h>
-// #include "list.h"
-// #include "hash.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "list.h"
+#include "hash.h"
 
 
 // // HashTable: περιεχει ολες τις πληροφοριες του hash table
@@ -86,21 +86,21 @@
 //     free(value);
 // }
 
-// //αφαιρει εναν κομβο απο το hash_table
-// void hashRemove(HashTable hash_table, int key, DestroyValueFunc func){
+//αφαιρει εναν κομβο απο το hash_table
+// void hashRemove(HashTable hash_table, int key, DestroyValueFunc func, CompareFunc compare){
 //     int pos = hashFunc(key, hash_table->size_of_array);
 
 //     List list = hash_table->array[pos]->list;
 
-//     listRemove(list, hashFindListNodeWithKey(hash_table, key), hashDestroyValue);
+//     listRemove(list, hashFindListNodeWithKey(hash_table, key, compare), hashDestroyValue);
 
 //     hash_table->occupied_buckets--; 
 
 // }   
 
-// //για την καταστροφη του hash table, διατρεχουμε τον πινακα και για καθε θεση του 
-// //διατρεχουμε την αντιστοιχη λιστα, αφαιρωντας ολους τους pointers στα nodes
-// //και καταστρεφοντας τα value τους
+//για την καταστροφη του hash table, διατρεχουμε τον πινακα και για καθε θεση του 
+//διατρεχουμε την αντιστοιχη λιστα, αφαιρωντας ολους τους pointers στα nodes
+//και καταστρεφοντας τα value τους
 
 // void hashDestroy(HashTable hash_table){
    
@@ -127,15 +127,22 @@
 //     free(hash_table);
 // }
 
+// Pointer hashFindListNodeWithValue(HashTable hash_table, Pointer value, CompareFunc compare){
+    // int pos = hashFunc(key, hash_table->size_of_array);
 
-
-
-// Pointer hashFindListNodeWithValue(HashTable hash_table, Pointer value){
-    
-//     int key = graphGetUser(value);
-//     ListNode node = hashFindListNodeWithKey(hash_table, key);
-//     return node;
+    // List list = hash_table->array[pos]->list;
+    // //τα nodes της λιστας εχουν value graph node
+    // //αρα πρεπει να βρουμε τον graph node του αντιστοιχου user
+    // for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
+    //     Pointer value = listNodeValue(list, node);
+        
+    //     if(compare(value, key) == 0){ 
+    //         return node;
+    //     }
+    // }
+    // return NULL;
 // }
+
 
 
 

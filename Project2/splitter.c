@@ -248,8 +248,9 @@ void splitterSendToBuilder(char* word, int num_of_builders){
     memcpy(buffer, &size, sizeof(int));  //σαν header για να ξερει ο builder ποσο πρεπει να διαβασει
     memcpy(buffer + sizeof(int), word, size); //αντιγραφεται στη θεση μνημης μετα το header
     
-    printf("splitter sent to builder %d word: %s\n", builder, buffer + sizeof(int));
     write(builder + 10, buffer, buffer_size);
+    printf("splitter sent to builder %d word: %s\n", builder, buffer + sizeof(int));
+    sleep(1);
 
     free(buffer);
 
