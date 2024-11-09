@@ -24,33 +24,38 @@ int main(int argc, char* argv[]){
     char* buffer = malloc(size_buffer);
     int bytes_to_read;
 
-    printf("fd of builder: %d\n", fd_read_end);
+    printf("read fd of builder: %d\n", fd_read_end);
+        bool start_of_size = false; 
+        bool start_of_word = false;
+        int start_i = 0;
+        int size = 0;
+        char* word;
 
     while((bytes_to_read = read(fd_read_end, buffer, size_buffer)) > 0){
         printf("builder received bytes: %d\n", bytes_to_read);
-        // printf("builder received: %s\n", buffer);
+       
+        printf("builder received: %s\n", buffer);
 
-        // int start_i = 0;
-        // bool start_of_size = false; 
-        // bool start_of_word = false;
-        // int size = 0;
-        // char* word;
-        // for(int i = 0; i < sizeof(buffer); i++){
-            
+        // for(int i = 0; i < bytes_to_read; i++){
         //     if( isalpha(buffer[i]) == false && (start_of_size == false)){
         //             start_of_size = true;
         //             start_i = i;
-        //             i++;
+        //             size = 0;
+        //             printf("start_i: %d\n", start_i);
         //     }
-            
-        //     if( isalpha(buffer[i]) == true){
+          
+        //     if( isalpha((unsigned char)buffer[i]) == true){
+        //         printf("INNN---");
+        //         fflush(stdout);
                 
         //         if(start_of_word == false){
+        //             start_of_size = false;
         //             start_of_word = true;
         //             int digits = i - start_i; //ποσα ψηφια εχει ο αριθμος
+        //             printf("digits: %d\n", digits);
                     
         //             for(int j = start_i; j < i; j++){
-        //                 size += size * 10 + (buffer[j] - '0');
+        //                 size = size * 10 + (buffer[j] - '0');
         //                 digits--;
         //             }
 

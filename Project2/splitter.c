@@ -59,8 +59,14 @@ int main(int argc, char* argv[]){
     //απο την οποια πρεπει να διαβασει ο splitter
     lseek(fd, offset__of_start_line, SEEK_SET);
 
+  
     //παραγωγη λεξεων, αγνοωντας σημεια στιξης, συμβολα κλπ
     splitterCreateWords(fd, end_line, start_line, exclusion_list, num_of_builders);
+
+
+    for(int i = 0; i < num_of_builders; i++){
+        close(i + 25);
+    }
 
     printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
 
@@ -248,9 +254,9 @@ void splitterSendToBuilder(char* word, int num_of_builders){
     memcpy(buffer, &size, sizeof(int));  //σαν header για να ξερει ο builder ποσο πρεπει να διαβασει
     memcpy(buffer + sizeof(int), word, size); //αντιγραφεται στη θεση μνημης μετα το header
     
-    write(builder + 10, buffer, buffer_size);
+    write(4, buffer, buffer_size);
     printf("splitter sent to builder %d word: %s\n", builder, buffer + sizeof(int));
-    sleep(1);
+    // sleep(1);
 
     free(buffer);
 

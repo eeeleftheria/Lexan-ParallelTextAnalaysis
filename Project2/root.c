@@ -110,11 +110,7 @@ int main(int argc, char* argv[]){
             
             splitter[i] = splitter_pid; //αποθηκευση του pid του splitter i   
             
-            int status;
-            if(waitpid(splitter_pid, &status, 0) == -1){
-                perror("error with waitpid splitter\n");
-                exit(1);
-            }
+           
         }
 
         if(splitter_pid == 0){ //εντος child process
@@ -166,6 +162,13 @@ int main(int argc, char* argv[]){
         }
     }   
 
+    for(int i = 0; i < num_of_splitter; i++){
+        int status;
+        if (waitpid(splitter[i], &status, 0) == -1) {
+            perror("error with waitpid splitter\n");
+        }
+    }
+
 
     //######### ΔΗΜΙΟΥΡΓΙΑ BUILDERS #########//
 
@@ -192,19 +195,19 @@ int main(int argc, char* argv[]){
             if(builder_pid != 0){ //εντος parent process
 
                 builder[i] = builder_pid; //αποθηκευση του pid του παιδιου i
-
-                int status;
-                if(waitpid(builder_pid, &status, 0) == -1){
-                    perror("error with waitpid builder\n");
-                    exit(1);
-                }
+                // write(4, "2HI3HEY", 8);
+             
             }
             if(builder_pid == 0){ //εντος child process
 
-                dup2(pipes_builder[i][1], i + 10); //το +10 γιατι οι fd 0, 1, 2 ειναι προκαθορισμενοι(stdin, stdout, stderror)
+                if (dup2(pipes_builder[i][1], i + 25) == -1) {
+                    perror("dup2 failed");
+                    exit(1);
+                }
 
-                close(pipes_builder[i][1]); //κλεισιμο του write end του pipe,
-                // θελουμε μονο διαβασμα απο τους splitters
+                // dup2(pipes_builder[i][1], i + 25); //οι fd 0, 1, 2 ειναι προκαθορισμενοι(stdin, stdout, stderror)
+
+                close(pipes_builder[i][1]); //κλεισιμο του write end του pipe, αφου εχουμε κανει dup2
 
                 //θελουμε επισης να κλεισουμε ολα τα read & write end των pipes 
                 //που δεν απασχολουν τον συγκεκριμενο builder
@@ -214,8 +217,8 @@ int main(int argc, char* argv[]){
                         close(pipes_builder[j][1]);
                     }
                 }
-
                 int fd_read = pipes_builder[i][0]; //το read end fd του pipe
+
                 char fd_read_str[10];
                 snprintf(fd_read_str, sizeof(fd_read_str), "%d", fd_read);
 
@@ -226,7 +229,15 @@ int main(int argc, char* argv[]){
                 execlp("./builder", "builder", num_of_builder_str, fd_read_str, NULL);
                 perror("exec failure\n");
                 exit(1);
-            }              
+            } 
+            close(pipes_builder[i][1]); //κλεισιμο του write end του pipe, αφου εχουμε κανει fork   
+    }
+
+    for (int i = 0; i < num_of_builders; i++) {
+        int status;
+        if (waitpid(builder[i], &status, 0) == -1) {
+            perror("error with waitpid builder\n");
+        }
     }
 
 
