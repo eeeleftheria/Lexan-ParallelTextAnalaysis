@@ -102,6 +102,9 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
     char* word = malloc(word_size); //αρχικα δεσμεουμε 10 Bytes για μια λεξη
     int lines = start_line;
 
+    int buffer_for_builder_size = 1046;
+    char* buffer_for_builder = malloc(buffer_for_builder_size);
+
     while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
 
         if(bytes_to_read < 0) {
@@ -182,6 +185,35 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
 
 
 
+int compareWords(Pointer a, Pointer b){
+    return strcmp((char*)a, (char*)b);
+}
+
+
+void splitterSendToBuilder(char* word, int num_of_builders){
+    int builder = splitterHashFunc(word, num_of_builders);
+    int size = strlen(word) + 1; //for \0
+    int buffer_size = size + 1; //for " "
+     
+    char* buffer = malloc(buffer_size);
+    if (buffer == NULL) {
+        perror("Memory allocation failed");
+        exit(1);
+    }
+
+    memcpy(buffer, word, size); 
+    memcpy(buffer + size, " ", 1);
+
+    // printf("splitter sent to builder %d word : %s\n", builder, buffer);
+    write(builder + 25, buffer, buffer_size);
+
+    // sleep(1);
+
+    free(buffer);
+
+}
+
+
 List splitterCreateExclusionList(char* exclusion_list){
     int fd = open(exclusion_list, O_RDONLY);
     if(fd < 0){
@@ -237,29 +269,3 @@ List splitterCreateExclusionList(char* exclusion_list){
 
 }
 
-int compareWords(Pointer a, Pointer b){
-    return strcmp((char*)a, (char*)b);
-}
-
-
-void splitterSendToBuilder(char* word, int num_of_builders){
-    int builder = splitterHashFunc(word, num_of_builders);
-    int size = strlen(word) + 1; //for \0
-    int buffer_size = size;
-     
-    char* buffer = malloc(buffer_size);
-    if (buffer == NULL) {
-        perror("Memory allocation failed");
-        exit(1);
-    }
-
-    memcpy(buffer, word, size); //αντιγραφεται στη θεση μνημης μετα το header
-
-    printf("splitter sent to builder %d word : %s\n", builder, buffer);
-    write(builder + 25, buffer, buffer_size);
-    write(builder + 25, " ", 1); //για να ξερει ο builder ποτε τελειωσε το word
-    // sleep(1);
-
-    free(buffer);
-
-}

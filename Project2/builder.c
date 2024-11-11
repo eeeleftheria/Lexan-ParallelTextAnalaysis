@@ -26,15 +26,15 @@ int main(int argc, char* argv[]){
     int bytes_to_read;
     int size = 0;
 
-    printf("read fd of builder: %d\n", fd_read_end);
+    printf("\n\nread fd of builder: %d\n", fd_read_end);
         char* word;
 
     while((bytes_to_read = read(fd_read_end, buffer, size_buffer)) > 0){
+       
         printf("builder received bytes: %d\n", bytes_to_read);
        
        for(int i = 0; i < bytes_to_read; i++){
-
-           
+          
 
             if(isalpha( buffer[i] )){
                 size++;
