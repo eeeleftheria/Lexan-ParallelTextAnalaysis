@@ -117,7 +117,6 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
         if(b_index >= buffer_size - 1){ //-1 γιατι ξεκιναει απο το 0
             buffer_size = 2 * buffer_size;
             buffer = realloc(buffer, buffer_size);
-<<<<<<< HEAD
         }
 
         //αποθηκευση καθε χαρακτρα στον buffer
@@ -176,124 +175,11 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
             // printf("Excluded: %s\n", word);
         }
 
-=======
-        }
-
-        //αποθηκευση καθε χαρακτρα στον buffer
-        buffer[b_index] = c;
-
-        if(isalpha(c)){ //αν ειναι αλφαβητικος χαρακτηρας μπορει να αποτελει μερος λεξης
-            word[w_index] = c;
-            w_index++;
-        }
-        else if(c == '\n' || c == ' '){
-            
-            if(c == '\n'){
-                lines++;
-            }
-            
-            //αν ο προηγουμενος ειναι αλφαβητικος, εχουμε λεξη
-            if(isalpha( buffer[b_index - 1] )){
-                word[w_index] = '\0';
-                w_index = 0;
-                
-                //ελεγχος αν ανηκει στο exclusion list
-                if(listfindNodeWithValue(exclusion_list, word, compareWords) == NULL){  
-                    splitterSendToBuilder(word, num_of_builders);
-                }
-                else{
-                    // printf("Excluded: %s\n", word);
-                }
-
-                //επαναφορα του word σε κενη λεξη
-                for(int i = 0; i < w_index; i++){
-                    word[i] = '\0';
-                }
-            }
-
-            if(lines == end_line + 1){
-                    break;
-            }
-
-        }
-   
-        else{
-            word[w_index] = '\0';
-            w_index = 0;
-        }
-        b_index++;       
-    }
-
-    if(bytes_to_read == 0){
-        word[w_index] = '\0';
-
-        if(listfindNodeWithValue(exclusion_list, word, compareWords) == NULL){
-        
-            splitterSendToBuilder(word, num_of_builders);
-        }
-        else{
-            // printf("Excluded: %s\n", word);
-        }
-
-    }
-}
-
-
-
-List splitterCreateExclusionList(char* exclusion_list){
-    int fd = open(exclusion_list, O_RDONLY);
-    if(fd < 0){
-        char* message = "Failure opening exclusion list\n";
-        write(STDOUT_FILENO, message, strlen(message));
-        exit(1);
-    }
-
-    List list = listCreate();
-
-    int bytes_to_read;
-    char c;
-    int word_size = 20;
-    char* word = malloc(word_size);
-    int count = 0;
-
-    while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
-        if(bytes_to_read < 0) {
-            perror("error reading from exclusion list\n");
-            close(fd);
-            return NULL;
-        }
-
-        if(count >= word_size - 1){
-            word_size = 2 * word_size;
-            word = realloc(word, word_size);
-        }
-
-        if(c != '\n'){
-            word[count] = c;
-            count++;
-        }
-        
-        else if(c == '\n'){
-            word[count] = '\0';
-            char* value = malloc(strlen(word) + 1);
-            strcpy(value, word);
-            listInsert(list, value);
-            count = 0;
-        }
-
-    }
-    if(bytes_to_read == 0){
-        word[count] = '\0';
-        char* value = malloc(strlen(word) + 1);
-        strcpy(value, word);
-        listInsert(list, value);
->>>>>>> 23d37c6571b1240b98922b16bcd5b6d4951a4e9d
     }
     free(word);
     free(buffer);
 }
 
-<<<<<<< HEAD
 
 
 List splitterCreateExclusionList(char* exclusion_list){
@@ -349,12 +235,6 @@ List splitterCreateExclusionList(char* exclusion_list){
     free(word);
     return list;
 
-=======
-    close(fd); //δεν χρειαζομαστε αλλο το αρχειο
-    free(word);
-    return list;
-
->>>>>>> 23d37c6571b1240b98922b16bcd5b6d4951a4e9d
 }
 
 int compareWords(Pointer a, Pointer b){
@@ -365,32 +245,19 @@ int compareWords(Pointer a, Pointer b){
 void splitterSendToBuilder(char* word, int num_of_builders){
     int builder = splitterHashFunc(word, num_of_builders);
     int size = strlen(word) + 1; //for \0
-<<<<<<< HEAD
     int buffer_size = size;
      
-=======
-    int buffer_size = sizeof(int) + size;
-    
->>>>>>> 23d37c6571b1240b98922b16bcd5b6d4951a4e9d
     char* buffer = malloc(buffer_size);
     if (buffer == NULL) {
         perror("Memory allocation failed");
         exit(1);
     }
 
-<<<<<<< HEAD
     memcpy(buffer, word, size); //αντιγραφεται στη θεση μνημης μετα το header
 
     printf("splitter sent to builder %d word : %s\n", builder, buffer);
     write(builder + 25, buffer, buffer_size);
     write(builder + 25, " ", 1); //για να ξερει ο builder ποτε τελειωσε το word
-=======
-    memcpy(buffer, &size, sizeof(int));  //σαν header για να ξερει ο builder ποσο πρεπει να διαβασει
-    memcpy(buffer + sizeof(int), word, size); //αντιγραφεται στη θεση μνημης μετα το header
-    
-    write(4, buffer, buffer_size);
-    printf("splitter sent to builder %d word: %s\n", builder, buffer + sizeof(int));
->>>>>>> 23d37c6571b1240b98922b16bcd5b6d4951a4e9d
     // sleep(1);
 
     free(buffer);

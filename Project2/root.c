@@ -92,7 +92,6 @@ int main(int argc, char* argv[]){
 
     int input_of_splitter = lines / num_of_splitter; //γραμμες ανα splitter
     pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
-<<<<<<< HEAD
 
     //θελουμε ενα pipe για καθε builder για επικοινωνια splitters-builders, 
     //δηλ num_of_builder pipes με 2 θεσεις το καθενα για τον pipefd
@@ -106,8 +105,6 @@ int main(int argc, char* argv[]){
         }
     }
 
-=======
->>>>>>> 23d37c6571b1240b98922b16bcd5b6d4951a4e9d
 
 
     //######### ΔΗΜΙΟΥΡΓΙΑ SPLITTERS #########//
@@ -125,12 +122,7 @@ int main(int argc, char* argv[]){
         if(splitter_pid != 0){ //εντος parent process
             
             splitter[i] = splitter_pid; //αποθηκευση του pid του splitter i   
-<<<<<<< HEAD
           
-=======
-            
-           
->>>>>>> 23d37c6571b1240b98922b16bcd5b6d4951a4e9d
         }
 
         if(splitter_pid == 0){ //εντος child process
@@ -193,7 +185,6 @@ int main(int argc, char* argv[]){
             perror("error with waitpid splitter\n");
         }
     }
-<<<<<<< HEAD
 
 
     //######### ΔΗΜΙΟΥΡΓΙΑ BUILDERS #########//
@@ -205,26 +196,6 @@ int main(int argc, char* argv[]){
     
     for(int i = 0; i < num_of_builders; i++){
 
-=======
-
-
-    //######### ΔΗΜΙΟΥΡΓΙΑ BUILDERS #########//
-
-
-    //θελουμε ενα pipe για καθε builder για επικοινωνια splitters-builders, 
-    //δηλ num_of_builder pipes με 2 θεσεις το καθενα για τον pipefd
-    int pipes_builder[num_of_builders][2]; //pipe[i][0] = read end of pipe i & pipe[i][1] = write end of pipe i
-    
-    pid_t builder[num_of_builders];
-    
-    for(int i = 0; i < num_of_builders; i++){
-            
-            if(pipe(pipes_builder[i]) == -1){
-                perror("error with pipe builder\n");
-                return -1;
-            }
-
->>>>>>> 23d37c6571b1240b98922b16bcd5b6d4951a4e9d
             pid_t builder_pid = fork(); //δημιουργια builder processes
 
             if(builder_pid == -1){
@@ -239,30 +210,13 @@ int main(int argc, char* argv[]){
             }
             if(builder_pid == 0){ //εντος child process
 
-<<<<<<< HEAD
-=======
-                if (dup2(pipes_builder[i][1], i + 25) == -1) {
-                    perror("dup2 failed");
-                    exit(1);
-                }
-
-                // dup2(pipes_builder[i][1], i + 25); //οι fd 0, 1, 2 ειναι προκαθορισμενοι(stdin, stdout, stderror)
-
-                close(pipes_builder[i][1]); //κλεισιμο του write end του pipe, αφου εχουμε κανει dup2
-
->>>>>>> 23d37c6571b1240b98922b16bcd5b6d4951a4e9d
                 //θελουμε επισης να κλεισουμε ολα τα read & write end των pipes 
                 //που δεν απασχολουν τον συγκεκριμενο builder
                 for(int j = 0; j < num_of_builders; j++){
                     if(j != i){
                         close(pipes_builder[j][0]);
-<<<<<<< HEAD
                     }
                     close(pipes_builder[j][1]);
-=======
-                        close(pipes_builder[j][1]);
-                    }
->>>>>>> 23d37c6571b1240b98922b16bcd5b6d4951a4e9d
                 }
                 int fd_read = pipes_builder[i][0]; //το read end fd του pipe
 
