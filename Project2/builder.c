@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
         }
     
         if (bytes_to_read == 0) {
-            printf("End of input stream\n");
+            printf("End of input in builder\n");
         } 
         else if (bytes_to_read < 0) {
             perror("Error reading from pipe");

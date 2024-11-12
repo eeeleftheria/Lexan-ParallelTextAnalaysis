@@ -51,34 +51,44 @@ int main(int argc, char* argv[]){
     //ανοιγμα αρχειου για να μετρησουμε τις γραμμες
     int fd = open(input_file, O_RDONLY);
     if(fd < 0){
-        fprintf(stderr, "Failure opening input file\n");
+        char* message = "Failure opening input file\n";
+        write(STDERR_FILENO, message, strlen(message));
     }
 
-
+    //######### ΥΠΟΛΟΓΙΣΜΟΣ ΓΡΑΜΜΩΝ ΑΡΧΕΙΟΥ ##########//
     int lines = 1;//κραταμε τον αριθμο γραμμων του αρχειου
     char c = 0;
 
-    //διαβασμα αρχειου ανα χαρακτηρα, ωστε να μετρησουμε το πληθος γραμμων
-    while(read(fd, &c, sizeof(c)) > 0) {  //για EOF επιστρεφει 0
+    //διαβασμα αρχειου ανα χαρακτηρα
+    int bytes_to_read;
+    while(bytes_to_read =  read(fd, &c, sizeof(c)) > 0) {  //για EOF επιστρεφει 0
         if(c == '\n'){
             lines++;
         }
     }
+    if (bytes_to_read == 0) {
+        printf("End of input in root\n");
+    } 
+    else if (bytes_to_read < 0) {
+        perror("Error reading from input file\n");
+    }
 
     lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
     
-    //κραταμε εναν πινακα με τα offset των γραμμων
-    long int* offset_of_line = malloc((lines + 1) * sizeof(long int)); //πινακας με τα offset των γραμμων
-    int count = 1;
-    int bytes = 0;
+
+    //########### ΥΠΟΛΟΓΙΣΜΟΣ OFFSET ΤΗΣ ΚΑΘΕ ΓΡΑΜΜΗΣ ###########//
+    
+    //πινακας με τα offset των γραμμων
+    long int* offset_of_line = malloc((lines + 1) * sizeof(long int)); //+1 γιατι δεν μετραμε την θεση 0 ως γραμμη
+    int count = 1; //μετρητης γραμμων
+    int bytes = 0; //ποσα bytes εχουμε διαβασει μεχρι ενα σημειο
     offset_of_line[0] = 0;
     
     while(read(fd, &c, sizeof(c)) > 0) {  
         bytes += sizeof(c);
         
-        if(c == '\n'){ 
+        if(c == '\n'){  //νεα γραμμη
             offset_of_line[count] = offset_of_line[count-1] + bytes;
-            // printf("LINE %d %ld\n", count, offset_of_line[count]);
             count++;
             bytes = 0;
         }
@@ -93,6 +103,9 @@ int main(int argc, char* argv[]){
     int input_of_splitter = lines / num_of_splitter; //γραμμες ανα splitter
     pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
 
+    
+    //####### ΔΗΜΙΟΥΡΓΙΑ PIPES ΓΙΑ ΕΠΙΚΟΙΝΩΝΙΑ SPLITTERS - BUILDERS #######//
+
     //θελουμε ενα pipe για καθε builder για επικοινωνια splitters-builders, 
     //δηλ num_of_builder pipes με 2 θεσεις το καθενα για τον pipefd
     int pipes_builder[num_of_builders][2]; //pipe[i][0] = read end of pipe i & pipe[i][1] = write end of pipe i
@@ -100,7 +113,7 @@ int main(int argc, char* argv[]){
     for(int i = 0; i < num_of_builders; i++){
             
         if(pipe(pipes_builder[i]) == -1){
-            perror("error with pipe builder\n");
+            perror("error with creation of pipe builder\n");
             return -1;
         }
     }
@@ -118,7 +131,6 @@ int main(int argc, char* argv[]){
             return -1;
         }
         
-
         if(splitter_pid != 0){ //εντος parent process
             
             splitter[i] = splitter_pid; //αποθηκευση του pid του splitter i   
@@ -127,9 +139,10 @@ int main(int argc, char* argv[]){
 
         if(splitter_pid == 0){ //εντος child process
 
+            //οι splitters πρεπει μονο να γραφουν στα pipes
             for(int j = 0; j < num_of_builders; j++){
                 close(pipes_builder[j][0]); //κλεισιμο του read end
-                dup2(pipes_builder[j][1], j + 25); 
+                dup2(pipes_builder[j][1], j + 25); //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
             }
             
 
@@ -137,8 +150,7 @@ int main(int argc, char* argv[]){
             int start_line = 0;
             int end_line = 0;
 
-            //αν ειναι ο 1ος splitter διαβαζει απο την αρχη του αρχειου 
-            //μεχρι το input_of_splitter
+            //αν ειναι ο 1ος splitter διαβαζει απο την αρχη του αρχειου μεχρι το input_of_splitter
             if(i == 0){
                 start_line = 1;
                 end_line = input_of_splitter;
@@ -146,7 +158,7 @@ int main(int argc, char* argv[]){
             //διαβαζει απο εκει που σταματησε ο προηγουμενος
             else if((i != 0) && (i != num_of_splitter - 1)){
                 start_line = i * input_of_splitter + 1;
-                end_line = start_line + input_of_splitter - 1;
+                end_line = start_line + input_of_splitter - 1; //αν πχ start_line = 5 και input = 5, πρεπει να διαβασει μεχρι και τη γραμμη 9
             }
             //αν ειναι ο τελευταιος splitter διαβαζει μεχρι το τελος του αρχειου
             //γιατι αν δεν διαιρειται ακριβως, θα περισσεψουν γραμμες. 
@@ -155,9 +167,8 @@ int main(int argc, char* argv[]){
                 end_line = lines;
             }   
 
-            // printf("start %d end %d\n", start_line, end_line);
 
-            long int offset_start_line = offset_of_line[start_line - 1]; //ta bytes mexri kai prin thn grammh start_line
+            long int offset_start_line = offset_of_line[start_line - 1]; //τα Bytes μεχρι και πριν τη γραμμη start_line
 
             char offset_start_line_str[10]; 
             char start_line_str[10];
@@ -173,12 +184,13 @@ int main(int argc, char* argv[]){
             //εκτελεση του splitter που βρισκεται στο ιδιο directory
             execlp("./splitter", "splitter", input_file, start_line_str, end_line_str, 
                 offset_start_line_str, exclusion_list_file, num_of_builders_str, NULL); 
-		    perror("exec failure\n");       
+		    perror("exec failure\n");  //δεν θα φτασει ποτε εδω εαν ειναι επιτυχης η exec     
             exit(1);         
 
         }
     }   
 
+    //ο parent πρεπει να περιμενει 
     for(int i = 0; i < num_of_splitter; i++){
         int status;
         if (waitpid(splitter[i], &status, 0) == -1) {
@@ -188,9 +200,6 @@ int main(int argc, char* argv[]){
 
 
     //######### ΔΗΜΙΟΥΡΓΙΑ BUILDERS #########//
-
-
-  
     
     pid_t builder[num_of_builders];
     
@@ -205,33 +214,33 @@ int main(int argc, char* argv[]){
             if(builder_pid != 0){ //εντος parent process
 
                 builder[i] = builder_pid; //αποθηκευση του pid του παιδιου i
-                // write(4, "2HI3HEY", 8);
              
             }
             if(builder_pid == 0){ //εντος child process
 
-                //θελουμε επισης να κλεισουμε ολα τα read & write end των pipes 
-                //που δεν απασχολουν τον συγκεκριμενο builder
+                //θελουμε να κλεισουμε ολα τα read end των pipes 
+                //που δεν απασχολουν τον συγκεκριμενο builder καθως και ολα τα write end
                 for(int j = 0; j < num_of_builders; j++){
                     if(j != i){
                         close(pipes_builder[j][0]);
                     }
                     close(pipes_builder[j][1]);
                 }
+
                 int fd_read = pipes_builder[i][0]; //το read end fd του pipe
 
                 char fd_read_str[10];
-                snprintf(fd_read_str, sizeof(fd_read_str), "%d", fd_read);
-
                 char num_of_builder_str[10];
+
+                snprintf(fd_read_str, sizeof(fd_read_str), "%d", fd_read);
                 snprintf(num_of_builder_str, sizeof(num_of_builder_str), "%d", i);
 
                 //εκτελεση του builder που βρισκεται στο ιδιο directory
                 execlp("./builder", "builder", num_of_builder_str, fd_read_str, NULL);
-                perror("exec failure\n");
+                perror("exec failure\n"); //εαν αποτυχει
                 exit(1);
             } 
-            close(pipes_builder[i][1]); //κλεισιμο του write end του pipe, αφου εχουμε κανει fork   
+  
     }
 
     for (int i = 0; i < num_of_builders; i++) {

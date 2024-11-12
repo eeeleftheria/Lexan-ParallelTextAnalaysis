@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
     //Ανοιγμα input file
     int fd = open(input_file, O_RDONLY);
     if(fd < 0){
-        char* message = "Failure opening input file\n";
+        char* message = "Failure opening input file in splitter\n";
         write(STDOUT_FILENO, message, strlen(message));
         exit(1);
     }
@@ -58,12 +58,11 @@ int main(int argc, char* argv[]){
     //πηγαινουμε τον δεικτη διαβασματος στη γραμμη start_line
     //απο την οποια πρεπει να διαβασει ο splitter
     lseek(fd, offset__of_start_line, SEEK_SET);
-
   
     //παραγωγη λεξεων, αγνοωντας σημεια στιξης, συμβολα κλπ
     splitterCreateWords(fd, end_line, start_line, exclusion_list, num_of_builders);
 
-
+    //αφου τελειωσαμε με το γραψιμο στους builder, κλεινουμε ολα τα write ends
     for(int i = 0; i < num_of_builders; i++){
         close(i + 25);
     }
@@ -76,6 +75,7 @@ int main(int argc, char* argv[]){
     
 }
 
+//############## ΣΥΝΑΡΤΗΣΕΙΣ ###############//
 
 int splitterHashFunc(char* word, int num_of_builders){
     int key = 0;
@@ -90,6 +90,7 @@ int splitterHashFunc(char* word, int num_of_builders){
 }
 
 
+
 void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_list, int num_of_builders){
 
     int bytes_to_read;
@@ -102,15 +103,8 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
     char* word = malloc(word_size); //αρχικα δεσμεουμε 10 Bytes για μια λεξη
     int lines = start_line;
 
-    int buffer_for_builder_size = 1046;
-    char* buffer_for_builder = malloc(buffer_for_builder_size);
-
     while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
-
-        if(bytes_to_read < 0) {
-            perror("error reading from pipe in splitter\n");
-        }
-
+   
         //αν δεν χωραει αλλος χαρακτηρας στο word δεσμευουμε τον διπλασιο χωρο
         if(w_index >= word_size - 1){ //-1 γιατι ξεκιναει απο το 0
             word_size = 2 * word_size;
@@ -122,7 +116,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
             buffer = realloc(buffer, buffer_size);
         }
 
-        //αποθηκευση καθε χαρακτρα στον buffer
+        //αποθηκευση καθε χαρακτηρα στον buffer
         buffer[b_index] = c;
 
         if(isalpha(c)){ //αν ειναι αλφαβητικος χαρακτηρας μπορει να αποτελει μερος λεξης
@@ -132,15 +126,14 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
         else if(c == '\n' || c == ' '){
             
             if(c == '\n'){
-                lines++;
+                lines++; //νεα γραμμη
             }
             
             //αν ο προηγουμενος ειναι αλφαβητικος, εχουμε λεξη
             if(isalpha( buffer[b_index - 1] )){
                 word[w_index] = '\0';
-                w_index = 0;
                 
-                //ελεγχος αν ανηκει στο exclusion list
+                //αν δεν ανηκει στο exclusion list την στελνουμε στον builder
                 if(listfindNodeWithValue(exclusion_list, word, compareWords) == NULL){  
                     splitterSendToBuilder(word, num_of_builders);
                 }
@@ -152,21 +145,29 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
                 for(int i = 0; i < w_index; i++){
                     word[i] = '\0';
                 }
+                w_index = 0; //επαναφορα του index στο 0, για ευρεση νεας λεξης
             }
 
+            //αν διαβασαμε και την τελευταια γραμμη που πρεπει να διαβασει ο splitter
             if(lines == end_line + 1){
                     break;
             }
 
         }
-   
+        //αν δεν ειναι αλφαβητικος χαρακτηρας ή αλλαγη γραμμης ή κενο
         else{
+            //καταργουμε τη λεξη
             word[w_index] = '\0';
             w_index = 0;
         }
-        b_index++;       
+        b_index++;  //αυξηση index του buffer
     }
 
+    if(bytes_to_read < 0) {
+        perror("error reading from pipe in splitter\n");
+    }
+    
+    //αν φτασαμε στο EOF
     if(bytes_to_read == 0){
         word[w_index] = '\0';
 
@@ -184,12 +185,12 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
 }
 
 
-
+//συγκρινει δυο λεξεις
 int compareWords(Pointer a, Pointer b){
     return strcmp((char*)a, (char*)b);
 }
 
-
+//υπολογιζει τον builder που πρεπει να σταλθει η λεξη και την κανει write
 void splitterSendToBuilder(char* word, int num_of_builders){
     int builder = splitterHashFunc(word, num_of_builders);
     int size = strlen(word) + 1; //for \0
@@ -213,7 +214,8 @@ void splitterSendToBuilder(char* word, int num_of_builders){
 
 }
 
-
+//Δημιουργια μιας λιστας με τις λεξεις που περιεχονται στο αρχειο Exclusion List
+//το αρχειο ειναι της μορφης: μια λεξη ανα γραμμη
 List splitterCreateExclusionList(char* exclusion_list){
     int fd = open(exclusion_list, O_RDONLY);
     if(fd < 0){
@@ -228,15 +230,10 @@ List splitterCreateExclusionList(char* exclusion_list){
     char c;
     int word_size = 20;
     char* word = malloc(word_size);
-    int count = 0;
+    int count = 0; //index λεξης
 
     while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
-        if(bytes_to_read < 0) {
-            perror("error reading from exclusion list\n");
-            close(fd);
-            return NULL;
-        }
-
+        
         if(count >= word_size - 1){
             word_size = 2 * word_size;
             word = realloc(word, word_size);
@@ -247,15 +244,22 @@ List splitterCreateExclusionList(char* exclusion_list){
             count++;
         }
         
-        else if(c == '\n'){
+        else if(c == '\n'){  //αρα εχουμε λεξη
             word[count] = '\0';
-            char* value = malloc(strlen(word) + 1);
+            char* value = malloc(strlen(word) + 1); //δεσμευση χωρου για τη λεξη
             strcpy(value, word);
             listInsert(list, value);
-            count = 0;
+            count = 0; //επαναφορα word index
         }
 
     }
+
+    if(bytes_to_read < 0) {
+            perror("error reading from exclusion list\n");
+            close(fd);
+            return NULL;
+    }
+
     if(bytes_to_read == 0){
         word[count] = '\0';
         char* value = malloc(strlen(word) + 1);
