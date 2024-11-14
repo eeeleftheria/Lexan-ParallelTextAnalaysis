@@ -1,8 +1,6 @@
 ////////////////////////////////////////////
+//
 // ΥΛΟΠΟΙΗΣΗ HASHTABLE ΜΕ SEPERATE CHAINING
-// 
-//  Για μεγεθος πινακα M και κλειδι k, η hαsh function μας θα ειναι
-// h(k) = k mod Μ οπου ο M πρεπει να ειναι πρωτος αριθμος
 //
 ////////////////////////////////////////////
 
@@ -14,136 +12,155 @@
 #include "hash.h"
 
 
-// // HashTable: περιεχει ολες τις πληροφοριες του hash table
-// struct hash_table {
-// 	HashNode* array;	//πινακας που θα εχει δεικτες σε hash_nodes τα οποια θα δειχνουν σε λιστες
-// 	int occupied_buckets; //ποσες θεσεις εχουμε γεμισει		
-// 	int size_of_array;	//ποσες θεσεις εχει ο πινακας
-// };
+// HashTable: περιεχει ολες τις πληροφοριες του hash table
+struct hash_table {
+	List* array;	//πινακας που θα εχει δεικτες σε λιστες	
+	int size_of_array;	//ποσες θεσεις εχει ο πινακας
+};
 
-// struct hash_node{
-//     List list; //λιστα με ολα τα graphNodes που εχουν το ιδιο h(k)
-// };
-
-
-// int hashFunc(int key, int M){
-//     int pos = key % M;
-//     return pos;
-// }
+struct hash_node{
+    Pointer key;
+    Pointer value;
+};
 
 
-// HashTable hashCreate(int size){
-//     HashTable hash_table = malloc(sizeof(struct hash_table));
+int hashFunc(char* word, int num_of_builders){
+    int key = 0;
+    //προσθετουμε τους αριθμους ascii του καθε χαρακτηρα
+    for(int i = 0; i < strlen(word); i++){
+        key += word[i];
+    }
+
+    int pos = key % num_of_builders;
+    return pos;
+}
+
+
+HashTable hashCreate(int size){
+    HashTable hash_table = malloc(sizeof(struct hash_table));
     
-//     hash_table->array = malloc(size*sizeof(struct hash_node));
-//     hash_table->occupied_buckets = 0;
-//     hash_table->size_of_array = size;
+    hash_table->array = malloc(size*sizeof(List)); // δεσμευουμε χωρο για size δεικτες σε λιστες List
+    hash_table->size_of_array = size;
 
-//     for (int i = 0; i < size; i++) {
-//         hash_table->array[i] = NULL; 
-//     }
+    for (int i = 0; i < size; i++) {
+        hash_table->array[i] = NULL; 
+    }
 
-//     return hash_table;  
+    return hash_table;  
 
-// }
+}
 
 
-// void hashAdd(HashTable hash_table, int key, Pointer value){
+void hashAdd(HashTable hash_table, Pointer key, Pointer value){
 
-//     int pos = hashFunc(key, hash_table->size_of_array); //σε ποια θεση του hash table πρεπει να μπει
+    int pos = hashFunc(key, hash_table->size_of_array); //σε ποια θεση του hash table πρεπει να μπει
 
-//     //μονο αν ειναι NULL ο κομβος τον δημιουργουμε και φτιαχνουμε τη λιστα
-//     if(hash_table->array[pos] == NULL) {
- 
-//         HashNode hash_node = malloc(sizeof(struct hash_node));
+    //δημιουργια του hash node
+    HashNode hash_node = malloc(sizeof(struct hash_node));
 
-//         if(hash_node == NULL) {
-//             printf("failed to allocate memory for hash node\n");
-//         }
-    
-//         hash_table->array[pos] = hash_node;
-//         hash_node->list = listCreate(); //δημιουργια της λιστας για το συγκεκριμενο hashtable node
-//         listInsert(hash_node->list, value); //προσθηκη του κομβου στη λιστα
-//         hash_table->occupied_buckets++; //αυξηση μονο οταν δημιουργουμε νεο hash node
+    if(hash_node == NULL) {
+        printf("failed to allocate memory for hash node\n");
+        return;
+    }
+
+    hash_node->key = key;
+    hash_node->value = value;
+
+    //μονο αν ειναι NULL δημιουργουμε τη λιστα
+    if(hash_table->array[pos] == NULL) {
         
-//     }
+        hash_table->array[pos] = listCreate();  
+    
+        listInsert(hash_table->array[pos], hash_node); //προσθηκη του κομβου στη λιστα
+        
+    }
 
-//     //αν δεν ειναι NULL σημαινει οτι εχει δημιουργηθει ηδη και υπαρχει η λιστα
-//     // οποτε αρκει να προσθεσουμε σε αυτην
-//     else if(hash_table->array[pos] != NULL){
-//         listInsert(hash_table->array[pos]->list, value);
-//     }   
-// }
+    //αν δεν ειναι NULL σημαινει οτι εχει δημιουργηθει ηδη η λιστα
+    // οποτε αρκει να προσθεσουμε σε αυτην τον κομβο
+    else if(hash_table->array[pos] != NULL){
+        listInsert(hash_table->array[pos], hash_node);
+    }   
+
+}
+
+//καταστρεφει το hash node
+void hashDestroyNode(Pointer hash_node){
+    free(hash_node);
+}
+
+//για καθε θεση του πινακα, καταστρεφουμε τη λιστα
+void hashDestroy(HashTable hash_table){
+   
+    for(int i = 0; i < hash_table->size_of_array; i++) {
+        
+        if(hash_table->array[i] != NULL) {
+            List list = hash_table->array[i];
+            
+            listDestroy(list, hashDestroyNode);
+
+        }
+    }
+    free(hash_table->array);
+    free(hash_table);
+}
 
 
-// int hashSize(HashTable hash_table){
-//     return hash_table->occupied_buckets;
-// }
-
-
-
-// void hashDestroyValue(Pointer value){
-//     free(value);
-// }
 
 //αφαιρει εναν κομβο απο το hash_table
-// void hashRemove(HashTable hash_table, int key, DestroyValueFunc func, CompareFunc compare){
-//     int pos = hashFunc(key, hash_table->size_of_array);
+void hashRemove(HashTable hash_table, Pointer key, CompareFunc compare){
+    int pos = hashFunc(key, hash_table->size_of_array);
 
-//     List list = hash_table->array[pos]->list;
+    List list = hash_table->array[pos];
+    ListNode node = hashFindListNodeWithKey(hash_table, key, compare);
 
-//     listRemove(list, hashFindListNodeWithKey(hash_table, key, compare), hashDestroyValue);
+    if(node == NULL){
+        return;
+    }
 
-//     hash_table->occupied_buckets--; 
+    listRemove(list, node, hashDestroyNode);
 
-// }   
+}   
 
-//για την καταστροφη του hash table, διατρεχουμε τον πινακα και για καθε θεση του 
-//διατρεχουμε την αντιστοιχη λιστα, αφαιρωντας ολους τους pointers στα nodes
-//και καταστρεφοντας τα value τους
 
-// void hashDestroy(HashTable hash_table){
-   
-//     for(int i = 0; i < hash_table->size_of_array; i++) {
+ListNode hashFindListNodeWithKey(HashTable hash_table, Pointer key, CompareFunc compare){
+    int pos = hashFunc(key, hash_table->size_of_array);
+
+    List list = hash_table->array[pos];
+    
+    //τα nodes της λιστας εχουν value hash node
+    for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
+        HashNode value = listNodeValue(list, node);
+        Pointer key_to_find = value->key;
         
-//         if(hash_table->array[i] != NULL) {
-//             List list = hash_table->array[i]->list;
+        //αν βρουμε τον hash node με αυτο το key τον επιστρεφουμε
+        if(compare(key_to_find, key) == 0){ 
+            return node;
+        }
+    }
+    return NULL;
+}
 
-//             if (listSize(list) != 0){
 
-//             ListNode node = listFirst(list);
+void hashDisplay(HashTable table){
+    if(table->size_of_array == 0){
+        return;
+    }
 
-//                 while(node != NULL) {
-//                     ListNode next = listGetNext(node);
-//                     free(node);
-//                     node = next;
-//                 }
-//             }
-//             free(list);
-//             free(hash_table->array[i]);
-//         }
-//     }
-//     free(hash_table->array);
-//     free(hash_table);
-// }
+    for(int i = 0; i < table->size_of_array; i++){
+        if(table->array[i] == NULL){
+            continue;
+        }
 
-// Pointer hashFindListNodeWithValue(HashTable hash_table, Pointer value, CompareFunc compare){
-    // int pos = hashFunc(key, hash_table->size_of_array);
-
-    // List list = hash_table->array[pos]->list;
-    // //τα nodes της λιστας εχουν value graph node
-    // //αρα πρεπει να βρουμε τον graph node του αντιστοιχου user
-    // for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
-    //     Pointer value = listNodeValue(list, node);
+        List list = table->array[i];
+        printf("bucket %d -> ",i);
         
-    //     if(compare(value, key) == 0){ 
-    //         return node;
-    //     }
-    // }
-    // return NULL;
-// }
+        ListNode node;
+        for(node = listFirst(list); node != NULL; node = listGetNext(node)){
+            HashNode hash_node = listNodeValue(list, node);
 
-
-
-
-
+            int* count = hash_node->value;
+            printf("key: %s ", (char*)hash_node->key);
+            printf("count: %d\n", *count);
+        }
+    }
+}
