@@ -6,12 +6,13 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include "splitter.h"
+#include "hash.h"
 
 
 int main(int argc, char* argv[]){
 
     char* input_file = NULL;
-    List exclusion_list = NULL;
+    HashTable exclusion_list = NULL;
     int start_line = 0;
     int end_line = 0;
     int num_of_builders = 0;
@@ -60,7 +61,7 @@ int main(int argc, char* argv[]){
     lseek(fd, offset__of_start_line, SEEK_SET);
   
     //παραγωγη λεξεων, αγνοωντας σημεια στιξης, συμβολα κλπ
-    splitterCreateWords(fd, end_line, start_line, exclusion_list, num_of_builders);
+    // splitterCreateWords(fd, end_line, start_line, exclusion_list, num_of_builders);
 
     //αφου τελειωσαμε με το γραψιμο στους builder, κλεινουμε ολα τα write ends
     for(int i = 0; i < num_of_builders; i++){
@@ -91,7 +92,7 @@ int splitterHashFunc(char* word, int num_of_builders){
 
 
 
-void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_list, int num_of_builders){
+void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusion_list, int num_of_builders){
 
     int bytes_to_read;
     char c;
@@ -134,7 +135,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
                 word[w_index] = '\0';
                 
                 //αν δεν ανηκει στο exclusion list την στελνουμε στον builder
-                if(listfindNodeWithValue(exclusion_list, word, compareWords) == NULL){  
+                if(hashFindListNodeWithKey(exclusion_list, word) == NULL){  
                     splitterSendToBuilder(word, num_of_builders);
                 }
                 else{
@@ -171,7 +172,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
     if(bytes_to_read == 0){
         word[w_index] = '\0';
 
-        if(listfindNodeWithValue(exclusion_list, word, compareWords) == NULL){
+        if(hashFindListNodeWithKey(exclusion_list, word) == NULL){
         
             splitterSendToBuilder(word, num_of_builders);
         }
@@ -187,7 +188,8 @@ void splitterCreateWords(int fd, int end_line, int start_line, List exclusion_li
 
 //συγκρινει δυο λεξεις
 int compareWords(Pointer a, Pointer b){
-    return strcmp((char*)a, (char*)b);
+    int res = strcmp((char*)a, (char*)b);
+    return res;
 }
 
 //υπολογιζει τον builder που πρεπει να σταλθει η λεξη και την κανει write
@@ -205,8 +207,15 @@ void splitterSendToBuilder(char* word, int num_of_builders){
     memcpy(buffer, word, size); 
     memcpy(buffer + size, " ", 1);
 
+    //ελεγχος αν ειναι ανοιχτος ο fd
+    int flags = fcntl(builder + 25, F_GETFD);
+    if (flags == -1) {
+        perror("Invalid file descriptor");
+    }
+
     // printf("splitter sent to builder %d word : %s\n", builder, buffer);
-    write(builder + 25, buffer, buffer_size);
+    int bytes_written = write(builder + 25, buffer, buffer_size);
+    
 
     // sleep(1);
 
@@ -214,9 +223,10 @@ void splitterSendToBuilder(char* word, int num_of_builders){
 
 }
 
+
 //Δημιουργια μιας λιστας με τις λεξεις που περιεχονται στο αρχειο Exclusion List
 //το αρχειο ειναι της μορφης: μια λεξη ανα γραμμη
-List splitterCreateExclusionList(char* exclusion_list){
+HashTable splitterCreateExclusionList(char* exclusion_list){
     int fd = open(exclusion_list, O_RDONLY);
     if(fd < 0){
         char* message = "Failure opening exclusion list\n";
@@ -224,7 +234,7 @@ List splitterCreateExclusionList(char* exclusion_list){
         exit(1);
     }
 
-    List list = listCreate();
+    HashTable table = hashCreate(51, compareWords);
 
     int bytes_to_read;
     char c;
@@ -239,16 +249,19 @@ List splitterCreateExclusionList(char* exclusion_list){
             word = realloc(word, word_size);
         }
 
-        if(c != '\n'){
+        if(c != '\n' && (isalpha(c))){
+
             word[count] = c;
             count++;
         }
         
-        else if(c == '\n'){  //αρα εχουμε λεξη
+        else if(c == '\n' || c == EOF){  //αρα εχουμε λεξη
             word[count] = '\0';
             char* value = malloc(strlen(word) + 1); //δεσμευση χωρου για τη λεξη
+
             strcpy(value, word);
-            listInsert(list, value);
+
+            hashAdd(table, value, value);
             count = 0; //επαναφορα word index
         }
 
@@ -264,12 +277,13 @@ List splitterCreateExclusionList(char* exclusion_list){
         word[count] = '\0';
         char* value = malloc(strlen(word) + 1);
         strcpy(value, word);
-        listInsert(list, value);
+
+        hashAdd(table, value, value);
     }
 
     close(fd); //δεν χρειαζομαστε αλλο το αρχειο
     free(word);
-    return list;
+    return table;
 
 }
 
