@@ -27,11 +27,11 @@ int main(int argc, char* argv[]){
     int size = 0;
 
     printf("\n\nread fd of builder: %d\n", fd_read_end);
-        char* word;
+    char* word;
 
     while((bytes_to_read = read(fd_read_end, buffer, size_buffer)) > 0){
        
-        printf("builder received bytes: %d\n", bytes_to_read);
+       printf("builder received bytes: %d\n", bytes_to_read);
        
        for(int i = 0; i < bytes_to_read; i++){
           
@@ -50,13 +50,15 @@ int main(int argc, char* argv[]){
             } 
            
         }
-    
-        if (bytes_to_read == 0) {
-            printf("End of input in builder\n");
-        } 
-        else if (bytes_to_read < 0) {
-            perror("Error reading from pipe");
-        }
-
+      
     }
+    if (bytes_to_read == 0) {
+    printf("End of input in builder\n");
+    } 
+    else if (bytes_to_read < 0) {
+        perror("Error reading from pipe");
+    }
+
+    exit(1);
+
 }

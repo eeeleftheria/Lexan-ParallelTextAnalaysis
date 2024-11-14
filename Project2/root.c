@@ -61,13 +61,13 @@ int main(int argc, char* argv[]){
 
     //διαβασμα αρχειου ανα χαρακτηρα
     int bytes_to_read;
-    while(bytes_to_read =  read(fd, &c, sizeof(c)) > 0) {  //για EOF επιστρεφει 0
+    while((bytes_to_read =  read(fd, &c, sizeof(c))) > 0) {  //για EOF επιστρεφει 0
         if(c == '\n'){
             lines++;
         }
     }
     if (bytes_to_read == 0) {
-        printf("End of input in root\n");
+        perror("End of input in root\n");
     } 
     else if (bytes_to_read < 0) {
         perror("Error reading from input file\n");
@@ -142,7 +142,7 @@ int main(int argc, char* argv[]){
             //οι splitters πρεπει μονο να γραφουν στα pipes
             for(int j = 0; j < num_of_builders; j++){
                 close(pipes_builder[j][0]); //κλεισιμο του read end
-                dup2(pipes_builder[j][1], j + 25); //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
+                dup2(pipes_builder[j][1], j + 4); //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
             }
             
 
@@ -196,6 +196,10 @@ int main(int argc, char* argv[]){
         if (waitpid(splitter[i], &status, 0) == -1) {
             perror("error with waitpid splitter\n");
         }
+    }
+
+    for (int i = 0; i < num_of_builders; i++){
+        close(pipes_builder[i][1]);
     }
 
 

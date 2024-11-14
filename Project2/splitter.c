@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include "splitter.h"
 #include "hash.h"
+#include <errno.h>
 
 
 int main(int argc, char* argv[]){
@@ -54,21 +55,24 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    printf("\nIN SPLITTER %d %d\n", start_line, end_line);
+    // printf("\nIN SPLITTER %d %d\n", start_line, end_line);
     
     //πηγαινουμε τον δεικτη διαβασματος στη γραμμη start_line
     //απο την οποια πρεπει να διαβασει ο splitter
     lseek(fd, offset__of_start_line, SEEK_SET);
   
     //παραγωγη λεξεων, αγνοωντας σημεια στιξης, συμβολα κλπ
-    // splitterCreateWords(fd, end_line, start_line, exclusion_list, num_of_builders);
+    splitterCreateWords(fd, end_line, start_line, exclusion_list, num_of_builders);
+
 
     //αφου τελειωσαμε με το γραψιμο στους builder, κλεινουμε ολα τα write ends
     for(int i = 0; i < num_of_builders; i++){
-        close(i + 25);
+        close(i + 4);
     }
 
+
     printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
+
 
     close(fd);
     
@@ -124,7 +128,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
             word[w_index] = c;
             w_index++;
         }
-        else if(c == '\n' || c == ' '){
+        else if(c == '\n' || c == ' ' || c == EOF || c == '!' || c == ',' || c == '.'){
             
             if(c == '\n'){
                 lines++; //νεα γραμμη
@@ -208,14 +212,17 @@ void splitterSendToBuilder(char* word, int num_of_builders){
     memcpy(buffer + size, " ", 1);
 
     //ελεγχος αν ειναι ανοιχτος ο fd
-    int flags = fcntl(builder + 25, F_GETFD);
+    int flags = fcntl(builder + 4, F_GETFD);
     if (flags == -1) {
-        perror("Invalid file descriptor");
+        perror("Invalid file descriptor in splitter to write");
     }
 
-    // printf("splitter sent to builder %d word : %s\n", builder, buffer);
-    int bytes_written = write(builder + 25, buffer, buffer_size);
+    // printf("splitter sent to builder %d word: %s\n", builder, word);
+    int bytes_written = write(builder + 4, buffer, buffer_size);
     
+    if (bytes_written == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+        perror("Write failed");
+    }
 
     // sleep(1);
 
