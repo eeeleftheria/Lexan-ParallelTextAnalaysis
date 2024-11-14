@@ -9,7 +9,7 @@ int compareWords(Pointer a, Pointer b){
 }
 
 int main(){
-    HashTable table = hashCreate(5);
+    HashTable table = hashCreate(5, compareWords);
     char* w1 ="mam";
     char* w2 = "rfhfrf";
     char* w3 = "wx";
@@ -18,13 +18,17 @@ int main(){
     int count3 = 0;
     
     hashAdd(table, w1, &count);
-    hashRemove(table, w1, compareWords);
+    hashRemove(table, w1);
 
     hashAdd(table, w2, &count2);
-    hashRemove(table, w2, compareWords);
 
     hashAdd(table, w3, &count3);
-    hashRemove(table, w3,compareWords);
+    hashRemove(table, w3);
+
+    hashAdd(table, w2, &count);
+    hashAdd(table, w3, &count);
+    hashAdd(table, w3, &count);
+
     
 
     hashDisplay(table);
