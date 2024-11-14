@@ -8,6 +8,7 @@
 #include "splitter.h"
 #include "hash.h"
 #include <errno.h>
+#include <signal.h>
 
 
 int main(int argc, char* argv[]){
@@ -71,9 +72,12 @@ int main(int argc, char* argv[]){
     }
 
 
-    printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
+    // printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
 
+    pid_t root_pid = getppid(); //το process id του root
+    kill(root_pid, SIGUSR1); //ο splitter στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
 
+    hashDestroy(exclusion_list);
     close(fd);
     
     exit(1);

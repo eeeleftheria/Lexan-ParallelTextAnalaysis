@@ -10,10 +10,17 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 
+//handler of signal USR1 when a splitter finishes its job.
+void splitterIsDone(int signum){
+        signal(SIGUSR1, splitterIsDone);
+        printf("splitter is done\n");
+}
 
-int main(int argc, char* argv[]){
+
+int main(int argc, char* argv[]){  
     
     char* input_file = NULL;
     char* output_file = NULL;
@@ -122,6 +129,9 @@ int main(int argc, char* argv[]){
 
     //######### ΔΗΜΙΟΥΡΓΙΑ SPLITTERS #########//
       
+    signal(SIGUSR1, splitterIsDone);
+
+
     for(int i = 0; i < num_of_splitter; i++){
     
         pid_t splitter_pid = fork(); //δημιουργια splitter processes
@@ -255,7 +265,7 @@ int main(int argc, char* argv[]){
     }
 
 
-            
+               
     free(offset_of_line);
     exit(1);
 }
