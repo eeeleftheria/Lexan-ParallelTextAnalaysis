@@ -26,14 +26,14 @@ struct hash_node{
 };
 
 
-int hashFunc(char* word, int num_of_builders){
+int hashFunc(char* word, int m){
     int key = 0;
     //προσθετουμε τους αριθμους ascii του καθε χαρακτηρα
     for(int i = 0; i < strlen(word); i++){
         key += word[i];
     }
 
-    int pos = key % num_of_builders;
+    int pos = key % m;
     return pos;
 }
 
@@ -144,6 +144,7 @@ ListNode hashFindListNodeWithKey(HashTable hash_table, Pointer key){
     List list = hash_table->array[pos];
 
     if(list == NULL){
+        // printf("list null\n");
         return NULL;
     }
     
@@ -154,6 +155,7 @@ ListNode hashFindListNodeWithKey(HashTable hash_table, Pointer key){
         
         //αν βρουμε τον hash node με αυτο το key τον επιστρεφουμε
         if(hash_table->compare(key_to_find, key) == 0){ 
+            // printf("found same node \n");
             return node;
         }
     }
@@ -179,10 +181,31 @@ void hashDisplay(HashTable table){
             HashNode hash_node = listNodeValue(list, node);
 
             printf("key: %s ", (char*)hash_node->key);
-            printf("count: %s\n", (char*)hash_node->value);
+            printf("count: %d\n", (*(int*)hash_node->value));
         }
     }
 }
+
+
+Pointer hashFindValue(HashTable table, Pointer key){
+    int pos = hashFunc(key, table->size_of_array);
+
+    List list = table->array[pos];
+    if(list == NULL){
+        return NULL;
+    }
+
+    ListNode node = hashFindListNodeWithKey(table, key);
+    if(node == NULL){
+        return NULL;
+    }
+
+    HashNode hash_node = listNodeValue(list, node);
+    return hash_node->value;
+}
+
+
+
 
 
 

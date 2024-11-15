@@ -7,7 +7,7 @@ CFLAGS = -Wall  -g -I ./Include
 # Αρχεία .o
 OBJ_ROOT =  root.o
 OBJ_SPLIT = splitter.o list.o hash.o
-OBJ_BUILD = builder.o
+OBJ_BUILD = builder.o list.o hash.o
 OBJ_HASH = hash.o list.o
 OBJ_LIST = list.o
 

@@ -1,15 +1,6 @@
-a7a  6 7 - =  aaaa   aaa
-bb3 bbbb bbb
-cc cccc ccc
-dd dddd ddd
-ee eeee eee
-ff ffff fff
-gg gggg ggg
-hh hhhh hhh
-ii iiii iii
-jj jjjj jjj
-kk kkkk kkk
-ll llll lll
-mm mmmm mmm
-nn nnnn nnn
-Foo   foo_bar bar "barfoo" 5 barfoo3   i am, greek. 5foo
+Foo
+bp2
+fappp
+greek
+Foo
+Foo Foo foo_bar bar "barfoo" 5 barfoo3   i am, greek. 5foo

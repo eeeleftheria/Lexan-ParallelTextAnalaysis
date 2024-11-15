@@ -23,6 +23,8 @@ void hashRemove(HashTable hash_table, Pointer key);
 //για ενα δεδομενο κομβο με κλειδι key επιστρεφουμε τον list node στον οποιο ανηκει
 ListNode hashFindListNodeWithKey(HashTable hash_table, Pointer key);
 
+Pointer hashFindValue(HashTable table, Pointer key);
+
 //ΣΥΝΑΡΤΗΣΕΙΣ DESTROY 
 void hashDestroy(HashTable hash_table);
 void hashDestroyNode(Pointer hash_node);
