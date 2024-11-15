@@ -270,10 +270,18 @@ HashTable splitterCreateExclusionList(char* exclusion_list){
         else if(c == '\n' || c == EOF){  //αρα εχουμε λεξη
             word[count] = '\0';
             char* value = malloc(strlen(word) + 1); //δεσμευση χωρου για τη λεξη
-
+            char* key = malloc(strlen(word) + 1);
+            
             strcpy(value, word);
+            strcpy(key, word);
 
-            hashAdd(table, value, value);
+
+            hashAdd(table, key, value);
+
+            for(int i = 0; i < count; i++){
+                word[i] = '\0';
+            }
+
             count = 0; //επαναφορα word index
         }
 
