@@ -114,7 +114,6 @@ int main(int argc, char* argv[]){
     //θελουμε ενα pipe για καθε builder για επικοινωνια splitters-builders, 
     //δηλ num_of_builder pipes με 2 θεσεις το καθενα για τον pipefd
     int pipes_builder[num_of_builders][2]; //pipe[i][0] = read end of pipe i & pipe[i][1] = write end of pipe i
-    int write_fds[num_of_builders]; //write_fds[i] = write end fd of builder i
 
     for(int i = 0; i < num_of_builders; i++){
             
@@ -122,23 +121,7 @@ int main(int argc, char* argv[]){
             perror("error with creation of pipe builder\n");
             return -1;
         }
-
-        write_fds[i] = pipes_builder[i][1];
     }
-
-    // char string_with_fds[64];
-    // int offset = 0;
-    // for(int i = 0; i < num_of_builders; i++){
-    //     char fd_str[10];
-    //     printf("%d\n", write_fds[i]);
-    //     int written = snprintf(fd_str, sizeof(fd_str), "%d", write_fds[i]); //μετατροπη fd σε string για να τα περασουμε ολα μαζι ως παραμετρο
-    //     memcpy(string_with_fds + offset, fd_str, sizeof(fd_str));
-    //     memcpy(string_with_fds + offset + 1, " ", 1);
-    //     offset += written;
-    // }
-    // printf("FDS ARE %s\n", string_with_fds);
-
-
 
 
     int input_of_splitter = lines / num_of_splitter; //γραμμες ανα splitter
@@ -232,8 +215,16 @@ int main(int argc, char* argv[]){
     }
 
 
+
     //######### ΔΗΜΙΟΥΡΓΙΑ BUILDERS #########//
-    
+
+    //Δημιουργια ενος pipe για επικοινωνια builders με ριζα
+    int fd_root[2]; //fd_pipe[0] read end, fd_pipe[1] write end
+    if(pipe(fd_root) == -1){
+        perror("error with creation of pipe builder\n");
+        return -1;
+    }
+
     pid_t builder[num_of_builders];
     
     for(int i = 0; i < num_of_builders; i++){
@@ -247,10 +238,13 @@ int main(int argc, char* argv[]){
             if(builder_pid != 0){ //εντος parent process
 
                 builder[i] = builder_pid; //αποθηκευση του pid του παιδιου i
-             
+                close(fd_root[1]); //o root πρεπει μονο να διαβαζει απο τους builders
             }
+
             if(builder_pid == 0){ //εντος child process
 
+                close(fd_root[0]); //μονο γραψιμο στον root
+                
                 //θελουμε να κλεισουμε ολα τα read end των pipes 
                 //που δεν απασχολουν τον συγκεκριμενο builder καθως και ολα τα write end
                 for(int j = 0; j < num_of_builders; j++){
@@ -261,15 +255,19 @@ int main(int argc, char* argv[]){
                 }
 
                 int fd_read = pipes_builder[i][0]; //το read end fd του pipe
+                int fd_root_write_end = fd_root[1]; 
 
                 char fd_read_str[10];
                 char num_of_builder_str[10];
+                char fd_root_write_str[10];
 
                 snprintf(fd_read_str, sizeof(fd_read_str), "%d", fd_read);
                 snprintf(num_of_builder_str, sizeof(num_of_builder_str), "%d", i);
+                snprintf(fd_root_write_str, sizeof(fd_root_write_str), "%d", fd_root_write_end);
+
 
                 //εκτελεση του builder που βρισκεται στο ιδιο directory
-                execlp("./builder", "builder", num_of_builder_str, fd_read_str, NULL);
+                execlp("./builder", "builder", num_of_builder_str, fd_read_str, fd_root_write_str, NULL);
                 perror("exec failure\n"); //εαν αποτυχει
                 exit(1);
             } 

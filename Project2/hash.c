@@ -205,7 +205,44 @@ Pointer hashFindValue(HashTable table, Pointer key){
 }
 
 
+List hashGetList(HashTable table, int pos){
+    return table->array[pos];
+}
 
+int hashGetSizeOfList(HashTable table, int pos){
+
+    if(table->array[pos] == NULL){
+        return 0;
+    }
+
+    return listSize(table->array[pos]);
+}
+
+
+// void hashSendToRoot(HashTable table, int fd){
+
+//     for(int i = 0; i < table->size_of_array; i++){
+//         List list = table->array[i];
+
+//         if(list != NULL){
+            
+//             ListNode node;
+            
+//             for(node = listFirst(list); node != NULL; node = listGetNext(node)){
+                
+//                 HashNode hash_node = listNodeValue(list, node);
+//                 Pointer key = hash_node->key;
+//                 Pointer value = hash_node->value;
+
+//                 // char* buffer = malloc(buffer_size);
+//                 // if (buffer == NULL) {
+//                 //     perror("Memory allocation failed");
+//                 //     exit(1);
+//                 // }
+//             }
+//         }
+//     }
+// }
 
 
 

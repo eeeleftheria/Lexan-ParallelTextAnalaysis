@@ -12,14 +12,15 @@
 
 int main(int argc, char* argv[]){
 
-    if(argc != 3){
-        char* message = "Error\nUsage is: ./builder numOfBuilder fdReadEnd\n";
+    if(argc != 4){
+        char* message = "Error\nUsage is: ./builder numOfBuilder fdReadEnd(pipe splitter-builder) fdWriteEnd(pipe builder-root)\n";
         write(STDOUT_FILENO, message, strlen(message));
         exit(1);
     }
 
     int num_of_builder = atoi(argv[1]);
     int fd_read_end = atoi(argv[2]);
+    int fd_write_end_root = atoi(argv[3]);
  
 
     int size_buffer = 1024;
@@ -65,7 +66,10 @@ int main(int argc, char* argv[]){
         perror("Error reading from pipe");
     }
 
-    hashDisplay(table);
+    // hashDisplay(table);
+
+
+
 
     close(fd_read_end);
 
@@ -81,7 +85,7 @@ int compareWords(Pointer a, Pointer b){
 
 
 void builderStoreInTable(HashTable table, char* word){
-
+    
     char* key = malloc(strlen(word) + 1); //δεσμευση χωρου για τη λεξη
     strcpy(key, word);
     
@@ -114,5 +118,9 @@ void builderStoreInTable(HashTable table, char* word){
 
     }
 
+}
+
+
+void builderSendToRoot(HashTable table, int fd){
     
 }
