@@ -105,17 +105,16 @@ int main(int argc, char* argv[]){
         }
             
     }
+
     close(fd); //κλεισιμο του αρχειου, θα το ξαναανοιξουμε μεσω των pipes
 
-    int input_of_splitter = lines / num_of_splitter; //γραμμες ανα splitter
-    pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
 
-    
     //####### ΔΗΜΙΟΥΡΓΙΑ PIPES ΓΙΑ ΕΠΙΚΟΙΝΩΝΙΑ SPLITTERS - BUILDERS #######//
 
     //θελουμε ενα pipe για καθε builder για επικοινωνια splitters-builders, 
     //δηλ num_of_builder pipes με 2 θεσεις το καθενα για τον pipefd
     int pipes_builder[num_of_builders][2]; //pipe[i][0] = read end of pipe i & pipe[i][1] = write end of pipe i
+    int write_fds[num_of_builders]; //write_fds[i] = write end fd of builder i
 
     for(int i = 0; i < num_of_builders; i++){
             
@@ -123,10 +122,29 @@ int main(int argc, char* argv[]){
             perror("error with creation of pipe builder\n");
             return -1;
         }
+
+        write_fds[i] = pipes_builder[i][1];
     }
 
+    // char string_with_fds[64];
+    // int offset = 0;
+    // for(int i = 0; i < num_of_builders; i++){
+    //     char fd_str[10];
+    //     printf("%d\n", write_fds[i]);
+    //     int written = snprintf(fd_str, sizeof(fd_str), "%d", write_fds[i]); //μετατροπη fd σε string για να τα περασουμε ολα μαζι ως παραμετρο
+    //     memcpy(string_with_fds + offset, fd_str, sizeof(fd_str));
+    //     memcpy(string_with_fds + offset + 1, " ", 1);
+    //     offset += written;
+    // }
+    // printf("FDS ARE %s\n", string_with_fds);
 
 
+
+
+    int input_of_splitter = lines / num_of_splitter; //γραμμες ανα splitter
+    pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
+
+    
     //######### ΔΗΜΙΟΥΡΓΙΑ SPLITTERS #########//
       
     signal(SIGUSR1, splitterIsDone);
@@ -152,7 +170,8 @@ int main(int argc, char* argv[]){
             //οι splitters πρεπει μονο να γραφουν στα pipes
             for(int j = 0; j < num_of_builders; j++){
                 close(pipes_builder[j][0]); //κλεισιμο του read end
-                dup2(pipes_builder[j][1], j + 4); //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
+                dup2(pipes_builder[j][1], j + 2000); //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
+                close(pipes_builder[j][1]); //κλεινουμε το original write end
             }
             
 
@@ -262,6 +281,11 @@ int main(int argc, char* argv[]){
         if (waitpid(builder[i], &status, 0) == -1) {
             perror("error with waitpid builder\n");
         }
+    }
+
+    for(int i = 0; i < num_of_builders; i ++){
+        close(pipes_builder[i][0]);
+        close(pipes_builder[i][1]);
     }
 
 

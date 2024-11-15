@@ -59,6 +59,8 @@ int main(int argc, char* argv[]){
         perror("Error reading from pipe");
     }
 
+    close(fd_read_end);
+
     exit(1);
 
 }

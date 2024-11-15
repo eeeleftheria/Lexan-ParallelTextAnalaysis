@@ -56,7 +56,7 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    // printf("\nIN SPLITTER %d %d\n", start_line, end_line);
+    printf("\nIN SPLITTER %d %d\n", start_line, end_line);
     
     //πηγαινουμε τον δεικτη διαβασματος στη γραμμη start_line
     //απο την οποια πρεπει να διαβασει ο splitter
@@ -68,11 +68,11 @@ int main(int argc, char* argv[]){
 
     //αφου τελειωσαμε με το γραψιμο στους builder, κλεινουμε ολα τα write ends
     for(int i = 0; i < num_of_builders; i++){
-        close(i + 4);
+        close(i + 2000);
     }
 
 
-    // printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
+    printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
 
     pid_t root_pid = getppid(); //το process id του root
     kill(root_pid, SIGUSR1); //ο splitter στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
@@ -118,6 +118,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
         if(w_index >= word_size - 1){ //-1 γιατι ξεκιναει απο το 0
             word_size = 2 * word_size;
             word = realloc(word, word_size);
+            
         }
 
         if(b_index >= buffer_size - 1){ //-1 γιατι ξεκιναει απο το 0
@@ -132,7 +133,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
             word[w_index] = c;
             w_index++;
         }
-        else if(c == '\n' || c == ' ' || c == EOF || c == '!' || c == ',' || c == '.'){
+        else if(c == '\n' || c == ' ' || c == EOF || c == '!' || c == ',' || c == '.' || c == '\t'){
             
             if(c == '\n'){
                 lines++; //νεα γραμμη
@@ -216,13 +217,13 @@ void splitterSendToBuilder(char* word, int num_of_builders){
     memcpy(buffer + size, " ", 1);
 
     //ελεγχος αν ειναι ανοιχτος ο fd
-    int flags = fcntl(builder + 4, F_GETFD);
+    int flags = fcntl(builder + 2000, F_GETFD);
     if (flags == -1) {
         perror("Invalid file descriptor in splitter to write");
     }
 
     // printf("splitter sent to builder %d word: %s\n", builder, word);
-    int bytes_written = write(builder + 4, buffer, buffer_size);
+    int bytes_written = write(builder + 2000, buffer, buffer_size);
     
     if (bytes_written == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
         perror("Write failed");
