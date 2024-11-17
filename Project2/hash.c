@@ -19,7 +19,7 @@ struct hash_table {
     int size; //αριθμος κομβων 
     CompareFunc compare;
 };
-
+    
 struct hash_node{
     Pointer key;
     Pointer value;
@@ -99,7 +99,10 @@ void hashAdd(HashTable hash_table, Pointer key, Pointer value){
 
 //καταστρεφει το hash node
 void hashDestroyNode(Pointer hash_node){
-    free(hash_node);
+    HashNode node = (HashNode)hash_node;
+    free(node->key);
+    free(node->value);
+    free(node);
 }
 
 //για καθε θεση του πινακα, καταστρεφουμε τη λιστα

@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
 
     HashTable table = hashCreate(101, compareWords);
 
-    printf("\n\nread fd of builder: %d\n", fd_read_end);
+    // printf("\n\nread fd of builder: %d\n", fd_read_end);
     char* word;
 
     while((bytes_to_read = read(fd_read_end, buffer, size_buffer)) > 0){
@@ -60,16 +60,13 @@ int main(int argc, char* argv[]){
       
     }
     if (bytes_to_read == 0) {
-    printf("End of input in builder\n");
+    // printf("End of input in builder\n");
     } 
     else if (bytes_to_read < 0) {
         perror("Error reading from pipe");
     }
 
-    // hashDisplay(table);
-
-
-
+    hashDisplay(table);
 
     close(fd_read_end);
 

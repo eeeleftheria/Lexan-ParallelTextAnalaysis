@@ -2,16 +2,21 @@
 
 typedef struct hash_node* HashNode;
 typedef struct hash_table* HashTable;
-typedef void* Pointer;
+typedef void* Pointer; //μπορει να δειχνει σε οποιοδηποτε τυπο, χωρις να οριστει το περιεχομενο του *p
 
 //δεικτης σε συναρτηση που δεχεται δυο Pointer a, b και επιστρεφει εναν int
 typedef int (*CompareFunc)(Pointer a, Pointer b);
+
+//δεικτης σε συναρτηση που καταστρεφει την τιμη value
 typedef void (*DestroyValueFunc)(Pointer value); 
 
-int hashFunc(char* word, int numer_of_builders); // hash function που παιρνει ενα κλειδι και το αντιστοιχιζει σε ενα index 
+// hash function που παιρνει ενα κλειδι και το αντιστοιχιζει σε ενα index 
+int hashFunc(char* word, int numer_of_builders); 
 
+//δημιουργια κενου hash table
 HashTable hashCreate(int size, CompareFunc func);
 
+//επιστρεφει τον αριθμο κομβων του hash table
 int hashGetSize(HashTable table);
 
 //προσθετει εναν κομβο με κλειδι key και τιμη value στο hash table

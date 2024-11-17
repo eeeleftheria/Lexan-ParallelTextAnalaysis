@@ -77,7 +77,7 @@ int main(int argc, char* argv[]){
     pid_t root_pid = getppid(); //το process id του root
     kill(root_pid, SIGUSR1); //ο splitter στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
 
-    hashDestroy(exclusion_list);
+    hashDestroy(exclusion_list); //καταστροφη του exclusion list
     close(fd);
     
     exit(1);
@@ -133,7 +133,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
             word[w_index] = c;
             w_index++;
         }
-        else if(c == '\n' || c == ' ' || c == EOF || c == '!' || c == ',' || c == '.' || c == '\t'){
+        else if(c == '\n' || c == ' ' || c == EOF || c == '!' || c == ',' || c == '.' || c == '\t' || c == '"'){
             
             if(c == '\n'){
                 lines++; //νεα γραμμη
@@ -256,7 +256,7 @@ HashTable splitterCreateExclusionList(char* exclusion_list){
 
     while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
         
-        if(count >= word_size - 1){
+        if(count >= word_size - 1){ //αν χρειαστει παραπανω χωρος για τη λεξη, δεσμευουμε τον διπλασιο
             word_size = 2 * word_size;
             word = realloc(word, word_size);
         }
@@ -269,8 +269,8 @@ HashTable splitterCreateExclusionList(char* exclusion_list){
         
         else if(c == '\n' || c == EOF){  //αρα εχουμε λεξη
             word[count] = '\0';
-            char* value = malloc(strlen(word) + 1); //δεσμευση χωρου για τη λεξη
-            char* key = malloc(strlen(word) + 1);
+            char* value = malloc(strlen(word) + 1); //δεσμευση χωρου για την τιμη που ισοδυναμει με τη λεξη
+            char* key = malloc(strlen(word) + 1); //δεσμευση χωρου για τη λεξη
             
             strcpy(value, word);
             strcpy(key, word);
