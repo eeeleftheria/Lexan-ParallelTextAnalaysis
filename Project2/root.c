@@ -16,7 +16,7 @@
 //handler of signal USR1 when a splitter finishes its job.
 void splitterIsDone(int signum){
         signal(SIGUSR1, splitterIsDone);
-        printf("splitter is done\n");
+        // printf("splitter is done\n");
 }
 
 

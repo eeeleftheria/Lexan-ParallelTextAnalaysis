@@ -53,9 +53,6 @@ HashTable hashCreate(int size, CompareFunc func){
 
 }
 
-int hashGetSize(HashTable table){
-    return table->size;
-}
 
 
 void hashAdd(HashTable hash_table, Pointer key, Pointer value){
@@ -100,8 +97,18 @@ void hashAdd(HashTable hash_table, Pointer key, Pointer value){
 //καταστρεφει το hash node
 void hashDestroyNode(Pointer hash_node){
     HashNode node = (HashNode)hash_node;
+
+    if(node->key != NULL){
     free(node->key);
-    free(node->value);
+        node->key = NULL;
+    }
+
+    // if (node->value != NULL) {
+    //     free(node->value);
+    //     node->value = NULL;
+    // }
+
+
     free(node);
 }
 
@@ -184,9 +191,12 @@ void hashDisplay(HashTable table){
             HashNode hash_node = listNodeValue(list, node);
 
             printf("key: %s ", (char*)hash_node->key);
+
+            if(hash_node->value != NULL){
             printf("count: %d\n", (*(int*)hash_node->value));
         }
     }
+}
 }
 
 

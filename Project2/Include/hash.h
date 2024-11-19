@@ -16,8 +16,6 @@ int hashFunc(char* word, int numer_of_builders);
 //δημιουργια κενου hash table
 HashTable hashCreate(int size, CompareFunc func);
 
-//επιστρεφει τον αριθμο κομβων του hash table
-int hashGetSize(HashTable table);
 
 //προσθετει εναν κομβο με κλειδι key και τιμη value στο hash table
 void hashAdd(HashTable hash_table, Pointer key, Pointer value);
@@ -36,4 +34,22 @@ void hashDestroyNode(Pointer hash_node);
 
 //display
 void hashDisplay(HashTable table);
+
+//getters
+int hashGetSizeOfArray(HashTable table);
+
+//επιστρεφει τον αριθμο κομβων του hash table
+int hashGetSize(HashTable table);
+
+int hashGetSizeOfBucket(HashTable table, int pos);
+
+HashNode hashGetNext(HashTable table, int pos, HashNode node, CompareFunc compare);
+
+HashNode hashGetFirst(HashTable table, int pos);
+
+Pointer hashGetValue(HashNode node);
+
+Pointer hashGetKey(HashNode node);
+
+
 
