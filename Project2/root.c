@@ -202,17 +202,7 @@ int main(int argc, char* argv[]){
         }
     }   
 
-    //ο parent πρεπει να περιμενει 
-    for(int i = 0; i < num_of_splitter; i++){
-        int status;
-        if (waitpid(splitter[i], &status, 0) == -1) {
-            perror("error with waitpid splitter\n");
-        }
-    }
-
-    for (int i = 0; i < num_of_builders; i++){
-        close(pipes_builder[i][1]);
-    }
+    
 
 
 
@@ -272,7 +262,14 @@ int main(int argc, char* argv[]){
                 exit(1);
             } 
   
+    }  
+    
+    for(int i = 0; i < num_of_builders; i ++){
+        close(pipes_builder[i][0]);
+        close(pipes_builder[i][1]);
     }
+
+
 
     for (int i = 0; i < num_of_builders; i++) {
         int status;
@@ -281,10 +278,15 @@ int main(int argc, char* argv[]){
         }
     }
 
-    for(int i = 0; i < num_of_builders; i ++){
-        close(pipes_builder[i][0]);
-        close(pipes_builder[i][1]);
+    //ο parent πρεπει να περιμενει 
+    for(int i = 0; i < num_of_splitter; i++){
+        int status;
+        if (waitpid(splitter[i], &status, 0) == -1) {
+            perror("error with waitpid splitter\n");
+        }
     }
+
+  
 
 
                
