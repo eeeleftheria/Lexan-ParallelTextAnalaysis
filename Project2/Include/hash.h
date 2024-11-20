@@ -41,7 +41,7 @@ int hashGetSizeOfArray(HashTable table);
 //επιστρεφει τον αριθμο κομβων του hash table
 int hashGetSize(HashTable table);
 
-int hashGetSizeOfBucket(HashTable table, int pos);
+int hashGetSizeOfList(HashTable table, int pos);
 
 HashNode hashGetNext(HashTable table, int pos, HashNode node, CompareFunc compare);
 

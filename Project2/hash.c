@@ -99,7 +99,7 @@ void hashDestroyNode(Pointer hash_node){
     HashNode node = (HashNode)hash_node;
 
     if(node->key != NULL){
-    free(node->key);
+        free(node->key);
         node->key = NULL;
     }
 
@@ -193,10 +193,10 @@ void hashDisplay(HashTable table){
             printf("key: %s ", (char*)hash_node->key);
 
             if(hash_node->value != NULL){
-            printf("count: %d\n", (*(int*)hash_node->value));
+                printf("count: %d\n", (*(int*)hash_node->value));
+            }
         }
     }
-}
 }
 
 
@@ -232,30 +232,51 @@ int hashGetSizeOfList(HashTable table, int pos){
 }
 
 
-// void hashSendToRoot(HashTable table, int fd){
+int hashGetSizeOfArray(HashTable table){
+    return table->size_of_array;
+}
 
-//     for(int i = 0; i < table->size_of_array; i++){
-//         List list = table->array[i];
 
-//         if(list != NULL){
-            
-//             ListNode node;
-            
-//             for(node = listFirst(list); node != NULL; node = listGetNext(node)){
-                
-//                 HashNode hash_node = listNodeValue(list, node);
-//                 Pointer key = hash_node->key;
-//                 Pointer value = hash_node->value;
+int hashGetSize(HashTable table){
+    return table->size;
+}
 
-//                 // char* buffer = malloc(buffer_size);
-//                 // if (buffer == NULL) {
-//                 //     perror("Memory allocation failed");
-//                 //     exit(1);
-//                 // }
-//             }
-//         }
-//     }
-// }
+HashNode hashGetNext(HashTable table, int pos, HashNode node, CompareFunc compare){
+    
+    ListNode list_node = listfindNodeWithValue(table->array[pos], node, compare);
+    if(list_node == NULL){
+        return NULL;
+    }
+
+    ListNode next = listGetNext(list_node);
+    if(next == NULL){
+        return NULL;
+    }
+
+    return listNodeValue(table->array[pos], next);
+}
+
+HashNode hashGetFirst(HashTable table, int pos){
+    
+    HashNode node = listNodeValue(table->array[pos], listFirst(table->array[pos]));
+
+    if(node == NULL){
+        return NULL;
+    }
+
+    return node;
+}
+
+Pointer hashGetKey(HashNode node){
+    return node->key;
+}
+
+Pointer hashGetValue(HashNode node){
+    return node->value;
+}
+
+
+
 
 
 

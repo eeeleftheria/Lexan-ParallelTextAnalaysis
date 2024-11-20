@@ -75,7 +75,7 @@ int main(int argc, char* argv[]){
     // printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
 
     pid_t root_pid = getppid(); //το process id του root
-    kill(root_pid, SIGUSR1); //ο splitter στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
+    // kill(root_pid, SIGUSR1); //ο splitter στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
 
     hashDestroy(exclusion_list); //καταστροφη του exclusion list
     close(fd);
@@ -130,10 +130,16 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
         buffer[b_index] = c;
 
         if(isalpha(c)){ //αν ειναι αλφαβητικος χαρακτηρας μπορει να αποτελει μερος λεξης
+
+            //μετατροπη των κεφαλαιων σε μικρα, ωστε οι λεξεις Hello και hello να ειναι ισοδυναμες
+            if(c >= 'A' && c <= 'Z'){
+                c = tolower(c);
+            }
+
             word[w_index] = c;
             w_index++;
         }
-        else if(c == '\n' || c == ' ' || c == EOF || c == '!' || c == ',' || c == '.' || c == '\t' || c == '"'){
+        else if(c == '\n' || c == ' ' || c == '!' || c == ',' || c == '.' || c == '\t' || c == '"'){
             
             if(c == '\n'){
                 lines++; //νεα γραμμη
@@ -159,7 +165,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
             }
 
             //αν διαβασαμε και την τελευταια γραμμη που πρεπει να διαβασει ο splitter
-            if(lines == end_line + 1){
+            if(lines > end_line){
                     break;
             }
 
@@ -179,6 +185,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
     
     //αν φτασαμε στο EOF
     if(bytes_to_read == 0){
+       
         word[w_index] = '\0';
 
         if(hashFindListNodeWithKey(exclusion_list, word) == NULL){
@@ -225,8 +232,9 @@ void splitterSendToBuilder(char* word, int num_of_builders){
     // printf("splitter sent to builder %d word: %s\n", builder, word);
     int bytes_written = write(builder + 2000, buffer, buffer_size);
     
-    if (bytes_written == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-        perror("Write failed");
+    if (bytes_written == -1) {
+        perror("Write to builder failed");
+        exit(1);
     }
 
     // sleep(1);
