@@ -140,7 +140,7 @@ void builderSendToRoot(HashTable table, int fd, CompareFunc compare, int fd_root
     
     for(int i = 0; i < size_of_table; i++){
         
-        printf("\nbucket %d\n", i);
+        // printf("\nbucket %d\n", i);
         if(hashGetSizeOfList(table, i) == 0){
             continue;
         }
@@ -167,7 +167,7 @@ void builderSendToRoot(HashTable table, int fd, CompareFunc compare, int fd_root
 
             //ενα write της μορφης word:count word:count word:count ....
             write(fd_root_write, buffer, sizeof(buffer));
-            printf("builder sent to root: %s\n", buffer);
+            // printf("builder sent to root: %s\n", buffer);
 
           
         }

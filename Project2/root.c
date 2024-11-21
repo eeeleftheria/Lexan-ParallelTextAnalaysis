@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <ctype.h>
 
 
 //handler of signal USR1 when a splitter finishes its job.
@@ -62,7 +63,7 @@ int main(int argc, char* argv[]){
         write(STDERR_FILENO, message, strlen(message));
     }
 
-    //######### ΥΠΟΛΟΓΙΣΜΟΣ ΓΡΑΜΜΩΝ ΑΡΧΕΙΟΥ ##########//
+    //################################################ ΥΠΟΛΟΓΙΣΜΟΣ ΓΡΑΜΜΩΝ ΑΡΧΕΙΟΥ #################################################//
     int lines = 1;//κραταμε τον αριθμο γραμμων του αρχειου
     char c = 0;
 
@@ -83,7 +84,7 @@ int main(int argc, char* argv[]){
     lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
     
 
-    //########### ΥΠΟΛΟΓΙΣΜΟΣ OFFSET ΤΗΣ ΚΑΘΕ ΓΡΑΜΜΗΣ ###########//
+    //########################################## ΥΠΟΛΟΓΙΣΜΟΣ OFFSET ΤΗΣ ΚΑΘΕ ΓΡΑΜΜΗΣ ###############################################//
     
     //πινακας με τα offset των γραμμων
     long int* offset_of_line = malloc((lines + 1) * sizeof(long int)); //+1 γιατι δεν μετραμε την θεση 0 ως γραμμη
@@ -109,7 +110,7 @@ int main(int argc, char* argv[]){
     close(fd); //κλεισιμο του αρχειου, θα το ξαναανοιξουμε μεσω των pipes
 
 
-    //####### ΔΗΜΙΟΥΡΓΙΑ PIPES ΓΙΑ ΕΠΙΚΟΙΝΩΝΙΑ SPLITTERS - BUILDERS #######//
+    //################################# ΔΗΜΙΟΥΡΓΙΑ PIPES ΓΙΑ ΕΠΙΚΟΙΝΩΝΙΑ SPLITTERS - BUILDERS #############################################//
 
     //θελουμε ενα pipe για καθε builder για επικοινωνια splitters-builders, 
     //δηλ num_of_builder pipes με 2 θεσεις το καθενα για τον pipefd
@@ -128,7 +129,7 @@ int main(int argc, char* argv[]){
     pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
 
     
-    //######### ΔΗΜΙΟΥΡΓΙΑ SPLITTERS #########//
+    //########################################## ΔΗΜΙΟΥΡΓΙΑ SPLITTERS ############################################//
       
     signal(SIGUSR1, splitterIsDone);
 
@@ -206,7 +207,7 @@ int main(int argc, char* argv[]){
 
 
 
-    //######### ΔΗΜΙΟΥΡΓΙΑ BUILDERS #########//
+    //#################################################### ΔΗΜΙΟΥΡΓΙΑ BUILDERS ######################################################//
 
     //Δημιουργια ενος pipe για επικοινωνια builders με ριζα
     int fd_root[2]; //fd_pipe[0] read end, fd_pipe[1] write end
@@ -263,7 +264,12 @@ int main(int argc, char* argv[]){
             } 
   
     }  
-    
+
+
+    //######################################################################################################################
+
+
+    //κλεισιμο ολων των ακρων των pipes builders - splitters
     for(int i = 0; i < num_of_builders; i ++){
         close(pipes_builder[i][0]);
         close(pipes_builder[i][1]);
@@ -286,8 +292,77 @@ int main(int argc, char* argv[]){
         }
     }
 
+
+
+
+
+    //########################################## ΔΙΑΒΑΣΜΑ ΑΠΟΤΕΛΕΣΜΑΤΩΝ ΑΠΟ BUILDERS ##########################################################//
+
+    close(fd_root[1]); //ο root πρεπει μονο να διαβαζει απο το pipe root - builders
+
+    // bytes_to_read = 0;
+    // int buffer_size = 1024;
+    // int size_word = 0;
+    // int size_count = 0;
+    // char* word;
+    // char* frequency;
+    // char* buffer = malloc(sizeof(buffer_size));
+
+    // while((bytes_to_read = read(fd_root[0], buffer, buffer_size)) > 0){
+
+    //    printf("root received %d butes\n", bytes_to_read); 
+
+    //    for(int i = 0; i < bytes_to_read; i++){
+          
+
+    //         if(isalpha( buffer[i] )){
+    //             size_word++;
+    //         }
+    //         else if(buffer[i] == ':'){
+    //             word = malloc(size_word + 1); //+1 for \0
+    //             memcpy(word, buffer + i - 1 - size_word, size_word);
+    //             word[size_word] = '\0';
+
+    //             printf("root received word: %s ", word);
+               
+              
+    //             size_word = 0;
+    //             free(word);
+    //         } 
+            
+    //         else if( ( !isalpha(buffer[i]) ) && (buffer[i] != ' ' )){
+    //             size_count++;
+    //         }
+
+    //         else if(buffer[i] == ' '){
+    //             frequency = malloc(size_count + 1);
+    //             memcpy(frequency, buffer + i - 1 - size_count, size_count);
+    //             frequency[size_count] = '\0';
+
+    //             printf("with count: %d\n", atoi(frequency));
+
+    //             size_count = 0;
+    //             free(frequency);
+    //         }
+           
+    //     }
+      
+    // }
+    // if (bytes_to_read == 0) {
+    //     // printf("End of input in root\n");
+    // } 
+    // else if (bytes_to_read < 0) {
+    //     perror("Error reading from pipe");
+    // }
+
+
+
+
+    
+
   
 
+  
 
                
     free(offset_of_line);
