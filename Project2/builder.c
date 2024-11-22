@@ -28,7 +28,7 @@ int main(int argc, char* argv[]){
     int bytes_to_read;
     int size = 0;
 
-    HashTable table = hashCreate(101, compareWords);
+    HashTable table = hashCreate(1000, compareWords);
 
     // printf("\n\nread fd of builder: %d\n", fd_read_end);
     char* word;
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]){
             }
             else if(buffer[i] == ' '){
                 word = malloc(size + 1); //+1 for \0
-                memcpy(word, buffer + i - 1 - size, size);
+                memcpy(word, buffer + i - 1 - size, size); //i - 1 αφου βρισκομαστε στη θεση του κενου
                 word[size] = '\0';
 
                 // printf("builder received word: %s\n", word);
@@ -67,11 +67,13 @@ int main(int argc, char* argv[]){
 
     // hashDisplay(table);
 
-    builderSendToRoot(table, fd_write_end_root, compareHashNodes, fd_write_end_root);
+    // printf("hash size is %d\n", hashGetSize(table));
+
+    builderSendToRoot(table, compareHashNodes, fd_write_end_root);
 
     hashDestroy(table);
 
-    printf("\nBUILDER FINISHED\n");
+    // printf("\nBUILDER FINISHED\n");
 
     close(fd_read_end);
     close(fd_write_end_root);
@@ -135,7 +137,7 @@ void builderStoreInTable(HashTable table, char* word){
 }
 
 
-void builderSendToRoot(HashTable table, int fd, CompareFunc compare, int fd_root_write){
+void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
     int size_of_table = hashGetSizeOfArray(table);
     
     for(int i = 0; i < size_of_table; i++){

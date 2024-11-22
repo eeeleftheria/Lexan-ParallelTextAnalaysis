@@ -7,6 +7,6 @@ int compareWords(Pointer a, Pointer b);
 
 void builderStoreInTable(HashTable table, char* word);
 
-void builderSendToRoot(HashTable table, int fd, CompareFunc compare, int fd_root_write);
+void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write);
 
 int compareHashNodes(Pointer a, Pointer b);
