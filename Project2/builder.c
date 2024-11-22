@@ -162,10 +162,12 @@ void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
             int size = strlen(word) + 1 + strlen(count) + 1 + 1;
             char buffer[size];
            
-            memcpy(buffer, word, strlen(word) + 1);
+            memcpy(buffer, word, strlen(word));
             memcpy(buffer + strlen(word), ":", 1);
-            memcpy(buffer + strlen(word) + 1, count, sizeof(count));
-            memcpy(buffer + strlen(word) + sizeof(count) + 1, " ", 1); 
+            memcpy(buffer + strlen(word) + 1, count, strlen(count));
+            memcpy(buffer + strlen(word) + strlen(count) + 1, "-", 1); 
+
+            buffer[size - 1] = '\0';
 
             //ενα write της μορφης word:count word:count word:count ....
             write(fd_root_write, buffer, sizeof(buffer));

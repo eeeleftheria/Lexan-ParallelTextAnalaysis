@@ -12,6 +12,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <ctype.h>
+#include <root.h>
 
 
 //handler of signal USR1 when a splitter finishes its job.
@@ -19,6 +20,11 @@ void splitterIsDone(int signum){
         signal(SIGUSR1, splitterIsDone);
         // printf("splitter is done\n");
 }
+
+struct word_with_count{
+    char* word;
+    int count;
+};
 
 
 int main(int argc, char* argv[]){  
@@ -276,14 +282,6 @@ int main(int argc, char* argv[]){
     }
 
 
-
-    for (int i = 0; i < num_of_builders; i++) {
-        int status;
-        if (waitpid(builder[i], &status, 0) == -1) {
-            perror("error with waitpid builder\n");
-        }
-    }
-
     //ο parent πρεπει να περιμενει 
     for(int i = 0; i < num_of_splitter; i++){
         int status;
@@ -293,78 +291,157 @@ int main(int argc, char* argv[]){
     }
 
 
-
-
-
+  
     //########################################## ΔΙΑΒΑΣΜΑ ΑΠΟΤΕΛΕΣΜΑΤΩΝ ΑΠΟ BUILDERS ##########################################################//
 
     close(fd_root[1]); //ο root πρεπει μονο να διαβαζει απο το pipe root - builders
-
-    // bytes_to_read = 0;
-    // int buffer_size = 1024;
-    // int size_word = 0;
-    // int size_count = 0;
-    // char* word;
-    // char* frequency;
-    // char* buffer = malloc(sizeof(buffer_size));
-
-    // while((bytes_to_read = read(fd_root[0], buffer, buffer_size)) > 0){
-
-    //    printf("root received %d butes\n", bytes_to_read); 
-
-    //    for(int i = 0; i < bytes_to_read; i++){
-          
-
-    //         if(isalpha( buffer[i] )){
-    //             size_word++;
-    //         }
-    //         else if(buffer[i] == ':'){
-    //             word = malloc(size_word + 1); //+1 for \0
-    //             memcpy(word, buffer + i - 1 - size_word, size_word);
-    //             word[size_word] = '\0';
-
-    //             printf("root received word: %s ", word);
-               
-              
-    //             size_word = 0;
-    //             free(word);
-    //         } 
-            
-    //         else if( ( !isalpha(buffer[i]) ) && (buffer[i] != ' ' )){
-    //             size_count++;
-    //         }
-
-    //         else if(buffer[i] == ' '){
-    //             frequency = malloc(size_count + 1);
-    //             memcpy(frequency, buffer + i - 1 - size_count, size_count);
-    //             frequency[size_count] = '\0';
-
-    //             printf("with count: %d\n", atoi(frequency));
-
-    //             size_count = 0;
-    //             free(frequency);
-    //         }
-           
-    //     }
-      
-    // }
-    // if (bytes_to_read == 0) {
-    //     // printf("End of input in root\n");
-    // } 
-    // else if (bytes_to_read < 0) {
-    //     perror("Error reading from pipe");
-    // }
-
-
-
-
     
+    //δημιουργια ενος απλου πινακα που εχει δεικτες σε struct word_with_count
+    int size_of_array = 1000; //αρχικο μεγεθος πινακα
+    WordWithCount* words = malloc(size_of_array * sizeof(struct word_with_count)); //πινακας με τις λεξεις και τις συχνοτητες τους
 
-  
+    //εαν αλλαξει εσωτερικα στη συναρτηση το μεγεθος του πινακα, τοτε ανανεωνεται καθως το επιστρεφει η συναρτηση
+    size_of_array = rootReadFromBuilder(fd_root[0], words, size_of_array); //διαβασμα απο το pipe root - builders
 
-  
+
+    for (int i = 0; i < num_of_builders; i++) {
+        int status;
+        if (waitpid(builder[i], &status, 0) == -1) {
+            perror("error with waitpid builder\n");
+        }
+    }
+
+
+    qsort(words, size_of_array, sizeof(WordWithCount), compareWordStructs); //ταξινομηση του πινακα με τις λεξεις
+
+    for(int i = 0; i < size_of_array; i++){
+        printf("word: %s with count: %d\n", words[i]->word, words[i]->count);
+    }
+
+    close(fd_root[0]);
 
                
     free(offset_of_line);
     exit(1);
 }
+
+
+
+
+int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
+
+    int bytes_to_read = 0;
+    int buffer_size = 4096;
+    
+    int size_word = 0;
+    int capacity = 20;
+    char* word = malloc(capacity);
+    
+    int size_count = 0;
+    int frequency = 0;
+    
+    char* buffer = malloc(buffer_size);
+
+    int array_index = 0;
+
+    //διαβαζει δεδομενα της μορφης word:count word:count ...
+    while((bytes_to_read = read(fd_read, buffer, buffer_size)) > 0){
+
+       for(int i = 0; i < bytes_to_read; i++){
+          
+            if(isalpha( buffer[i] )){
+                
+                if(size_word >= capacity){
+                    capacity *= 2;
+                    word = realloc(word, capacity);
+                }
+                
+                word[size_word] = buffer[i];
+                
+                
+                size_word++;
+            }
+            
+            //σχηματισμος λεξης
+            else if(buffer[i] == ':'){
+
+                word[size_word] = '\0';
+
+                //επαναφορα σε κενη λεξη
+                size_word = 0;
+                                          
+            } 
+            
+            else if( isdigit(buffer[i]) ){
+                size_count++;
+
+                //καθε φορα που διαβαζουμε νεο ψηφιο η θεση του προηγουμενο 
+                frequency = frequency * 10 + (buffer[i] - '0'); //μετατροπος απο char σε int αφαιρωντας τον ασκι κωδικο του 0 που ειναι 48
+                //και απεχει οσο τον αριθμο απο την ασκι μορφη του
+            }
+
+            //μεταβαση στην επομενη λεξη
+            else if(buffer[i] == '-'){
+
+                if(array_index >= array_size){
+                    array_size *= 2;
+                    words = realloc(words, array_size);
+                    printf("reallocating array\n");
+                }
+           
+                words[array_index] = malloc(sizeof(struct word_with_count));
+
+                words[array_index]->word = malloc(strlen(word) + 1);
+                strcpy(words[array_index]->word, word);
+                words[array_index]->count = frequency;
+
+                // printf("word %s with count %d\n", words[array_index]->word, words[array_index]->count);
+                
+                array_index++;
+
+                // printf("root received word: %s with count: %d\n ", word, frequency);
+                
+
+                //επαναφορα σε κενη λεξη
+                memset(word, '\0', strlen(word));
+                
+                //επαναφορα μεταβλητων
+                size_count = 0; 
+                frequency = 0;
+            }
+           
+        }
+      
+    }
+
+    memset(buffer, '\0', sizeof(buffer)); //καθαρισμος buffer
+
+    if (bytes_to_read == 0) {
+        // printf("End of input in root\n");
+    } 
+    else if (bytes_to_read < 0) {
+        perror("Error reading from pipe");
+    }
+
+    free(word);
+   
+    return array_index;
+ 
+}
+
+
+int compareWordStructs(const void* a, const void* b){
+
+    const WordWithCount w1 = (const WordWithCount)a;
+    const WordWithCount w2 = (const WordWithCount)b;
+
+    if(w1->count < w2->count){
+        return 1;
+    }
+    else if(w1->count > w2->count){
+        return -1;
+    }
+    
+    return strcmp(w1->word, w2->word);
+}
+
