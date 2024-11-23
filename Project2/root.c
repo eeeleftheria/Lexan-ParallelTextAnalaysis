@@ -20,14 +20,12 @@ int num_of_usr2 = 0; //μετρητης για το ποσες φορες εχε
 
 //handler σηματος USR1 οταν ενας splitter τελειωσει τη δουλεια του
 void splitterIsDone(int signum){
-        signal(SIGUSR1, splitterIsDone); //ορισμος hanler για το USR1
         num_of_usr1++;
 }
 
 
 //handler σηματος USR2 οταν ενας builder τελειωσει τη δουλεια του
 void builderIsDone(int signum){
-        signal(SIGUSR2, builderIsDone);
         num_of_usr2++;
 }
 
@@ -40,13 +38,15 @@ struct word_with_count{
 
 int main(int argc, char* argv[]){  
 
-    //το struct αυτο οριζει πως θα συμπεριφερθει το σημα
+    //struct sigaction: περιγραφει ενα action που θα πραγματοποιηθει για ενα συγκεκριμενο σημα
+    //sigaction(): συσχετιζει το action(handler) με το σημα
+
     struct sigaction sa1;
     sa1.sa_handler = splitterIsDone;  // ορισμος signal handler
     sa1.sa_flags = SA_RESTART;       // SA_RESTART για να συνεχισουν πιθανον μπλοκαρισμενα sys calls 
     sigemptyset(&sa1.sa_mask);       //να μην μπλοκαρει κανενα σημα κατα τη διαρκει της εκτελεσης του κωδικα του handler
 
- 
+
     if (sigaction(SIGUSR1, &sa1, NULL) == -1) {
         perror("sigaction");
         return 1;
@@ -173,16 +173,12 @@ int main(int argc, char* argv[]){
     }
 
 
-
     int input_of_splitter = lines / num_of_splitter; //γραμμες ανα splitter
     pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
 
     
     //########################################## ΔΗΜΙΟΥΡΓΙΑ SPLITTERS ############################################//
       
-    signal(SIGUSR1, splitterIsDone);
-
-
     for(int i = 0; i < num_of_splitter; i++){
     
         pid_t splitter_pid = fork(); //δημιουργια splitter processes
