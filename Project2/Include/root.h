@@ -7,3 +7,5 @@ typedef struct word_with_count* WordWithCount;
 int rootReadFromBuilder(int fd_read, WordWithCount* words, int size_of_array);
 
 int compareWordStructs( const void* a, const void* b);
+
+void rootPrintToOutputFile(char* output, WordWithCount* words, int size_of_array, int num_of_top_popular);
