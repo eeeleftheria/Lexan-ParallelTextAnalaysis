@@ -56,7 +56,6 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    // printf("\nIN SPLITTER %d %d\n", start_line, end_line);
     
     //πηγαινουμε τον δεικτη διαβασματος στη γραμμη start_line
     //απο την οποια πρεπει να διαβασει ο splitter
@@ -72,10 +71,8 @@ int main(int argc, char* argv[]){
     }
 
 
-    // printf("\nI AM SPLITTER %d %d AND FINISHED\n", start_line, end_line);
-
     pid_t root_pid = getppid(); //το process id του root
-    // kill(root_pid, SIGUSR1); //ο splitter στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
+    kill(root_pid, SIGUSR1); //ο splitter στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
 
     hashDestroy(exclusion_list); //καταστροφη του exclusion list
     close(fd);

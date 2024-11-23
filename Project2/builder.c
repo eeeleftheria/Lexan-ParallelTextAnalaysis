@@ -80,7 +80,7 @@ int main(int argc, char* argv[]){
  
   
     pid_t root_pid = getppid(); //το process id του root
-    // kill(root_pid, SIGUSR2); //ο builder στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
+    kill(root_pid, SIGUSR2); //ο builder στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
 
 
 
@@ -179,7 +179,7 @@ void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
             //ενα write της μορφης word:count-word:count-word:count ....
             bytes_written = write(fd_root_write, buffer, sizeof(buffer));
             if(bytes_written == -1){
-                //  perror("Write failed");
+                 perror("Write from builder to root failed");
             }
       
             // printf("builder sent to root: %s\n", buffer);

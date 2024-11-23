@@ -27,21 +27,43 @@ void splitterIsDone(int signum){
 
 //handler of signal USR2 when a builder finishes its job.
 void builderIsDone(int signum){
-        signal(SIGUSR2, splitterIsDone);
+        signal(SIGUSR2, builderIsDone);
         num_of_usr2++;
 }
 
 struct word_with_count{
     char* word;
-    int count;
+    int* count;
 };
 
 
 
 int main(int argc, char* argv[]){  
 
-    // signal(SIGUSR1 , splitterIsDone);
-    // signal(SIGUSR2 , builderIsDone);
+    //το struct αυτο οριζει πως θα συμπεριφερθει το σημα
+    struct sigaction sa1;
+    sa1.sa_handler = splitterIsDone;  // ορισμος signal handler
+    sa1.sa_flags = SA_RESTART;       // SA_RESTART για να συνεχισουν πιθανον μπλοκαρισμενα sys calls 
+    sigemptyset(&sa1.sa_mask);       //να μην μπλοκαρει κανενα σημα κατα τη διαρκει της εκτελεσης του κωδικα του handler
+
+ 
+    if (sigaction(SIGUSR1, &sa1, NULL) == -1) {
+        perror("sigaction");
+        return 1;
+    }
+
+    struct sigaction sa2;
+    sa2.sa_handler = builderIsDone;  // ορισμος signal handler
+    sa2.sa_flags = SA_RESTART;       // SA_RESTART για να συνεχισουν πιθανον μπλοκαρισμενα sys calls 
+    sigemptyset(&sa2.sa_mask);     
+
+    // Install the handler for SIGUSR1
+    if (sigaction(SIGUSR2, &sa2, NULL) == -1) {
+        perror("sigaction");
+        return 1;
+    }
+
+
     
     char* input_file = NULL;
     char* output_file = NULL;
@@ -315,14 +337,14 @@ int main(int argc, char* argv[]){
     //############# ΔΙΑΒΑΣΜΑ ΑΠΟΤΕΛΕΣΜΑΤΩΝ ΑΠΟ ROOT #################//
     
     //δημιουργια ενος απλου πινακα που εχει δεικτες σε struct word_with_count με τις λεξεις και τις συχνοτητες τους
-    int size_of_array = 1000; //αρχικο μεγεθος πινακα
-    WordWithCount* words = malloc(size_of_array * sizeof(WordWithCount)); //δεσμευση χωρου για size_of_array δεικτες σε struct word_with_count
-    //η malloc επιστρεφει δεικτη στην πρωτη θεση του πινακα
+    int* array_size = malloc(sizeof(int)); //αρχικο μεγεθος πινακα
+    *array_size = 1000;
+
 
     //εαν αλλαξει εσωτερικα στη συναρτηση το μεγεθος του πινακα, τοτε ανανεωνεται καθως το επιστρεφει η συναρτηση
-    size_of_array = rootReadFromBuilder(fd_root[0], words, size_of_array); //διαβασμα απο το pipe root - builders
+    WordWithCount* words = rootReadFromBuilder(fd_root[0], array_size); //διαβασμα απο το pipe root - builders
 
-
+    printf("SIZE IS %d\n", *array_size);
 
 
     for (int i = 0; i < num_of_builders; i++) {
@@ -332,7 +354,10 @@ int main(int argc, char* argv[]){
         }
     }
 
-    // rootPrintToOutputFile(output_file, words, size_of_array, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
+    rootPrintToOutputFile(output_file, words, *array_size, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
+   
+    printf("root received %d USR1 signal(s)\n", num_of_usr1);
+    printf("root received %d USR2 signal(s)\n", num_of_usr2);
    
     close(fd_root[0]); //κλεισιμο του read end του pipe root - builders
 
@@ -346,24 +371,21 @@ int main(int argc, char* argv[]){
 
 
 
+WordWithCount* rootReadFromBuilder(int fd_read, int* size){
 
+    int array_size = *size;
 
-int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
-
-    int counter = 0;
+    WordWithCount* words = malloc(array_size * sizeof(WordWithCount)); //δεσμευση χωρου για size_of_array δεικτες σε struct word_with_count
+    //η malloc επιστρεφει δεικτη στην πρωτη θεση του πινακα
 
     int buffer_size = 4096;
-    
     int size_word = 0;
     int capacity = 20;
     char* word = malloc(capacity);
-    
     int frequency = 0;
-    
     char* buffer = malloc(buffer_size);
 
     int array_index = 0;
-
     int bytes_to_read = 0;
 
     //διαβαζει δεδομενα της μορφης word:count word:count ...
@@ -404,25 +426,23 @@ int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
             //μεταβαση στην επομενη λεξη
             else if(buffer[i] == '-'){
 
-                // if(array_index >= array_size){
-                //     array_size *= 2;
-                //     words = realloc(words, array_size * sizeof(WordWithCount));
-                //     printf("reallocating array\n");
-                // }
+                if(array_index >= array_size){
+                    array_size *= 2;
+                    words = realloc(words, array_size * sizeof(WordWithCount));
+                    
+                }
            
-                // words[array_index] = malloc(sizeof(struct word_with_count)); //δεσμευση χωρου για το ιδιο το struct
-                // //η malloc επιστρεφει δεικτη σε αυτο
+                words[array_index] = malloc(sizeof(struct word_with_count)); //δεσμευση χωρου για το ιδιο το struct
+                //η malloc επιστρεφει δεικτη σε αυτο
 
-                // words[array_index]->word = malloc(strlen(word) + 1);
-                // strcpy(words[array_index]->word, word);
-                // words[array_index]->count = frequency;
+                words[array_index]->word = malloc(strlen(word) + 1);
+                strcpy(words[array_index]->word, word);
 
-                // printf("word %s with count %d\n", words[array_index]->word, words[array_index]->count);
+                words[array_index]->count = malloc(sizeof(int));
+                *(words[array_index]->count) = frequency; 
                 
                 array_index++;
 
-                printf("root received word: %s with count: %d\n ", word, frequency);
-                counter++;
 
                 //επαναφορα σε κενη λεξη
                 memset(word, '\0', strlen(word));
@@ -443,27 +463,31 @@ int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
         perror("Error reading from pipe");
     }
 
-    printf("counter %d\n", counter);
-
     free(word);
 
-    return array_index;
+    *size = array_size;
  
+    return words;
 }
 
 
 
 //δεχεται δυο δεικτες σε WordWithCount και συγκρινει τις συχνοτοτητες των λεξεων αφου
 //η qsort καλειται με δυο δεικτες στα στοιχεια του πινακα και οχι με τα ιδια τα στοιχεια
-int compareWordStructs(const void* a, const void* b){
+int compareWordStructs(const void* a, const void* b) {
+    const WordWithCount* p1 = (const WordWithCount*)a;
+    const WordWithCount* p2 = (const WordWithCount*)b;
 
-    const WordWithCount w1 = *(const WordWithCount*)a;
-    const WordWithCount w2 = *(const WordWithCount*)b;
+    WordWithCount w1 = *p1;
+    WordWithCount w2 = *p2;
 
-    if(w1->count < w2->count){
+    int* count1 = w1->count;
+    int* count2 = w2->count;
+
+    if ((*count1) < *(count2)) {
         return 1;
     }
-    else if(w1->count > w2->count){
+    else if (*(count1) > *(count2)) {
         return -1;
     }
     
@@ -490,37 +514,23 @@ void rootPrintToOutputFile(char* output, WordWithCount* words, int size_of_array
 
     //εκτυπωση των num_of_top_popular πιο δημοφιλων λεξεων
 
-    if(num_of_top_popular > size_of_array){
-        printf("requested number of top popular is greater than the total words\n");
-        return;
-    }
 
-
-    for(int i = 0; i < num_of_top_popular; i++){
+    // for(int i = 0; i < num_of_top_popular; i++){
   
-        char* word = words[i]->word;
-        int count = words[i]->count;
-        char count_str[10];
-        snprintf(count_str, sizeof(count_str), "%d", count); //μετατροπη του count σε string
+    //     char* word = words[i]->word;
+    //     int count = *(words[i]->count);
+    //     char count_str[10];
+    //     snprintf(count_str, sizeof(count_str), "%d", count); //μετατροπη του count σε string
   
-        printf("%s: %d\n", word, count);
+    //     printf("%s: %d\n", word, count);
 
-        write(fd, word, strlen(word));
-        write(fd, ":", 1);
-        write(fd, count_str, strlen(count_str));
-        write(fd, "\n", 1);
+    //     write(fd, word, strlen(word));
+    //     write(fd, ":", 1);
+    //     write(fd, count_str, strlen(count_str));
+    //     write(fd, "\n", 1);
 
-
-        // char buffer[20];
-        // memcpy(buffer, word, strlen(word));
-        // buffer[strlen(word)] = ':';
-        // memcpy(buffer + strlen(word) + 1, count_str, strlen(count_str));
-        // memcpy(buffer + strlen(word) + 1 + strlen(count_str), "\n", 1);
-        // write(fd, buffer, strlen(buffer));
-    }
-
-    // printf("received %d USR1 signal(s)\n", num_of_usr1);
-    // printf("received %d USR2 signal(s)\n", num_of_usr2);
+    // }
+  
 
 
     close(fd);
