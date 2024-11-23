@@ -282,7 +282,7 @@ int main(int argc, char* argv[]){
     }
 
 
-    //ο parent πρεπει να περιμενει 
+    //ο parent πρεπει να περιμενει αρχικα τον splitter προκειμενου να εχουν σταλθει ολες οι λεξεις στους builders
     for(int i = 0; i < num_of_splitter; i++){
         int status;
         if (waitpid(splitter[i], &status, 0) == -1) {
@@ -292,16 +292,19 @@ int main(int argc, char* argv[]){
 
 
   
-    //########################################## ΔΙΑΒΑΣΜΑ ΑΠΟΤΕΛΕΣΜΑΤΩΝ ΑΠΟ BUILDERS ##########################################################//
+    //############# ΔΙΑΒΑΣΜΑ ΑΠΟΤΕΛΕΣΜΑΤΩΝ ΑΠΟ ROOT #################//
 
     close(fd_root[1]); //ο root πρεπει μονο να διαβαζει απο το pipe root - builders
     
-    //δημιουργια ενος απλου πινακα που εχει δεικτες σε struct word_with_count
+    //δημιουργια ενος απλου πινακα που εχει δεικτες σε struct word_with_count με τις λεξεις και τις συχνοτητες τους
     int size_of_array = 1000; //αρχικο μεγεθος πινακα
-    WordWithCount* words = malloc(size_of_array * sizeof(struct word_with_count)); //πινακας με τις λεξεις και τις συχνοτητες τους
+    WordWithCount* words = malloc(size_of_array * sizeof(WordWithCount)); //δεσμευση χωρου για size_of_array δεικτες σε struct word_with_count
+    //η malloc επιστρεφει δεικτη στην πρωτη θεση του πινακα
 
     //εαν αλλαξει εσωτερικα στη συναρτηση το μεγεθος του πινακα, τοτε ανανεωνεται καθως το επιστρεφει η συναρτηση
     size_of_array = rootReadFromBuilder(fd_root[0], words, size_of_array); //διαβασμα απο το pipe root - builders
+
+
 
 
     for (int i = 0; i < num_of_builders; i++) {
@@ -311,19 +314,17 @@ int main(int argc, char* argv[]){
         }
     }
 
+    rootPrintToOutputFile(output_file, words, size_of_array, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
 
-    qsort(words, size_of_array, sizeof(WordWithCount), compareWordStructs); //ταξινομηση του πινακα με τις λεξεις
-
-    for(int i = 0; i < size_of_array; i++){
-        printf("word: %s with count: %d\n", words[i]->word, words[i]->count);
-    }
-
-    close(fd_root[0]);
+    close(fd_root[0]); //κλεισιμο του read end του pipe root - builders
 
                
     free(offset_of_line);
     exit(1);
 }
+
+
+
 
 
 
@@ -389,7 +390,8 @@ int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
                     printf("reallocating array\n");
                 }
            
-                words[array_index] = malloc(sizeof(struct word_with_count));
+                words[array_index] = malloc(sizeof(struct word_with_count)); //δεσμευση χωρου για το ιδιο το struct
+                //η malloc επιστρεφει δεικτη σε αυτο
 
                 words[array_index]->word = malloc(strlen(word) + 1);
                 strcpy(words[array_index]->word, word);
@@ -414,7 +416,7 @@ int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
       
     }
 
-    memset(buffer, '\0', sizeof(buffer)); //καθαρισμος buffer
+    memset(buffer, '\0', buffer_size); //καθαρισμος buffer
 
     if (bytes_to_read == 0) {
         // printf("End of input in root\n");
@@ -430,10 +432,12 @@ int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
 }
 
 
+//δεχεται δυο δεικτες σε WordWithCount και συγκρινει τις συχνοτοτητες των λεξεων αφου
+//η qsort καλειται με δυο δεικτες στα στοιχεια του πινακα και οχι με τα ιδια τα στοιχεια
 int compareWordStructs(const void* a, const void* b){
 
-    const WordWithCount w1 = (const WordWithCount)a;
-    const WordWithCount w2 = (const WordWithCount)b;
+    const WordWithCount w1 = *(const WordWithCount*)a;
+    const WordWithCount w2 = *(const WordWithCount*)b;
 
     if(w1->count < w2->count){
         return 1;
@@ -445,3 +449,48 @@ int compareWordStructs(const void* a, const void* b){
     return strcmp(w1->word, w2->word);
 }
 
+
+//εκτυπωση των num_of_top_popular πιο δημοφιλων λεξεων στο output file
+void rootPrintToOutputFile(char* output, WordWithCount* words, int size_of_array, int num_of_top_popular){
+            
+    //ανοιγμα αρχειου εξοδου
+                    //εγγραφη μονο, δημιουργια αν δεν υπαρχει, διαγραφη περιεχομενων αν δεν ειναι αδειο
+    int fd = open(output, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if(fd < 0){
+        char* message = "Failure opening output file\n";
+        write(STDERR_FILENO, message, strlen(message));
+        return;
+    }
+
+    //ταξινομηση του πινακα με τις λεξεις
+    qsort(words, size_of_array, sizeof(WordWithCount), compareWordStructs);
+
+    printf("The %d most popular words are:\n", num_of_top_popular);
+
+    //εκτυπωση των num_of_top_popular πιο δημοφιλων λεξεων
+    for(int i = 0; i < num_of_top_popular; i++){
+  
+        char* word = words[i]->word;
+        int count = words[i]->count;
+        char count_str[10];
+        snprintf(count_str, sizeof(count_str), "%d", count); //μετατροπη του count σε string
+  
+        // printf("%s: %d\n", word, count);
+
+        write(fd, word, strlen(word));
+        write(fd, ":", 1);
+        write(fd, count_str, strlen(count_str));
+        write(fd, "\n", 1);
+
+
+        // char buffer[20];
+        // memcpy(buffer, word, strlen(word));
+        // buffer[strlen(word)] = ':';
+        // memcpy(buffer + strlen(word) + 1, count_str, strlen(count_str));
+        // memcpy(buffer + strlen(word) + 1 + strlen(count_str), "\n", 1);
+        // write(fd, buffer, strlen(buffer));
+    }
+
+    close(fd);
+
+}
