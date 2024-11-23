@@ -70,16 +70,15 @@ int main(int argc, char* argv[]){
 
     // printf("hash size is %d\n", hashGetSize(table));
 
+    close(fd_read_end);
+
     builderSendToRoot(table, compareHashNodes, fd_write_end_root);
 
     hashDestroy(table);
 
- 
-    // printf("\nBUILDER FINISHED\n");
-
-    close(fd_read_end);
     close(fd_write_end_root);
-
+ 
+  
     pid_t root_pid = getppid(); //το process id του root
     // kill(root_pid, SIGUSR2); //ο builder στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
 
@@ -145,6 +144,7 @@ void builderStoreInTable(HashTable table, char* word){
 
 
 void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
+
     int size_of_table = hashGetSizeOfArray(table);
     
     for(int i = 0; i < size_of_table; i++){
@@ -175,12 +175,20 @@ void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
 
             buffer[size - 1] = '\0';
 
-            //ενα write της μορφης word:count word:count word:count ....
-            write(fd_root_write, buffer, sizeof(buffer));
-            // printf("builder sent to root: %s\n", buffer);z
+            int bytes_written = 0;
+            //ενα write της μορφης word:count-word:count-word:count ....
+            bytes_written = write(fd_root_write, buffer, sizeof(buffer));
+            if(bytes_written == -1){
+                //  perror("Write failed");
+            }
+      
+            // printf("builder sent to root: %s\n", buffer);
+
 
           
         }
-
+    
     }
+
+
 }

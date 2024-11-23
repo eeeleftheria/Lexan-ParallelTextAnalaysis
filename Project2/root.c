@@ -144,6 +144,14 @@ int main(int argc, char* argv[]){
         }
     }
 
+    //Δημιουργια ενος pipe για επικοινωνια builders με ριζα
+    int fd_root[2]; //fd_pipe[0] read end, fd_pipe[1] write end
+    if(pipe(fd_root) == -1){
+        perror("error with creation of pipe builder\n");
+        return -1;
+    }
+
+
 
     int input_of_splitter = lines / num_of_splitter; //γραμμες ανα splitter
     pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
@@ -173,9 +181,13 @@ int main(int argc, char* argv[]){
 
             //οι splitters πρεπει μονο να γραφουν στα pipes
             for(int j = 0; j < num_of_builders; j++){
+
                 close(pipes_builder[j][0]); //κλεισιμο του read end
                 dup2(pipes_builder[j][1], j + 2000); //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
                 close(pipes_builder[j][1]); //κλεινουμε το original write end
+
+                close(fd_root[0]);
+                close(fd_root[1]);
             }
             
 
@@ -229,12 +241,6 @@ int main(int argc, char* argv[]){
 
     //#################################################### ΔΗΜΙΟΥΡΓΙΑ BUILDERS ######################################################//
 
-    //Δημιουργια ενος pipe για επικοινωνια builders με ριζα
-    int fd_root[2]; //fd_pipe[0] read end, fd_pipe[1] write end
-    if(pipe(fd_root) == -1){
-        perror("error with creation of pipe builder\n");
-        return -1;
-    }
 
     pid_t builder[num_of_builders];
     
@@ -249,7 +255,6 @@ int main(int argc, char* argv[]){
             if(builder_pid != 0){ //εντος parent process
 
                 builder[i] = builder_pid; //αποθηκευση του pid του παιδιου i
-                close(fd_root[1]); //o root πρεπει μονο να διαβαζει απο τους builders
             }
 
             if(builder_pid == 0){ //εντος child process
@@ -288,6 +293,7 @@ int main(int argc, char* argv[]){
 
     //############################## ΣΥΓΧΡΟΝΙΣΜΟΣ #############################################
 
+    close(fd_root[1]); //ο root πρεπει μονο να διαβαζει απο το pipe root - builders
 
     //κλεισιμο ολων των ακρων των pipes builders - splitters
     for(int i = 0; i < num_of_builders; i ++){
@@ -307,8 +313,6 @@ int main(int argc, char* argv[]){
 
   
     //############# ΔΙΑΒΑΣΜΑ ΑΠΟΤΕΛΕΣΜΑΤΩΝ ΑΠΟ ROOT #################//
-
-    close(fd_root[1]); //ο root πρεπει μονο να διαβαζει απο το pipe root - builders
     
     //δημιουργια ενος απλου πινακα που εχει δεικτες σε struct word_with_count με τις λεξεις και τις συχνοτητες τους
     int size_of_array = 1000; //αρχικο μεγεθος πινακα
@@ -328,7 +332,7 @@ int main(int argc, char* argv[]){
         }
     }
 
-    rootPrintToOutputFile(output_file, words, size_of_array, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
+    // rootPrintToOutputFile(output_file, words, size_of_array, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
    
     close(fd_root[0]); //κλεισιμο του read end του pipe root - builders
 
@@ -345,7 +349,9 @@ int main(int argc, char* argv[]){
 
 
 int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
-    
+
+    int counter = 0;
+
     int buffer_size = 4096;
     
     int size_word = 0;
@@ -398,25 +404,25 @@ int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
             //μεταβαση στην επομενη λεξη
             else if(buffer[i] == '-'){
 
-                if(array_index >= array_size){
-                    array_size *= 2;
-                    words = realloc(words, array_size);
-                    printf("reallocating array\n");
-                }
+                // if(array_index >= array_size){
+                //     array_size *= 2;
+                //     words = realloc(words, array_size * sizeof(WordWithCount));
+                //     printf("reallocating array\n");
+                // }
            
-                words[array_index] = malloc(sizeof(struct word_with_count)); //δεσμευση χωρου για το ιδιο το struct
-                //η malloc επιστρεφει δεικτη σε αυτο
+                // words[array_index] = malloc(sizeof(struct word_with_count)); //δεσμευση χωρου για το ιδιο το struct
+                // //η malloc επιστρεφει δεικτη σε αυτο
 
-                words[array_index]->word = malloc(strlen(word) + 1);
-                strcpy(words[array_index]->word, word);
-                words[array_index]->count = frequency;
+                // words[array_index]->word = malloc(strlen(word) + 1);
+                // strcpy(words[array_index]->word, word);
+                // words[array_index]->count = frequency;
 
                 // printf("word %s with count %d\n", words[array_index]->word, words[array_index]->count);
                 
                 array_index++;
 
                 printf("root received word: %s with count: %d\n ", word, frequency);
-                
+                counter++;
 
                 //επαναφορα σε κενη λεξη
                 memset(word, '\0', strlen(word));
@@ -437,8 +443,10 @@ int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
         perror("Error reading from pipe");
     }
 
+    printf("counter %d\n", counter);
+
     free(word);
-   
+
     return array_index;
  
 }
@@ -481,6 +489,13 @@ void rootPrintToOutputFile(char* output, WordWithCount* words, int size_of_array
     printf("The %d most popular words are:\n", num_of_top_popular);
 
     //εκτυπωση των num_of_top_popular πιο δημοφιλων λεξεων
+
+    if(num_of_top_popular > size_of_array){
+        printf("requested number of top popular is greater than the total words\n");
+        return;
+    }
+
+
     for(int i = 0; i < num_of_top_popular; i++){
   
         char* word = words[i]->word;
@@ -488,7 +503,7 @@ void rootPrintToOutputFile(char* output, WordWithCount* words, int size_of_array
         char count_str[10];
         snprintf(count_str, sizeof(count_str), "%d", count); //μετατροπη του count σε string
   
-        // printf("%s: %d\n", word, count);
+        printf("%s: %d\n", word, count);
 
         write(fd, word, strlen(word));
         write(fd, ":", 1);
