@@ -9,6 +9,7 @@
 #include "splitter.h"
 #include "hash.h"
 #include "builder.h"
+#include <signal.h>
 
 int main(int argc, char* argv[]){
 
@@ -73,10 +74,16 @@ int main(int argc, char* argv[]){
 
     hashDestroy(table);
 
+ 
     // printf("\nBUILDER FINISHED\n");
 
     close(fd_read_end);
     close(fd_write_end_root);
+
+    pid_t root_pid = getppid(); //το process id του root
+    // kill(root_pid, SIGUSR2); //ο builder στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
+
+
 
     exit(1);
 
@@ -149,8 +156,7 @@ void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
 
 
         for(HashNode node = hashGetFirst(table, i); node != NULL; node = hashGetNext(table, i, node, compare)){
-            // printf("node %s: %d times ", (char*)hashGetKey(node), *(int*)(hashGetValue(node)));
-         
+       
 
             char word[strlen(hashGetKey(node))]; //δεσμευση χωρου για τη λεξη
             strcpy(word, hashGetKey(node));
@@ -171,7 +177,7 @@ void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
 
             //ενα write της μορφης word:count word:count word:count ....
             write(fd_root_write, buffer, sizeof(buffer));
-            // printf("builder sent to root: %s\n", buffer);
+            // printf("builder sent to root: %s\n", buffer);z
 
           
         }

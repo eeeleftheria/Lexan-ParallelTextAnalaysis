@@ -14,11 +14,21 @@
 #include <ctype.h>
 #include <root.h>
 
+int num_of_usr1 = 0; //μετρητης για το ποσες φορες εχει ληφθει το σημα USR1
+int num_of_usr2 = 0; //μετρητης για το ποσες φορες εχει ληφθει το σημα USR2
+
 
 //handler of signal USR1 when a splitter finishes its job.
 void splitterIsDone(int signum){
         signal(SIGUSR1, splitterIsDone);
-        // printf("splitter is done\n");
+        num_of_usr1++;
+}
+
+
+//handler of signal USR2 when a builder finishes its job.
+void builderIsDone(int signum){
+        signal(SIGUSR2, splitterIsDone);
+        num_of_usr2++;
 }
 
 struct word_with_count{
@@ -27,7 +37,11 @@ struct word_with_count{
 };
 
 
+
 int main(int argc, char* argv[]){  
+
+    // signal(SIGUSR1 , splitterIsDone);
+    // signal(SIGUSR2 , builderIsDone);
     
     char* input_file = NULL;
     char* output_file = NULL;
@@ -272,7 +286,7 @@ int main(int argc, char* argv[]){
     }  
 
 
-    //######################################################################################################################
+    //############################## ΣΥΓΧΡΟΝΙΣΜΟΣ #############################################
 
 
     //κλεισιμο ολων των ακρων των pipes builders - splitters
@@ -315,7 +329,7 @@ int main(int argc, char* argv[]){
     }
 
     rootPrintToOutputFile(output_file, words, size_of_array, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
-
+   
     close(fd_root[0]); //κλεισιμο του read end του pipe root - builders
 
                
@@ -329,24 +343,25 @@ int main(int argc, char* argv[]){
 
 
 
-int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
 
-    int bytes_to_read = 0;
+int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
+    
     int buffer_size = 4096;
     
     int size_word = 0;
     int capacity = 20;
     char* word = malloc(capacity);
     
-    int size_count = 0;
     int frequency = 0;
     
     char* buffer = malloc(buffer_size);
 
     int array_index = 0;
 
+    int bytes_to_read = 0;
+
     //διαβαζει δεδομενα της μορφης word:count word:count ...
-    while((bytes_to_read = read(fd_read, buffer, buffer_size)) > 0){
+    while(( bytes_to_read = read(fd_read, buffer, buffer_size)) > 0){
 
        for(int i = 0; i < bytes_to_read; i++){
           
@@ -374,8 +389,7 @@ int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
             } 
             
             else if( isdigit(buffer[i]) ){
-                size_count++;
-
+                
                 //καθε φορα που διαβαζουμε νεο ψηφιο η θεση του προηγουμενο 
                 frequency = frequency * 10 + (buffer[i] - '0'); //μετατροπος απο char σε int αφαιρωντας τον ασκι κωδικο του 0 που ειναι 48
                 //και απεχει οσο τον αριθμο απο την ασκι μορφη του
@@ -401,22 +415,20 @@ int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
                 
                 array_index++;
 
-                // printf("root received word: %s with count: %d\n ", word, frequency);
+                printf("root received word: %s with count: %d\n ", word, frequency);
                 
 
                 //επαναφορα σε κενη λεξη
                 memset(word, '\0', strlen(word));
                 
                 //επαναφορα μεταβλητων
-                size_count = 0; 
                 frequency = 0;
             }
-           
+                    
         }
       
-    }
-
     memset(buffer, '\0', buffer_size); //καθαρισμος buffer
+    }
 
     if (bytes_to_read == 0) {
         // printf("End of input in root\n");
@@ -430,6 +442,7 @@ int rootReadFromBuilder(int fd_read, WordWithCount* words, int array_size){
     return array_index;
  
 }
+
 
 
 //δεχεται δυο δεικτες σε WordWithCount και συγκρινει τις συχνοτοτητες των λεξεων αφου
@@ -452,7 +465,7 @@ int compareWordStructs(const void* a, const void* b){
 
 //εκτυπωση των num_of_top_popular πιο δημοφιλων λεξεων στο output file
 void rootPrintToOutputFile(char* output, WordWithCount* words, int size_of_array, int num_of_top_popular){
-            
+
     //ανοιγμα αρχειου εξοδου
                     //εγγραφη μονο, δημιουργια αν δεν υπαρχει, διαγραφη περιεχομενων αν δεν ειναι αδειο
     int fd = open(output, O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -490,6 +503,10 @@ void rootPrintToOutputFile(char* output, WordWithCount* words, int size_of_array
         // memcpy(buffer + strlen(word) + 1 + strlen(count_str), "\n", 1);
         // write(fd, buffer, strlen(buffer));
     }
+
+    // printf("received %d USR1 signal(s)\n", num_of_usr1);
+    // printf("received %d USR2 signal(s)\n", num_of_usr2);
+
 
     close(fd);
 
