@@ -10,22 +10,22 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <signal.h>
 #include <ctype.h>
 #include <root.h>
+#include <signal.h>
 
 int num_of_usr1 = 0; //μετρητης για το ποσες φορες εχει ληφθει το σημα USR1
 int num_of_usr2 = 0; //μετρητης για το ποσες φορες εχει ληφθει το σημα USR2
 
 
-//handler of signal USR1 when a splitter finishes its job.
+//handler σηματος USR1 οταν ενας splitter τελειωσει τη δουλεια του
 void splitterIsDone(int signum){
-        signal(SIGUSR1, splitterIsDone);
+        signal(SIGUSR1, splitterIsDone); //ορισμος hanler για το USR1
         num_of_usr1++;
 }
 
 
-//handler of signal USR2 when a builder finishes its job.
+//handler σηματος USR2 οταν ενας builder τελειωσει τη δουλεια του
 void builderIsDone(int signum){
         signal(SIGUSR2, builderIsDone);
         num_of_usr2++;
@@ -57,7 +57,6 @@ int main(int argc, char* argv[]){
     sa2.sa_flags = SA_RESTART;       // SA_RESTART για να συνεχισουν πιθανον μπλοκαρισμενα sys calls 
     sigemptyset(&sa2.sa_mask);     
 
-    // Install the handler for SIGUSR1
     if (sigaction(SIGUSR2, &sa2, NULL) == -1) {
         perror("sigaction");
         return 1;
@@ -354,8 +353,15 @@ int main(int argc, char* argv[]){
         }
     }
 
+    qsort(words, *array_size, sizeof(WordWithCount), compareWordStructs); //ταξινομηση των λεξεων με βαση τη συχνοτητα τους
+
     rootPrintToOutputFile(output_file, words, *array_size, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
    
+
+
+
+
+
     printf("root received %d USR1 signal(s)\n", num_of_usr1);
     printf("root received %d USR2 signal(s)\n", num_of_usr2);
    
@@ -465,6 +471,13 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
 
     free(word);
 
+    for(int i = array_index; i < array_size; i++){
+        words[i] = malloc(sizeof(struct word_with_count));
+        words[i]->word = NULL;
+        words[i]->count = NULL;
+
+    }
+
     *size = array_size;
  
     return words;
@@ -483,6 +496,16 @@ int compareWordStructs(const void* a, const void* b) {
 
     int* count1 = w1->count;
     int* count2 = w2->count;
+
+    if(count1 == NULL || count2 == NULL){
+        return 0;
+    }
+    else if(count1 == NULL){
+        return 1;
+    }
+    else if(count2 == NULL){
+        return -1;
+    }
 
     if ((*count1) < *(count2)) {
         return 1;
@@ -515,21 +538,21 @@ void rootPrintToOutputFile(char* output, WordWithCount* words, int size_of_array
     //εκτυπωση των num_of_top_popular πιο δημοφιλων λεξεων
 
 
-    // for(int i = 0; i < num_of_top_popular; i++){
+    for(int i = 0; i < num_of_top_popular; i++){
   
-    //     char* word = words[i]->word;
-    //     int count = *(words[i]->count);
-    //     char count_str[10];
-    //     snprintf(count_str, sizeof(count_str), "%d", count); //μετατροπη του count σε string
+        char* word = words[i]->word;
+        int count = *(words[i]->count);
+        char count_str[10];
+        snprintf(count_str, sizeof(count_str), "%d", count); //μετατροπη του count σε string
   
-    //     printf("%s: %d\n", word, count);
+        printf("%s: %d\n", word, count);
 
-    //     write(fd, word, strlen(word));
-    //     write(fd, ":", 1);
-    //     write(fd, count_str, strlen(count_str));
-    //     write(fd, "\n", 1);
+        write(fd, word, strlen(word));
+        write(fd, ":", 1);
+        write(fd, count_str, strlen(count_str));
+        write(fd, "\n", 1);
 
-    // }
+    }
   
 
 
