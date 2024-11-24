@@ -21,12 +21,14 @@ int num_of_usr2 = 0; //μετρητης για το ποσες φορες εχε
 //handler σηματος USR1 οταν ενας splitter τελειωσει τη δουλεια του
 void splitterIsDone(int signum){
         num_of_usr1++;
+        signal(SIGUSR1, splitterIsDone); 
 }
 
 
 //handler σηματος USR2 οταν ενας builder τελειωσει τη δουλεια του
 void builderIsDone(int signum){
         num_of_usr2++;
+        signal(SIGUSR2, builderIsDone);
 }
 
 struct word_with_count{
@@ -102,6 +104,7 @@ int main(int argc, char* argv[]){
     if(fd < 0){
         char* message = "Failure opening input file\n";
         write(STDERR_FILENO, message, strlen(message));
+        exit(1);
     }
 
     //################################################ ΥΠΟΛΟΓΙΣΜΟΣ ΓΡΑΜΜΩΝ ΑΡΧΕΙΟΥ #################################################//
@@ -111,15 +114,18 @@ int main(int argc, char* argv[]){
     //διαβασμα αρχειου ανα χαρακτηρα
     int bytes_to_read;
     while((bytes_to_read =  read(fd, &c, sizeof(c))) > 0) {  //για EOF επιστρεφει 0
+        
         if(c == '\n'){
             lines++;
         }
     }
+
     if (bytes_to_read == 0) {
         perror("End of input in root\n");
     } 
     else if (bytes_to_read < 0) {
         perror("Error reading from input file\n");
+        exit(1);
     }
 
     lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
@@ -161,7 +167,7 @@ int main(int argc, char* argv[]){
             
         if(pipe(pipes_builder[i]) == -1){
             perror("error with creation of pipe builder\n");
-            return -1;
+            exit(1);
         }
     }
 
@@ -169,7 +175,7 @@ int main(int argc, char* argv[]){
     int fd_root[2]; //fd_pipe[0] read end, fd_pipe[1] write end
     if(pipe(fd_root) == -1){
         perror("error with creation of pipe builder\n");
-        return -1;
+        exit(1);
     }
 
 
@@ -185,7 +191,7 @@ int main(int argc, char* argv[]){
         
         if(splitter_pid == -1){
             perror("error with fork splitter\n");
-            return -1;
+            exit(1);
         }
         
         if(splitter_pid != 0){ //εντος parent process
@@ -203,7 +209,8 @@ int main(int argc, char* argv[]){
                 dup2(pipes_builder[j][1], j + 2000); //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
                 close(pipes_builder[j][1]); //κλεινουμε το original write end
 
-                close(fd_root[0]);
+                //κλεισιμο των fd_root αφου δεν απασχολουν τον splitter
+                close(fd_root[0]); 
                 close(fd_root[1]);
             }
             
@@ -246,18 +253,15 @@ int main(int argc, char* argv[]){
             //εκτελεση του splitter που βρισκεται στο ιδιο directory
             execlp("./splitter", "splitter", input_file, start_line_str, end_line_str, 
                 offset_start_line_str, exclusion_list_file, num_of_builders_str, NULL); 
-		    perror("exec failure\n");  //δεν θα φτασει ποτε εδω εαν ειναι επιτυχης η exec     
+		    
+            perror("exec failure\n");  //δεν θα φτασει ποτε εδω εαν ειναι επιτυχης η exec     
             exit(1);         
 
         }
     }   
 
     
-
-
-
     //#################################################### ΔΗΜΙΟΥΡΓΙΑ BUILDERS ######################################################//
-
 
     pid_t builder[num_of_builders];
     
@@ -312,18 +316,18 @@ int main(int argc, char* argv[]){
 
     close(fd_root[1]); //ο root πρεπει μονο να διαβαζει απο το pipe root - builders
 
-    //κλεισιμο ολων των ακρων των pipes builders - splitters
+    //κλεισιμο ολων των ακρων των pipes builders - splitters, αφου δεν αφορουν τον root
     for(int i = 0; i < num_of_builders; i ++){
         close(pipes_builder[i][0]);
         close(pipes_builder[i][1]);
     }
-
 
     //ο parent πρεπει να περιμενει αρχικα τον splitter προκειμενου να εχουν σταλθει ολες οι λεξεις στους builders
     for(int i = 0; i < num_of_splitter; i++){
         int status;
         if (waitpid(splitter[i], &status, 0) == -1) {
             perror("error with waitpid splitter\n");
+            exit(1);
         }
     }
 
@@ -332,16 +336,13 @@ int main(int argc, char* argv[]){
     //############# ΔΙΑΒΑΣΜΑ ΑΠΟΤΕΛΕΣΜΑΤΩΝ ΑΠΟ ROOT #################//
     
     //δημιουργια ενος απλου πινακα που εχει δεικτες σε struct word_with_count με τις λεξεις και τις συχνοτητες τους
-    int* array_size = malloc(sizeof(int)); //αρχικο μεγεθος πινακα
-    *array_size = 1000;
+    int* array_size = malloc(sizeof(int)); 
+    *array_size = 1000; //αρχικο μεγεθος πινακα
 
-
-    //εαν αλλαξει εσωτερικα στη συναρτηση το μεγεθος του πινακα, τοτε ανανεωνεται καθως το επιστρεφει η συναρτηση
+    //επιστρεφει τον πινακα με τις λεξεις και τις συχνοτητες τους
     WordWithCount* words = rootReadFromBuilder(fd_root[0], array_size); //διαβασμα απο το pipe root - builders
 
-    printf("SIZE IS %d\n", *array_size);
-
-
+    //προκειμενου να διαβαζει ο root ταυτοχρονα οσο γραφει ο builder, το wait πρεπει να γινει μετα τη συναρτηση
     for (int i = 0; i < num_of_builders; i++) {
         int status;
         if (waitpid(builder[i], &status, 0) == -1) {
@@ -351,11 +352,8 @@ int main(int argc, char* argv[]){
 
     qsort(words, *array_size, sizeof(WordWithCount), compareWordStructs); //ταξινομηση των λεξεων με βαση τη συχνοτητα τους
 
-    rootPrintToOutputFile(output_file, words, *array_size, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
+    rootPrintToOutputFile(output_file, words, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
    
-
-
-
 
 
     printf("root received %d USR1 signal(s)\n", num_of_usr1);
@@ -363,9 +361,18 @@ int main(int argc, char* argv[]){
    
     close(fd_root[0]); //κλεισιμο του read end του pipe root - builders
 
-               
+    //απελευθερωση μνημης               
     free(offset_of_line);
-    exit(1);
+    
+    for(int i = 0; i < *array_size; i++){
+        free(words[i]->word);
+        free(words[i]->count);
+        free(words[i]);
+    }
+    
+    free(array_size);
+
+    exit(0);
 }
 
 
@@ -390,6 +397,8 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
     int array_index = 0;
     int bytes_to_read = 0;
 
+    bool waiting_for_frequency = false;
+
     //διαβαζει δεδομενα της μορφης word:count word:count ...
     while(( bytes_to_read = read(fd_read, buffer, buffer_size)) > 0){
 
@@ -403,26 +412,23 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
                 }
                 
                 word[size_word] = buffer[i];
-                
-                
+                                
                 size_word++;
             }
             
             //σχηματισμος λεξης
             else if(buffer[i] == ':'){
-
-                word[size_word] = '\0';
-
-                //επαναφορα σε κενη λεξη
-                size_word = 0;
-                                          
+                word[size_word] = '\0';    
+                waiting_for_frequency = true;  
             } 
             
             else if( isdigit(buffer[i]) ){
-                
-                //καθε φορα που διαβαζουμε νεο ψηφιο η θεση του προηγουμενο 
-                frequency = frequency * 10 + (buffer[i] - '0'); //μετατροπος απο char σε int αφαιρωντας τον ασκι κωδικο του 0 που ειναι 48
-                //και απεχει οσο τον αριθμο απο την ασκι μορφη του
+
+                if(waiting_for_frequency == true){
+                    //καθε φορα που διαβαζουμε νεο ψηφιο η θεση του προηγουμενο 
+                    frequency = frequency * 10 + (buffer[i] - '0'); //μετατροπη απο char σε int αφαιρωντας τον ασκι κωδικο του 0 που ειναι 48
+                    //και απεχει οσο τον αριθμο απο την ασκι μορφη του
+                }
             }
 
             //μεταβαση στην επομενη λεξη
@@ -433,7 +439,9 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
                     words = realloc(words, array_size * sizeof(WordWithCount));
                     
                 }
-           
+
+                waiting_for_frequency = false;
+
                 words[array_index] = malloc(sizeof(struct word_with_count)); //δεσμευση χωρου για το ιδιο το struct
                 //η malloc επιστρεφει δεικτη σε αυτο
 
@@ -445,12 +453,12 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
                 
                 array_index++;
 
-
                 //επαναφορα σε κενη λεξη
                 memset(word, '\0', strlen(word));
                 
                 //επαναφορα μεταβλητων
                 frequency = 0;
+                size_word = 0;
             }
                     
         }
@@ -465,7 +473,7 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
         perror("Error reading from pipe");
     }
 
-    free(word);
+    
 
     for(int i = array_index; i < array_size; i++){
         words[i] = malloc(sizeof(struct word_with_count));
@@ -475,7 +483,9 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
     }
 
     *size = array_size;
- 
+    free(word);
+    free(buffer);
+
     return words;
 }
 
@@ -515,7 +525,7 @@ int compareWordStructs(const void* a, const void* b) {
 
 
 //εκτυπωση των num_of_top_popular πιο δημοφιλων λεξεων στο output file
-void rootPrintToOutputFile(char* output, WordWithCount* words, int size_of_array, int num_of_top_popular){
+void rootPrintToOutputFile(char* output, WordWithCount* words,  int num_of_top_popular){
 
     //ανοιγμα αρχειου εξοδου
                     //εγγραφη μονο, δημιουργια αν δεν υπαρχει, διαγραφη περιεχομενων αν δεν ειναι αδειο
@@ -525,9 +535,6 @@ void rootPrintToOutputFile(char* output, WordWithCount* words, int size_of_array
         write(STDERR_FILENO, message, strlen(message));
         return;
     }
-
-    //ταξινομηση του πινακα με τις λεξεις
-    qsort(words, size_of_array, sizeof(WordWithCount), compareWordStructs);
 
     printf("The %d most popular words are:\n", num_of_top_popular);
 

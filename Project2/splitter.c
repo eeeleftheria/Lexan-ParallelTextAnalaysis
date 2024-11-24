@@ -57,13 +57,11 @@ int main(int argc, char* argv[]){
     }
 
     
-    //πηγαινουμε τον δεικτη διαβασματος στη γραμμη start_line
-    //απο την οποια πρεπει να διαβασει ο splitter
+    //πηγαινουμε τον δεικτη διαβασματος στη γραμμη start_line απο την οποια πρεπει να διαβασει ο splitter
     lseek(fd, offset__of_start_line, SEEK_SET);
   
     //παραγωγη λεξεων, αγνοωντας σημεια στιξης, συμβολα κλπ
     splitterCreateWords(fd, end_line, start_line, exclusion_list, num_of_builders);
-
 
     //αφου τελειωσαμε με το γραψιμο στους builder, κλεινουμε ολα τα write ends
     for(int i = 0; i < num_of_builders; i++){
@@ -158,6 +156,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
                 for(int i = 0; i < w_index; i++){
                     word[i] = '\0';
                 }
+
                 w_index = 0; //επαναφορα του index στο 0, για ευρεση νεας λεξης
             }
 
@@ -173,6 +172,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
             word[w_index] = '\0';
             w_index = 0;
         }
+
         b_index++;  //αυξηση index του buffer
     }
 
@@ -190,7 +190,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
             splitterSendToBuilder(word, num_of_builders);
         }
         else{
-            // printf("Excluded: %s\n", word);
+            
         }
 
     }
@@ -205,9 +205,11 @@ int compareWords(Pointer a, Pointer b){
     return res;
 }
 
+
 //υπολογιζει τον builder που πρεπει να σταλθει η λεξη και την κανει write
 void splitterSendToBuilder(char* word, int num_of_builders){
     int builder = splitterHashFunc(word, num_of_builders);
+
     int size = strlen(word) + 1; //for \0
     int buffer_size = size + 1; //for " "
      
@@ -220,21 +222,13 @@ void splitterSendToBuilder(char* word, int num_of_builders){
     memcpy(buffer, word, size); 
     memcpy(buffer + size, " ", 1);
 
-    //ελεγχος αν ειναι ανοιχτος ο fd
-    int flags = fcntl(builder + 2000, F_GETFD);
-    if (flags == -1) {
-        perror("Invalid file descriptor in splitter to write");
-    }
-
-    // printf("splitter sent to builder %d word: %s\n", builder, word);
+    //στελνει λεξης στη μορφη word word word ...
     int bytes_written = write(builder + 2000, buffer, buffer_size);
     
     if (bytes_written == -1) {
         perror("Write to builder failed");
         exit(1);
     }
-
-    // sleep(1);
 
     free(buffer);
 
@@ -244,6 +238,7 @@ void splitterSendToBuilder(char* word, int num_of_builders){
 //Δημιουργια μιας λιστας με τις λεξεις που περιεχονται στο αρχειο Exclusion List
 //το αρχειο ειναι της μορφης: μια λεξη ανα γραμμη
 HashTable splitterCreateExclusionList(char* exclusion_list){
+    
     int fd = open(exclusion_list, O_RDONLY);
     if(fd < 0){
         char* message = "Failure opening exclusion list\n";
@@ -281,9 +276,9 @@ HashTable splitterCreateExclusionList(char* exclusion_list){
             strcpy(key, word);
 
 
-            hashAdd(table, key, value);
+            hashAdd(table, key, value); //προσθηκη λεξης στο hash table με ιδιο κλειδι και value
 
-            for(int i = 0; i < count; i++){
+            for(int i = 0; i < count; i++){ //επαναφορα σε κενη λεξη
                 word[i] = '\0';
             }
 
@@ -295,7 +290,7 @@ HashTable splitterCreateExclusionList(char* exclusion_list){
     if(bytes_to_read < 0) {
             perror("error reading from exclusion list\n");
             close(fd);
-            return NULL;
+            exit(1);
     }
 
     if(bytes_to_read == 0){

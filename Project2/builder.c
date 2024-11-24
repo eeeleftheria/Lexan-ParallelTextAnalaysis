@@ -23,32 +23,30 @@ int main(int argc, char* argv[]){
     int fd_read_end = atoi(argv[2]);
     int fd_write_end_root = atoi(argv[3]);
  
-
     int size_buffer = 1024;
     char* buffer = malloc(size_buffer);
-    int bytes_to_read;
+    int bytes_to_read = 0;
     int size = 0;
 
+    //δημιουργια δομης για αποθηκευση λεξεων που λαμβανει απο τους splitters
     HashTable table = hashCreate(1000, compareWords);
 
-    // printf("\n\nread fd of builder: %d\n", fd_read_end);
+ 
     char* word;
 
     while((bytes_to_read = read(fd_read_end, buffer, size_buffer)) > 0){
-    //    printf("builder received bytes: %d\n", bytes_to_read);
-       
+        
        for(int i = 0; i < bytes_to_read; i++){
           
-
             if(isalpha( buffer[i] )){
                 size++;
             }
+          
             else if(buffer[i] == ' '){
                 word = malloc(size + 1); //+1 for \0
                 memcpy(word, buffer + i - 1 - size, size); //i - 1 αφου βρισκομαστε στη θεση του κενου
                 word[size] = '\0';
 
-                // printf("builder received word: %s\n", word);
                 builderStoreInTable(table, word); //προσθηκη λεξης στο hash table
                
               
@@ -60,19 +58,18 @@ int main(int argc, char* argv[]){
       
     }
     if (bytes_to_read == 0) {
-        // printf("End of input in builder\n");
+
     } 
+
     else if (bytes_to_read < 0) {
         perror("Error reading from pipe");
     }
 
-    // hashDisplay(table);
-
-    // printf("hash size is %d\n", hashGetSize(table));
-
+    free(buffer);
+    
     close(fd_read_end);
 
-    builderSendToRoot(table, compareHashNodes, fd_write_end_root);
+    builderSendToRoot(table, compareHashNodes, fd_write_end_root); //εγγραφη λεξεων στον root
 
     hashDestroy(table);
 
@@ -83,8 +80,7 @@ int main(int argc, char* argv[]){
     kill(root_pid, SIGUSR2); //ο builder στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
 
 
-
-    exit(1);
+    exit(0);
 
 }
 
@@ -94,6 +90,8 @@ int compareWords(Pointer a, Pointer b){
     return res;
 }
 
+
+//συγκρινει δυο κομβους του HashTable με βαση το κλειδι τους
 int compareHashNodes(Pointer a, Pointer b){
     HashNode node1 = (HashNode)a;
     HashNode node2 = (HashNode)b;
@@ -106,6 +104,7 @@ int compareHashNodes(Pointer a, Pointer b){
 }
 
 
+//αποθηκευει μια λεξη που ελαβε απο splitter σε μια δομη HashTable
 void builderStoreInTable(HashTable table, char* word){
         
     //αν υπαρχει ηδη η λεξη αποθηκευμενη, αρκει να αυξησουμε τον μετρητη της
@@ -120,8 +119,6 @@ void builderStoreInTable(HashTable table, char* word){
         else{
             printf("count is null\n");
         }
-        
-        // printf("found word %s with count %d\n", word, *value);
 
     }
     //αν δεν υπαρχει η λεξη, τη προσθετουμε
@@ -135,36 +132,31 @@ void builderStoreInTable(HashTable table, char* word){
 
      
         hashAdd(table, key, count); //προσθηκη στη δομη με τιμη τον μετρητη
-     
-        // printf("ADDED word %s with count %d\n", key, count);
-
     }
-
 }
 
 
+//αφου αποθηκευσει ολες τις λεξεις στην δομη, τις στελνει στον root
 void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
 
     int size_of_table = hashGetSizeOfArray(table);
     
     for(int i = 0; i < size_of_table; i++){
         
-        // printf("\nbucket %d\n", i);
+        //αν καποια λιστα δεν έχει κανεναν κομβο, προχωραμε στην επομενη
         if(hashGetSizeOfList(table, i) == 0){
             continue;
         }
 
-
+        //διατρεχουμε το hash table προκειμενου να γραψουμε καθε λεξη που περιεχει στο pipe
         for(HashNode node = hashGetFirst(table, i); node != NULL; node = hashGetNext(table, i, node, compare)){
        
-
             char word[strlen(hashGetKey(node))]; //δεσμευση χωρου για τη λεξη
             strcpy(word, hashGetKey(node));
 
             char count[10];  //δεσμευση χωρου για το count
             snprintf(count, sizeof(count), "%d", *(int*)(hashGetValue(node))); //μετατροπη σε string κ αποθηκευση στη μεταβητη count
-            
-        
+                    
             int size = strlen(word) + 1 + strlen(count) + 1 + 1;
             char buffer[size];
            
@@ -180,15 +172,7 @@ void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
             bytes_written = write(fd_root_write, buffer, sizeof(buffer));
             if(bytes_written == -1){
                  perror("Write from builder to root failed");
-            }
-      
-            // printf("builder sent to root: %s\n", buffer);
-
-
-          
+            }         
         }
-    
     }
-
-
 }
