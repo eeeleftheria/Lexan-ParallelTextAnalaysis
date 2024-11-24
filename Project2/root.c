@@ -350,7 +350,6 @@ int main(int argc, char* argv[]){
         }
     }
 
-    qsort(words, *array_size, sizeof(WordWithCount), compareWordStructs); //ταξινομηση των λεξεων με βαση τη συχνοτητα τους
 
     rootPrintToOutputFile(output_file, words, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
    
@@ -485,6 +484,8 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
     *size = array_size;
     free(word);
     free(buffer);
+
+    qsort(words, array_index, sizeof(WordWithCount), compareWordStructs); //ταξινομηση των λεξεων με βαση τη συχνοτητα τους
 
     return words;
 }
