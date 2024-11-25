@@ -210,7 +210,7 @@ int main(int argc, char* argv[]){
                if(pipes_builder[j][1] < 0){
                 perror("write end of pipe of builder is closed\n");
                }
-                if( dup2(pipes_builder[j][1], j + 2000) == - 1){
+                if( dup2(pipes_builder[j][1], j + 300) == - 1){
                     perror("dup2 failed\n");
                 } //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
                
