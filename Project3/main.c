@@ -8,6 +8,18 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "CommonTypes.h"
+
+enum DRINK_OPTIONS {
+    WATER,
+    WINE
+};
+
+enum FOOD_OPTIONS {
+    CHEESE,
+    SALAD
+};
+
 
 struct statistics{
     int numOfWaterDrinks;
@@ -20,10 +32,14 @@ struct statistics{
 };
 
 struct sharedObjects{
+    pid_t table0[4];
+    pid_t table1[4];
+    pid_t table2[4];
+    pid_t table3[4];
     sem_t mutex;
     sem_t receptionist;
     sem_t visitor;
-    struct statistics stats;
+    Statistics stats;
 };
 
 int main(){
@@ -54,6 +70,24 @@ int main(){
     }
 
     printf("Shared memory segment created and mapped successfully\n");
+
+    // Initialization of semaphores & data
+    sem_init(&sharedData->mutex, 1, 1);
+    sem_init(&sharedData->receptionist, 1, 0);
+    sem_init(&sharedData->visitor, 1, 0);
+    
+    Statistics stats = sharedData->stats;
+    stats->numOfWaterDrinks = 0;
+    stats->numOfWineDrinks = 0;
+    stats->numOfCheesePlates = 0;
+    stats->numOfSalads = 0;
+    stats->numOfVisitors = 0;
+    stats->avgWaitTime = 0;
+    stats->avgStayTime = 0;
+
+
+
+
 
 
 
