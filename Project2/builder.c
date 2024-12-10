@@ -19,7 +19,6 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    int num_of_builder = atoi(argv[1]);
     int fd_read_end = atoi(argv[2]);
     int fd_write_end_root = atoi(argv[3]);
  

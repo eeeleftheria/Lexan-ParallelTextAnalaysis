@@ -65,7 +65,7 @@ int main(int argc, char* argv[]){
 
     //αφου τελειωσαμε με το γραψιμο στους builder, κλεινουμε ολα τα write ends
     for(int i = 0; i < num_of_builders; i++){
-        close(i + 2000);
+        close(i + 500);
     }
 
 
@@ -223,7 +223,7 @@ void splitterSendToBuilder(char* word, int num_of_builders){
     memcpy(buffer + size, " ", 1);
 
     //στελνει λεξης στη μορφη word word word ...
-    int bytes_written = write(builder + 2000, buffer, buffer_size);
+    int bytes_written = write(builder + 500, buffer, buffer_size);
     
     if (bytes_written == -1) {
         perror("Write to builder failed");

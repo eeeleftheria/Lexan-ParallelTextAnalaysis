@@ -121,7 +121,7 @@ int main(int argc, char* argv[]){
     }
 
     if (bytes_to_read == 0) {
-        perror("End of input in root\n");
+        // perror("End of input in root\n");
     } 
     else if (bytes_to_read < 0) {
         perror("Error reading from input file\n");
@@ -206,7 +206,7 @@ int main(int argc, char* argv[]){
             for(int j = 0; j < num_of_builders; j++){
 
                 close(pipes_builder[j][0]); //κλεισιμο του read end
-                dup2(pipes_builder[j][1], j + 2000); //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
+                dup2(pipes_builder[j][1], j + 500); //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
                 close(pipes_builder[j][1]); //κλεινουμε το original write end
 
                 //κλεισιμο των fd_root αφου δεν απασχολουν τον splitter
@@ -355,7 +355,7 @@ int main(int argc, char* argv[]){
    
 
 
-    printf("root received %d USR1 signal(s)\n", num_of_usr1);
+    printf("\nroot received %d USR1 signal(s)\n", num_of_usr1);
     printf("root received %d USR2 signal(s)\n", num_of_usr2);
    
     close(fd_root[0]); //κλεισιμο του read end του pipe root - builders
