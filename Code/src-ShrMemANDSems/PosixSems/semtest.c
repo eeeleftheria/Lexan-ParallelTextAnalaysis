@@ -14,20 +14,23 @@ int main(int argc, char **argv)
 	int retval;
 
 	/* Initialize the semaphore. */
-	retval = sem_init(&sp,1,2);
+	retval = sem_init(&sp, 1, 2);
 	if (retval != 0) {
 		perror("Couldn't initialize.");
 		exit(3);
 	}
 	
 	retval = sem_wait(&sp);
-	printf("Did trywait. Returned %d >\n",retval); getchar();
+	printf("Did trywait. Returned %d >\n", retval);
+	getchar();
 	
 	retval = sem_trywait(&sp);
-	printf("Did trywait. Returned %d >\n",retval); getchar();
+	printf("Did trywait. Returned %d >\n", retval); 
+	getchar();
 
 	retval = sem_trywait(&sp);
-	printf("Did trywait. Returned %d >\n",retval); getchar();
+	printf("Did trywait. Returned %d >\n",retval); 
+	getchar();
 
 	sem_destroy(&sp);
 	return 0;

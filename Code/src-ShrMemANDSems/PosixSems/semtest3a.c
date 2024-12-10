@@ -19,7 +19,10 @@ int main(int argc,char **argv)
 	int retval;
 	int id, err;
 
-	if (argc <= 1) { printf("Need shmem id. \n"); exit(1); }
+	if (argc <= 1) { 
+		printf("Need shmem id. \n"); 
+		exit(1); 
+	}
 
 	/* Get id from command line. */
 	sscanf(argv[1], "%d", &id);
@@ -27,7 +30,10 @@ int main(int argc,char **argv)
 
 	/* Attach the segment. */
 	sp = (sem_t *) shmat(id,(void*) 0, 0);
-	if (sp == (void *) -1) { perror("Attachment."); exit(2);}
+	if (sp == (void *) -1) { 
+		perror("Attachment."); 
+		exit(2);
+	}
 
 	/* Initialize the semaphore. */
 	retval = sem_init(sp,1,1);

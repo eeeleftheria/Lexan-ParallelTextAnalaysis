@@ -18,35 +18,48 @@ int main(int argc, char **argv)
 
 	/* Make shared memory segment. */
 	id = shmget(IPC_PRIVATE, SEGMENTSIZE, SEGMENTPERM);
-	if (id == -1) perror("Creation");
-	else printf("Allocated %d\n", id);
+	
+	if (id == -1) 
+		perror("Creation");
+	else 
+		printf("Allocated %d\n", id);
 
 	/* Attach the segment. */
-	sp = (sem_t *) shmat(id,(void*) 0, 0);
-	if ( sp == (void *) -1) { perror("Attachment."); exit(2);}
+	sp = (sem_t *) shmat(id, (void*) 0, 0);
+	
+	if ( sp == (void *) -1){ 
+		perror("Attachment."); 
+		exit(2);
+	}
 
 	/* Initialize the semaphore. */
-	retval = sem_init(sp,1,2);
+	retval = sem_init(sp, 1, 2);
+
 	if (retval != 0) {
 		perror("Couldn't initialize.");
 		exit(3);
 	}
 
 	retval = sem_trywait(sp);
-	printf("Did trywait. Returned %d >\n", retval); getchar();
+	printf("Did trywait. Returned %d >\n", retval); 
+	getchar();
 
 	retval = sem_trywait(sp);
-	printf("Did trywait. Returned %d >\n", retval); getchar();
+	printf("Did trywait. Returned %d >\n", retval); 
+	getchar();
 
 	retval = sem_trywait(sp);
-	printf("Did trywait. Returned %d >\n", retval); getchar();
+	printf("Did trywait. Returned %d >\n", retval); 
+	getchar();
 
 	sem_destroy(sp);
 
 	/* Remove segment. */
 	err = shmctl(id, IPC_RMID, 0);
-	if (err == -1) perror("Removal.");
-	else printf("Removed. %d\n",err);
+	if (err == -1) 
+		perror("Removal.");
+	else 
+		printf("Removed. %d\n",err);
 	
 	return 0;
 }

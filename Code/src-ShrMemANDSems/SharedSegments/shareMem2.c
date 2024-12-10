@@ -4,12 +4,18 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+// Αφου τρεξω το shareMem1, τρεχω το shareMem2 με το id που επιστρεφει
+// το shareMem1 σε ενα δευτερο terminal.
+
+
 int main(int argc, char **argv) {
 	int id, err;
 	int *mem;
 
 	if (argc <= 1) { 
-		printf("Need shared memory id. \n"); exit(1); }
+		printf("Need shared memory id. \n"); 
+		exit(1);
+	}
 
 	/* Get id from command line. */
 	sscanf(argv[1], "%d", &id);
@@ -17,17 +23,28 @@ int main(int argc, char **argv) {
 
 	/* Attach the segment */
 	mem = (int *) shmat(id, (void*) 0,0);
-	if (*(int *) mem == -1) perror("Attachment.");
-	else printf(">> Attached Shared Segment whose Mem content is: %d\n",*mem);
+
+	if (*(int *) mem == -1){
+		perror("Attachment.");
+	}
+
+	else{
+		printf(">> Attached Shared Segment whose Mem content is: %d\n",*mem);
+	} 
 
 	/* Give it a different value */
-	*mem=2;
+	*mem = 2;
 	printf(">> Changed Shared Segment ; Memory is now: %d\n", *mem);
 
 	/* Detach segment */
 	err = shmdt((void *) mem);
-	if (err == -1) perror ("Detachment.");
-	else printf(">> Detachment of Shared Segment %d\n", err);
+	if (err == -1){
+		perror ("Detachment.");
+	} 
+	else{
+		printf(">> Detachment of Shared Segment %d\n", err);
+	} 
+
 	return 0;
 }
 

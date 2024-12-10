@@ -8,11 +8,11 @@ int main(int argc, char **argv){
 	int *mem;
 
 	/* Make shared memory segment */
-	id = shmget(IPC_PRIVATE,10,0666); 
+	id = shmget(IPC_PRIVATE, 10, 0666); 
 	if (id == -1) 
 		perror ("Creation");
 	else 	
-		printf("Allocated Shared Memory with ID: %d\n",(int)id);
+		printf("Allocated Shared Memory with ID: %d\n", (int)id);
 
 	/* Attach the segment */
 	mem = (int *) shmat(id, (void*)0, 0);
@@ -22,10 +22,12 @@ int main(int argc, char **argv){
 		printf("Just Attached Shared Memory whose content is: %d\n",*mem);
 
 	/* Give it initial value */
-	*mem=1;
+	*mem = 1;
+
 	printf("Just Altered Shared Memory content to: %d\n",*mem);
 
-	printf("Start other process. >"); getchar();
+	printf("Start other process. >"); 
+	getchar();
 
 	/* Print out new value */
 	printf("Content of Shared Mem is now: %d\n", *mem);
