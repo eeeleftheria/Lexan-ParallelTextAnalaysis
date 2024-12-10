@@ -1,0 +1,3 @@
+
+The programs that use SEMAPHOREs deploy SystemV-Unix sems and NOT-Posix.
+The interface is somewhat different.
