@@ -76,7 +76,7 @@ int main(int argc, char* argv[]){
     close(fd);
     
     exit(1);
-    
+     
 }
 
 //############## ΣΥΝΑΡΤΗΣΕΙΣ ###############//
@@ -223,7 +223,11 @@ void splitterSendToBuilder(char* word, int num_of_builders){
     memcpy(buffer + size, " ", 1);
 
     //στελνει λεξης στη μορφη word word word ...
+<<<<<<< HEAD
     int bytes_written = write(builder + 500, buffer, buffer_size);
+=======
+    int bytes_written = write(builder + 300, buffer, buffer_size);
+>>>>>>> e4f275507a7d0f6bb3bf254f70ab9bf6f9c8429e
     
     if (bytes_written == -1) {
         perror("Write to builder failed");
