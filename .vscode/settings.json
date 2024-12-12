@@ -4,7 +4,10 @@
         "graph.h": "c",
         "string.h": "c",
         "LIST.C": "cpp",
-        "random": "c"
+        "random": "c",
+        "fcntl.h": "c",
+        "stdlib.h": "c",
+        "shm.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }
