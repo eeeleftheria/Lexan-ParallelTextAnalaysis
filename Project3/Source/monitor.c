@@ -20,7 +20,7 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    char* shmid = argv[1];
+    char* shmid = argv[1]; // name of the shared memory segment
 
     // Open the shared memory segment, only read/write flags since
     // it has already been created
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    // ###### print shared memory segment
+    // ###### print data of shared memory segment
     printf("Shared memory segment:\n");
     printStatistics(sharedData->stats);
     printTables(sharedData->tables);
@@ -60,6 +60,7 @@ int main(int argc, char* argv[]){
 
 
 void printStatistics(statistics stats){
+
     printf("-----Statistics-----\n");
     printf("Total water drinks served: %d\n", stats.totalWaterDrinks);
     printf("Total wine drinks served: %d\n", stats.totalWineDrinks);
@@ -71,24 +72,26 @@ void printStatistics(statistics stats){
     printf("Average serving time: %f\n\n", stats.avgServeTime);
 }
 
+
 void printTables(table tables[]){
+
     printf("-----Tables-----\n");
 
     for(int i = 0; i < MAX_TABLES; i++){
 
         printf("Table %d: ", i);
 
-        if(tables[i].occupiedSeats == 0){
+        if(tables[i].occupiedSeats == 0){ // if the table is empty
             printf("Empty\n");
         }
         else{
 
-            for(int j = 0; j < MAX_CHAIRS; j++){
+            for(int j = 0; j < MAX_CHAIRS; j++){ // for each chair print which visitor is seated
                 printf("%d in chair %d | ", tables[i].chairs[j].visitor, j);
             }
             printf("\n");
             
-            printf("Is full: %d\n", tables[i].is_full);
+            printf("Is full: %d\n", tables[i].is_full); // if the table is full or not
         }
     printf("\n");
     }
@@ -101,14 +104,14 @@ void printOrders(order orders[MAX_TABLES][MAX_CHAIRS]){
     
         printf("Table %d:\n", i);
 
-
+        // for each table print the items each visitor has ordered
         for(int j = 0; j < MAX_CHAIRS; j++){
     
             printf("    Chair %d: ", j);
             printf("visitor id: %d | ", orders[i][j].visitor_id);
             printf("Items: ");
 
-            int count = orders[i][j].count;
+            int count = orders[i][j].count; // how many items has the visitor ordered
 
             for(int k = 0; k < count; k++){
                 printf("%d ", orders[i][j].items[k]);
@@ -119,10 +122,11 @@ void printOrders(order orders[MAX_TABLES][MAX_CHAIRS]){
     printf("\n");
 }
 
+
 void printWaitingLine(circularBuffer waitingLine){
     printf("-----Waiting Line-----\n");
     
-    if(waitingLine.count == 0){
+    if(waitingLine.count == 0){ // if no clients are waiting to enter the bar
         printf("No clients waiting\n\n");
         return;
     }
@@ -131,18 +135,19 @@ void printWaitingLine(circularBuffer waitingLine){
     printf("Last: %d\n", waitingLine.last);
     printf("Count: %d\n", waitingLine.count);
     
-
-    printf("Pids: ");
+    // print the pids of the clients waiting
+    printf("Pids: "); 
     for(int i = 0; i < MAX_WAITING; i++){
         printf("%d ", waitingLine.buffer[i]);
     }
     printf("\n\n");
 }
 
+
 void printOrdersOrder(circularOrders ordersOrder){
     printf("-----Orders Line-----\n");
     
-    if(ordersOrder.count == 0){
+    if(ordersOrder.count == 0){ // if there are no orders
         printf("No orders\n\n");
         return;
     }
@@ -151,7 +156,7 @@ void printOrdersOrder(circularOrders ordersOrder){
     printf("Last: %d\n", ordersOrder.last);
     printf("Count: %d\n", ordersOrder.count);
     
-
+    // for each order print the visitor's id
     printf("Orders: ");
     for(int i = 0; i < MAX_ORDERS; i++){
         printf("%d ", ordersOrder.buffer[i].visitor_id);
