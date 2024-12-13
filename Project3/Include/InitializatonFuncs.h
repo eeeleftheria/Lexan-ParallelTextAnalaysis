@@ -1,5 +1,13 @@
 #include "SharedMemory.h"
 
+// initializes the shared memory segment
 void initSharedMemory(struct sharedObjects* sharedData);
-void createRecept(float orderTime, char* shmid);
-void createVisitor(int numOfVisitors, float restTime, char* shmid);
+
+// forks one receptionist process & executes it
+void createRecept(float orderTime, char* shmid, char* loggingFile);
+
+// forks multiple visitor processes & executes them
+void createVisitor(int numOfVisitors, float restTime, char* shmid, char* loggingFile);
+
+// creates a logging file where all the actions will be written
+void createLoggingFile(char* loggingFile);

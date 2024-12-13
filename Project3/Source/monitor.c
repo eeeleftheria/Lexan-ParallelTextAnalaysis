@@ -46,6 +46,7 @@ int main(int argc, char* argv[]){
     printOrders(sharedData->orders);
     printWaitingLine(sharedData->waitingLine);
     printOrdersOrder(sharedData->ordersOrder);
+    printSemaphores(sharedData);
 
     
     // detach the shared memory segment
@@ -97,6 +98,7 @@ void printTables(table tables[]){
     }
 }
 
+
 void printOrders(order orders[MAX_TABLES][MAX_CHAIRS]){
     printf("-----Orders-----\n");
     
@@ -125,6 +127,8 @@ void printOrders(order orders[MAX_TABLES][MAX_CHAIRS]){
 
 void printWaitingLine(circularBuffer waitingLine){
     printf("-----Waiting Line-----\n");
+
+    int count = waitingLine.count;
     
     if(waitingLine.count == 0){ // if no clients are waiting to enter the bar
         printf("No clients waiting\n\n");
@@ -137,8 +141,17 @@ void printWaitingLine(circularBuffer waitingLine){
     
     // print the pids of the clients waiting
     printf("Pids: "); 
-    for(int i = 0; i < MAX_WAITING; i++){
+    for(int i = 0; i < count; i++){
         printf("%d ", waitingLine.buffer[i]);
+    }
+
+    printf("\nSemaphores: ");
+    for(int i = 0; i < count; i++){
+        
+        int sem_value;
+        sem_getvalue(&waitingLine.sems[i], &sem_value);
+        printf("%d ", sem_value);
+    
     }
     printf("\n\n");
 }
@@ -162,4 +175,16 @@ void printOrdersOrder(circularOrders ordersOrder){
         printf("%d ", ordersOrder.buffer[i].visitor_id);
     }
     printf("\n\n");
+}
+
+void printSemaphores(struct sharedObjects* sharedData){
+    printf("Semaphores' values:\n");
+    int sem_value;
+    sem_getvalue(&sharedData->mutex, &sem_value);
+    printf("Mutex: %d\n", sem_value);
+    sem_getvalue(&sharedData->receptionist, &sem_value);
+    printf("Receptionist: %d\n", sem_value);
+    sem_getvalue(&sharedData->maxWaiting, &sem_value);
+    printf("Number of available seats in waiting line: %d\n", sem_value);
+    printf("\n");
 }

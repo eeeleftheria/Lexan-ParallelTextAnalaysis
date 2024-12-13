@@ -10,23 +10,25 @@
 #include <unistd.h>
 #include "SharedMemory.h"
 #include "InitializatonFuncs.h"
+#include <string.h>
 
 
 #define SHARED_MEMORY_NAME "/sharedMemory" // name of the shared memory segment
-#define NUM_OF_VISITORS 2 // number of visitor processes
+#define NUM_OF_VISITORS 2 // number of visitor processes to be created
 
 int main(int argc, char* argv[]){
     
     float orderTime; // max time for the receptionist to take an order
     float restTime; // max duration of a visitor's stay in sleep mode after he gets served
 
-    if(argc != 3){
-        printf("Usage: ./main <orderTime> <restTime>");
+    if(argc != 4){
+        printf("Usage: ./main <orderTime> <restTime> <LoggingFile>\n");
         exit(1);
     }
 
     orderTime = atof(argv[1]);
     restTime = atof(argv[2]);
+    char* loggingFile = argv[3];
 
 
     // Creation of shared memory segment
@@ -59,7 +61,9 @@ int main(int argc, char* argv[]){
     // Initialize the shared memory segment
     initSharedMemory(sharedData);
 
-    sleep(10);
+    // Initialize logging file with all the actions of the clients and the receptionist
+    createLoggingFile(loggingFile);
+
 
     //######## Creation of receptionist process
     
@@ -68,8 +72,11 @@ int main(int argc, char* argv[]){
 
     // Creation of visitor processes
 
-    // createVisitor(NUM_OF_VISITORS, restTime, SHARED_MEMORY_NAME);
+    createVisitor(NUM_OF_VISITORS, restTime, SHARED_MEMORY_NAME, loggingFile);
 
+    sleep(10);
+   
+   
     // detach the shared memory segment
     if(munmap(sharedData, sizeof(struct sharedObjects)) == -1){
         printf("munmap failure in monitor\n");
@@ -88,14 +95,35 @@ int main(int argc, char* argv[]){
 }
 
 
+// ############################ //
+// ######### FUNCTIONS ######## //
+// ############################ //
+
 void initSharedMemory(struct sharedObjects* sharedData){
     
+    int res;
+
     // ####### Initialization of semaphores
-    sem_init(&sharedData->mutex, 1, 1);
-    sem_init(&sharedData->receptionist, 1, 1); // the receptionist can only do one job at a time
-    
+    res = sem_init(&sharedData->mutex, 1, 1);
+    if(res == -1){
+        perror("sem_init mutex failed");
+        exit(1);
+    }
+
+    res = sem_init(&sharedData->receptionist, 1, 0); // the receptionist is initially asleep 
+    // till he is woken up by a client.
+    if(res == -1){
+        perror("sem_init recept failed");
+        exit(1);
+    }
+
+
     // max number of waiting visitors, if it falls below 0 the visitor cannot enter the waiting queue
-    sem_init(&sharedData->maxWaiting, 1, MAX_WAITING); 
+    res = sem_init(&sharedData->maxWaiting, 1, MAX_WAITING);
+    if(res == -1){
+        perror("sem_init maxWaiting failed");
+        exit(1);
+    } 
     
 
     // ####### Initialization of arrays
@@ -131,7 +159,13 @@ void initSharedMemory(struct sharedObjects* sharedData){
     waitingLine.count = 0;
 
     for(int i = 0; i < MAX_WAITING; i++){
-        sem_init(&waitingLine.sems[i], 1, 0); ///??????????????????
+        
+        res = sem_init(&waitingLine.sems[i], 1, 0); ///??????????????????
+        
+        if(res == -1){
+            perror("sem_init waitingLine failed");
+            exit(1);
+        }
     }
 
     circularOrders ordersOrder = sharedData->ordersOrder;
@@ -141,7 +175,13 @@ void initSharedMemory(struct sharedObjects* sharedData){
     ordersOrder.count = 0;
 
     for(int i = 0; i < MAX_ORDERS; i++){
-        sem_init(&ordersOrder.sems[i], 1, 0); // each order is set to 0 and only the first in the queue will be woken up
+        
+        res = sem_init(&ordersOrder.sems[i], 1, 0); // each order is set to 0 and only the first in the queue will be woken up
+        
+        if(res == -1){
+            perror("sem_init ordersOrder failed");
+            exit(1);
+        }
     }
 
 
@@ -156,7 +196,8 @@ void initSharedMemory(struct sharedObjects* sharedData){
 }
 
 
-void createRecept(float orderTime, char* shmid){
+
+void createRecept(float orderTime, char* shmid, char* loggingFile){
     
     // forking a receptionist process
     pid_t pid = fork();
@@ -171,13 +212,13 @@ void createRecept(float orderTime, char* shmid){
         char orderTimeStr[10];
         snprintf(orderTimeStr, sizeof(orderTimeStr), "%f", orderTime);
 
-        execlp("receptionist", "receptionist", "-d", orderTimeStr, "-s", shmid, NULL);
+        execlp("receptionist", "receptionist", "-d", orderTimeStr, "-s", shmid, "-l", loggingFile, NULL);
     }
 }
 
 
 
-void createVisitor(int numOfVisitors, float restTime, char* shmid){
+void createVisitor(int numOfVisitors, float restTime, char* shmid, char* loggingFile){
     
     // forking numOfVisitors processes
     for(int i = 0; i < numOfVisitors; i++){
@@ -193,8 +234,32 @@ void createVisitor(int numOfVisitors, float restTime, char* shmid){
             char restTimeStr[10];
             snprintf(restTimeStr, sizeof(restTimeStr), "%f", restTime);
 
-            execlp("visitor", "visitor", "-d", restTimeStr, "-s", shmid, NULL);
+            execlp("visitor", "visitor", "-d", restTimeStr, "-s", shmid, "-l", loggingFile, NULL);
         }
     }
 
 }
+
+
+void createLoggingFile(char* loggingFile){
+    // open the file for writing - create if it does not exist
+    int fd = open(loggingFile, O_CREAT | O_RDWR | O_TRUNC, 0666);
+    if(fd == -1){
+        printf("opening logging file failed\n");
+        exit(1);
+    }
+
+    char* message = "Logging file of the bar:\n";
+    
+    ssize_t bytesWritten = write(fd, message, strlen(message));
+    if(bytesWritten == -1){
+        printf("writing to logging file failed\n");
+        exit(1);
+    }
+
+    // close the file
+    if(close(fd) == -1){
+        printf("closing logging file failed\n");
+        exit(1);
+    }
+}   
