@@ -11,24 +11,47 @@
 #include "SharedMemory.h"
 #include "InitializatonFuncs.h"
 #include <string.h>
+#include <sys/wait.h>
 
 
 #define SHARED_MEMORY_NAME "/sharedMemory" // name of the shared memory segment
-#define NUM_OF_VISITORS 2 // number of visitor processes to be created
+#define NUM_OF_VISITORS 4 // number of visitor processes to be created
 
 int main(int argc, char* argv[]){
     
     float orderTime; // max time for the receptionist to take an order
     float restTime; // max duration of a visitor's stay in sleep mode after he gets served
+    char* loggingFile; // name of the logging file
+    int openTime; // time the bar will remain open
+    
+    pid_t* receptPid = malloc(sizeof(pid_t)); // pid of the receptionist process
+    pid_t* visitorPids = malloc(NUM_OF_VISITORS * sizeof(pid_t)); // pids of the visitor processes
+    pid_t* closingPid = malloc(sizeof(pid_t)); // pid of the closing process
 
-    if(argc != 4){
-        printf("Usage: ./main <orderTime> <restTime> <LoggingFile>\n");
+    if(argc != 9){
+        printf("Usage: ./main -o <orderTime> -r <restTime> -l <LoggingFile> -t <openTime>\n");
         exit(1);
     }
 
-    orderTime = atof(argv[1]);
-    restTime = atof(argv[2]);
-    char* loggingFile = argv[3];
+    for(int i = 0; i < argc; i++){
+        
+        if(strcmp(argv[i], "-o") == 0){
+            orderTime = atof(argv[i+1]);
+        }
+
+        else if(strcmp(argv[i], "-r") == 0){
+            restTime = atof(argv[i+1]);
+        }
+
+        else if(strcmp(argv[i], "-l") == 0){
+            loggingFile = argv[i+1];
+        }
+        else if(strcmp(argv[i], "-t") == 0){
+            // time the bar will remain open
+            openTime = atoi(argv[i+1]);
+        }
+    }
+
 
 
     // Creation of shared memory segment
@@ -44,6 +67,7 @@ int main(int argc, char* argv[]){
     }
 
     // Change the size of the shared memory segment to be as much as the struct's sharedObjects
+    // only one process does this
     if( ftruncate(fd, sizeof(struct sharedObjects))  == -1){
         printf("ftruncate failure");
         exit(1);
@@ -67,12 +91,44 @@ int main(int argc, char* argv[]){
 
     //######## Creation of receptionist process
     
-    // createRecept(orderTime, SHARED_MEMORY_NAME);
+    createRecept(orderTime, SHARED_MEMORY_NAME, loggingFile, receptPid);
 
 
     // Creation of visitor processes
 
-    createVisitor(NUM_OF_VISITORS, restTime, SHARED_MEMORY_NAME, loggingFile);
+    createVisitor(NUM_OF_VISITORS, restTime, SHARED_MEMORY_NAME, loggingFile, visitorPids);
+
+    // createClosingProcess(SHARED_MEMORY_NAME, openTime, closingPid, loggingFile);
+
+
+    int status;
+   
+    // if(waitpid(*closingPid, &status, 0) == -1){
+    //     perror("waitpid failure in closing");
+    //     exit(1);
+    // }
+
+
+    // wait for the visitors
+    for(int i = 0; i < NUM_OF_VISITORS; i++){
+        
+        if(waitpid(visitorPids[i], &status, 0) == -1){
+            perror("waitpid failure in visitor");
+            exit(1);
+        }
+    }
+
+    // wait for the receptionist
+    if(waitpid(*receptPid, &status, 0) == -1){
+        perror("waitpid failure in receptionist");
+        exit(1);
+    }
+
+
+    free(receptPid);
+    free(visitorPids);
+    free(closingPid);
+
 
     sleep(10);
    
@@ -100,6 +156,8 @@ int main(int argc, char* argv[]){
 // ############################ //
 
 void initSharedMemory(struct sharedObjects* sharedData){
+
+    sharedData->isClosing = false;
     
     int res;
 
@@ -126,41 +184,32 @@ void initSharedMemory(struct sharedObjects* sharedData){
     } 
     
 
-    // ####### Initialization of arrays
+    // ####### Initialization of array of tables
     for(int i = 0; i < MAX_TABLES; i++){
         
         sharedData->tables[i].is_full = false;
         sharedData->tables[i].occupiedSeats = 0; // no visitor has sat on the table yet
         
         for(int j = 0; j < MAX_CHAIRS; j++){
+
+            sem_init(&sharedData->tables[i].sems[j], 1, 0); // semaphore for each chair 
+            
             sharedData->tables[i].chairs[j].visitor = -1; // no visitor has sat yet
         }
+
     }
 
-
-    for(int i = 0; i < MAX_TABLES; i++){
-        
-        for(int j = 0; j < MAX_CHAIRS; j++){
-            sharedData->orders[i][j].visitor_id = -1; // no visitor has ordered anything yet
-            
-            for(int k = 0; k < MAX_NUM_OF_ITEMS_PER_ORDER; k++){
-                sharedData->orders[i][j].items[k] = -1; // no item has been ordered yet
-            }
-
-            sharedData->orders[i][j].count = 0; // no items have been ordered yet
-        }
-    }
 
     // ####### Initialization of circular buffers
-    circularBuffer waitingLine = sharedData->waitingLine;
+
     // no visitors yet
-    waitingLine.first = 0;
-    waitingLine.last = 0;
-    waitingLine.count = 0;
+    sharedData->waitingLine.first = 0;
+    sharedData->waitingLine.last = 0;
+    sharedData->waitingLine.count = 0;
 
     for(int i = 0; i < MAX_WAITING; i++){
         
-        res = sem_init(&waitingLine.sems[i], 1, 0); ///??????????????????
+        res = sem_init(&sharedData->waitingLine.sems[i], 1, 0); /// each visitor in the queue is initially asleep
         
         if(res == -1){
             perror("sem_init waitingLine failed");
@@ -168,21 +217,15 @@ void initSharedMemory(struct sharedObjects* sharedData){
         }
     }
 
-    circularOrders ordersOrder = sharedData->ordersOrder;
     // no orders yet
-    ordersOrder.first = 0;
-    ordersOrder.last = 0;
-    ordersOrder.count = 0;
-
     for(int i = 0; i < MAX_ORDERS; i++){
-        
-        res = sem_init(&ordersOrder.sems[i], 1, 0); // each order is set to 0 and only the first in the queue will be woken up
-        
-        if(res == -1){
-            perror("sem_init ordersOrder failed");
-            exit(1);
-        }
+        sharedData->ordersOrder.buffer[i].visitor_id = -1; // no visitor has placed an order yet
+        sharedData->ordersOrder.buffer[i].count = 0; // no items in the order yet
     }
+
+    sharedData->ordersOrder.first = 0;
+    sharedData->ordersOrder.last = 0;
+    sharedData->ordersOrder.count = 0;
 
 
     // ####### Initialization of Statistics
@@ -197,7 +240,7 @@ void initSharedMemory(struct sharedObjects* sharedData){
 
 
 
-void createRecept(float orderTime, char* shmid, char* loggingFile){
+void createRecept(float orderTime, char* shmid, char* loggingFile, pid_t* receptPid){
     
     // forking a receptionist process
     pid_t pid = fork();
@@ -213,12 +256,16 @@ void createRecept(float orderTime, char* shmid, char* loggingFile){
         snprintf(orderTimeStr, sizeof(orderTimeStr), "%f", orderTime);
 
         execlp("receptionist", "receptionist", "-d", orderTimeStr, "-s", shmid, "-l", loggingFile, NULL);
+        perror("execlp receptionist failed");
+    }
+    else{
+        *receptPid = pid;
     }
 }
 
 
 
-void createVisitor(int numOfVisitors, float restTime, char* shmid, char* loggingFile){
+void createVisitor(int numOfVisitors, float restTime, char* shmid, char* loggingFile, pid_t visitorPids[]){
     
     // forking numOfVisitors processes
     for(int i = 0; i < numOfVisitors; i++){
@@ -235,6 +282,10 @@ void createVisitor(int numOfVisitors, float restTime, char* shmid, char* logging
             snprintf(restTimeStr, sizeof(restTimeStr), "%f", restTime);
 
             execlp("visitor", "visitor", "-d", restTimeStr, "-s", shmid, "-l", loggingFile, NULL);
+            perror("execlp visitor failed");
+        }
+        else{
+            visitorPids[i] = pid;
         }
     }
 
@@ -263,3 +314,28 @@ void createLoggingFile(char* loggingFile){
         exit(1);
     }
 }   
+
+
+void createClosingProcess(char* shmid, int openTimeOfBar, pid_t* closingPid, char* loggingFile){
+    
+    // forking a closing process
+    pid_t pid = fork();
+    
+    if(pid == -1){
+        perror("forking closing process failed");
+        exit(1);
+    }
+
+    // inside of closing process
+    if(pid == 0){
+        char openTimeOfBarStr[10];
+        snprintf(openTimeOfBarStr, sizeof(openTimeOfBarStr), "%d", openTimeOfBar);
+
+        execlp("closing", "closing", "-s", shmid, "-t", openTimeOfBarStr, "-l", loggingFile, NULL);
+        perror("execlp closing failed");
+    }
+
+    else{
+        *closingPid = pid;
+    }
+}

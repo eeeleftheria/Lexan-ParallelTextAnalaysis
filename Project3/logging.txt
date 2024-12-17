@@ -1,3 +1,0 @@
-Logging file of the bar:
-72006 has entered the waiting line
-72005 has entered the waiting line
