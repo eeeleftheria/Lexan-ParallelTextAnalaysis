@@ -13,9 +13,12 @@
 #include <stdbool.h>
 #include "receptionist.h"
 #include "visitor.h"
+#include <time.h>
 
 
 int main(int argc, char* argv[]){
+
+    srand(time(NULL) + getpid());
 
     if(argc != 7){
         printf("Usage: ./receptionist -d ordertime -s shmid -l loggingFile\n");

@@ -93,7 +93,10 @@ void printTables(table tables[]){
             int count = tables[i].occupiedSeats;
 
             for(int j = 0; j < count; j++){ // for each chair print which visitor is seated
-                printf("%d in chair %d | ", tables[i].chairs[j].visitor, j);
+                
+                if(tables[i].chairs[j].visitor != 0){
+                    printf("%d in chair %d | ", tables[i].chairs[j].visitor, j);
+                }
             }
             printf("\n");
             

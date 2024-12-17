@@ -11,9 +11,11 @@
 #include "SharedMemory.h"
 #include <string.h>
 #include "visitor.h"
-
+#include <time.h>
 
 int main(int argc, char* argv[]){
+
+    srand(time(NULL) + getpid());
 
     if(argc != 7){
         printf("Usage: ./visitor -d resttime -s shmid -l loggingFile\n");
