@@ -39,16 +39,18 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
+    sem_wait(&sharedData->mutex);
+
     // ###### print data of shared memory segment
     printf("Shared memory segment:\n");
     printStatistics(sharedData->stats);
     printTables(sharedData->tables);
-    printOrders(sharedData->orders);
     printWaitingLine(sharedData->waitingLine);
     printOrdersOrder(sharedData->ordersOrder);
-    printSemaphores(sharedData);
 
-    
+
+    sem_post(&sharedData->mutex);
+
     // detach the shared memory segment
     if(munmap(sharedData, sizeof(struct sharedObjects)) == -1){
         printf("munmap failure in monitor\n");
@@ -85,44 +87,22 @@ void printTables(table tables[]){
         if(tables[i].occupiedSeats == 0){ // if the table is empty
             printf("Empty\n");
         }
+
         else{
 
-            for(int j = 0; j < MAX_CHAIRS; j++){ // for each chair print which visitor is seated
+            int count = tables[i].occupiedSeats;
+
+            for(int j = 0; j < count; j++){ // for each chair print which visitor is seated
                 printf("%d in chair %d | ", tables[i].chairs[j].visitor, j);
             }
             printf("\n");
             
-            printf("Is full: %d\n", tables[i].is_full); // if the table is full or not
         }
     printf("\n");
     }
 }
 
 
-void printOrders(order orders[MAX_TABLES][MAX_CHAIRS]){
-    printf("-----Orders-----\n");
-    
-    for(int i = 0; i < MAX_TABLES; i++){
-    
-        printf("Table %d:\n", i);
-
-        // for each table print the items each visitor has ordered
-        for(int j = 0; j < MAX_CHAIRS; j++){
-    
-            printf("    Chair %d: ", j);
-            printf("visitor id: %d | ", orders[i][j].visitor_id);
-            printf("Items: ");
-
-            int count = orders[i][j].count; // how many items has the visitor ordered
-
-            for(int k = 0; k < count; k++){
-                printf("%d ", orders[i][j].items[k]);
-            }
-            printf("\n");
-        }
-    }
-    printf("\n");
-}
 
 
 void printWaitingLine(circularBuffer waitingLine){
@@ -145,14 +125,6 @@ void printWaitingLine(circularBuffer waitingLine){
         printf("%d ", waitingLine.buffer[i]);
     }
 
-    printf("\nSemaphores: ");
-    for(int i = 0; i < count; i++){
-        
-        int sem_value;
-        sem_getvalue(&waitingLine.sems[i], &sem_value);
-        printf("%d ", sem_value);
-    
-    }
     printf("\n\n");
 }
 
@@ -165,16 +137,37 @@ void printOrdersOrder(circularOrders ordersOrder){
         return;
     }
     
-    printf("First: %d\n", ordersOrder.first);
-    printf("Last: %d\n", ordersOrder.last);
-    printf("Count: %d\n", ordersOrder.count);
+    printf("First order: %d\n", ordersOrder.first);
+    printf("Last order: %d\n", ordersOrder.last);
+    printf("Total orders: %d\n\n", ordersOrder.count);
+
+    int count = ordersOrder.count;
     
-    // for each order print the visitor's id
-    printf("Orders: ");
-    for(int i = 0; i < MAX_ORDERS; i++){
-        printf("%d ", ordersOrder.buffer[i].visitor_id);
-    }
+    for(int i = 0; i < count; i++){
+            
+        printf("Order %d of %d: ", i, ordersOrder.buffer[i].visitor_id);
+        
+        int numOfItems = ordersOrder.buffer[i].count;
+        printf("Number of items: %d\n", numOfItems);
+        for(int i = 0; i < numOfItems; i++){
+
+            if(ordersOrder.buffer[i].items[i] == 0){
+                printf("Water | ");
+            }
+            else if(ordersOrder.buffer[i].items[i] == 1){
+                printf("Wine | ");
+            }
+            else if(ordersOrder.buffer[i].items[i] == 2){
+                printf("Cheese | ");
+            }
+            else if(ordersOrder.buffer[i].items[i] == 3){
+                printf("Salad | ");
+            }
+      
+        }
+    
     printf("\n\n");
+    }
 }
 
 void printSemaphores(struct sharedObjects* sharedData){

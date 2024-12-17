@@ -43,6 +43,7 @@ struct table{
     chair chairs[4]; //4 seats per table
     int occupiedSeats; //number of occupied seats
     bool is_full; //boolean var to check if the table is full
+    sem_t sems[MAX_CHAIRS]; //semaphore for each chair, so visitor gets suspended when he is waiting for his order
 };
 
 struct order{
@@ -51,11 +52,11 @@ struct order{
     int count; // number of items in the order
 };
 
-// this struct helps the implementation of the FCFS policy
+// this struct preserves the FCFS policy
 struct circularBuffer{
     pid_t buffer[MAX_WAITING]; //buffer that stores the pids of the clients waiting
-    int first; // first one waiting
-    int last; // last one waiting
+    int first; // pos of first one waiting
+    int last; // pos of last one waiting
     int count; //number of clients waiting
     sem_t sems[MAX_WAITING]; //semaphore for each client, so that only one client wakes up at a time
     // from the waiting line & FIFO is ensured
@@ -66,14 +67,13 @@ struct circularOrders{
     int first; // first order
     int last; // last order
     int count; //number of orders currently
-    sem_t sems[MAX_ORDERS]; //semaphore for each order, so that only one order is taken at a time
+
 };
 
 // segment of shared memory
 struct sharedObjects{
     statistics stats; //statistics struct
     table tables[MAX_TABLES]; //an array of 3 tables
-    order orders[MAX_TABLES][MAX_CHAIRS]; //for each chair of each table, there is an order
 
     sem_t mutex; // mutual exclusion for the shared memory
     sem_t receptionist; // one receptionist
@@ -82,6 +82,8 @@ struct sharedObjects{
     sem_t maxWaiting; //semaphore to control the number of clients waiting
 
     circularOrders ordersOrder; // the order of the orders
+
+    bool isClosing; // boolean var to check if the restaurant is closing
     
 };
 
