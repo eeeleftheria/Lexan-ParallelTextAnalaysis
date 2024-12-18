@@ -15,7 +15,7 @@
 
 
 #define SHARED_MEMORY_NAME "/sharedMemory" // name of the shared memory segment
-#define NUM_OF_VISITORS 12 // number of visitor processes to be created
+#define NUM_OF_VISITORS 13 // number of visitor processes to be created
 
 int main(int argc, char* argv[]){
     

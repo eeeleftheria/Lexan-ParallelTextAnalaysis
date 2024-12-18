@@ -119,6 +119,8 @@ int main(int argc, char* argv[]){
 
         // 1b) if there is no space, he remains in the waiting line and waits for a table
         else{
+            
+
             // write to logging file that a visitor has entered the waiting line
             char message[100];
             sprintf(message, "%d has entered the waiting line\n", pid);
@@ -127,7 +129,15 @@ int main(int argc, char* argv[]){
 
             sem_post(&sharedData->mutex); // free the mutex
 
+            printf("%d is in the waiting line\n", pid);
+            
             sem_wait(&sharedData->waitingLine.sems[0]); // wait for someone to wake him up when there is a free table
+            
+            printf("%d is woken up\n", pid);
+
+            checkForTable(sharedData, fdLogging, pid);
+            placeOrder(sharedData, fdLogging, pid);
+            stayInBar(sharedData, fdLogging, pid, resttime);
         }
     
     }
@@ -147,6 +157,13 @@ int main(int argc, char* argv[]){
         sem_post(&sharedData->mutex); // free the mutex
         
         sem_wait(&sharedData->waitingLine.sems[0]); // wait for someone to wake him up when there is a free table
+
+        sem_wait(&sharedData->mutex); // lock the mutex again
+
+        // the client has been woken up, he can now have a seat at the bar
+        checkForTable(sharedData, fdLogging, pid);
+        placeOrder(sharedData, fdLogging, pid);
+        stayInBar(sharedData, fdLogging, pid, resttime);
 
     }
 
@@ -384,6 +401,9 @@ void stayInBar(struct sharedObjects* sharedData, int fdLogging, pid_t pid, float
     // if all 4 clients left, mark the table as not full
     if(sharedData->tables[tableNum].occupiedSeats == 0){
         sharedData->tables[tableNum].is_full = false;
+
+        // last visitor leaving the table should wake up up to 4 visitors waiting 
+        wakeUpWaitingVisitors(sharedData, tableNum);
     }
 
     float avgStayTime = sharedData->stats.avgStayTime;
@@ -395,5 +415,60 @@ void stayInBar(struct sharedObjects* sharedData, int fdLogging, pid_t pid, float
     sem_post(&sharedData->mutex);
 
 
+}
+
+void wakeUpWaitingVisitors(struct sharedObjects* sharedData, int tableNum){
+
+    int totalWaiting = sharedData->waitingLine.count;
+    
+    if(totalWaiting == 0){
+        printf("No visitors in the waiting line\n");
+        return;
+    }
+
+    // if the line has less than 4 visitors
+    else if(totalWaiting <= 4){
+
+        printf("Waking up %d visitors in the waiting line\n", totalWaiting);
+
+        int first = sharedData->waitingLine.first;
+        int last = sharedData->waitingLine.last;
+
+        //wake them all up
+        for(int i = first; i <= last; i++){
+            printf("Waking up %d\n", sharedData->waitingLine.buffer[i]);
+            sem_post(&sharedData->waitingLine.sems[i]);
+        }
+
+        // remove the visitors from the waiting line
+        for(int i = first; i <= last; i++){
+            sharedData->waitingLine.buffer[i] = 0; // set all the pids of the consumed positions to 0
+        }
+
+        // the line is now empty
+        sharedData->waitingLine.count = 0;
+        sharedData->waitingLine.first = 0;
+        sharedData->waitingLine.last = 0;
+
+    }
+
+    else{
+        // wake up the first 4 visitors
+        int first = sharedData->waitingLine.first;
+
+        for(int i = first; i < first + 4; i++){
+            sem_post(&sharedData->waitingLine.sems[i]);
+        }
+
+        // remove the first 4 visitors from the waiting line
+        for(int i = first; i < first + 4; i++){
+            sharedData->waitingLine.buffer[i] = 0;
+        }
+
+        // update the first & last of the waiting line
+        sharedData->waitingLine.first = (first + 4) % MAX_WAITING;
+        sharedData->waitingLine.count -= 4; // 4 less visitors in the waiting line
+
+    }
 }
 
