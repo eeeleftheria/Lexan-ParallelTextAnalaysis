@@ -228,7 +228,7 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
             newOrder.items[0] = WATER;
         }
         else{
-            newOrder.items[0] = WINE;
+            newOrder.items[1] = WINE;
         }
     }
     else if(numOfDrinks == 2){
@@ -252,10 +252,10 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
         int food = rand() % 2; // 0 for cheese or 1 for salad
         
         if(food == 0){
-            newOrder.items[newOrder.count] = CHEESE;
+            newOrder.items[2] = CHEESE;
         }
         else{
-            newOrder.items[newOrder.count] = SALAD;
+            newOrder.items[3] = SALAD;
         }
 
         newOrder.count++;
@@ -263,8 +263,8 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
 
     else if(numOfFood == 2){
 
-        newOrder.items[newOrder.count] = CHEESE;
-        newOrder.items[newOrder.count + 1] = SALAD;
+        newOrder.items[2] = CHEESE;
+        newOrder.items[3] = SALAD;
         
         newOrder.count += 2;
     }
@@ -286,7 +286,7 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
     
     // write to logging file that a visitor has placed an order
     char message[100];
-    sprintf(message, "%d ordered %d items\n", pid, newOrder.count);
+    sprintf(message, "%d ordered %d drinks and %d plates\n", pid, numOfDrinks, numOfFood);
     write(fdLogging, message, strlen(message));
 
     sem_post(&sharedData->receptionist); // wake up the receptionist to take the order

@@ -29,7 +29,8 @@ struct statistics{
     int totalWineDrinks; // number of wine drinks served
     int totalCheesePlates; // number of cheese plates served
     int totalSalads; // number of salads served
-    int totalVisitors; // number of visitors served
+    int totalVisitorsServed; // number of visitors served
+    int totalVisitors; // number of visitors that entered the bar
     float avgWaitTime; // average waiting time of the visitors
     float avgStayTime; // average stay time of the visitors
     float avgServeTime; // average serving time

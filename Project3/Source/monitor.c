@@ -70,6 +70,7 @@ void printStatistics(statistics stats){
     printf("Total cheese plates served: %d\n", stats.totalCheesePlates);
     printf("Total salads served: %d\n", stats.totalSalads);
     printf("Total visitors served: %d\n", stats.totalVisitors);
+    printf("Total visitors: %d\n", stats.totalVisitors);
     printf("Average waiting time: %f\n", stats.avgWaitTime);
     printf("Average stay time: %f\n", stats.avgStayTime);
     printf("Average serving time: %f\n\n", stats.avgServeTime);
@@ -90,9 +91,7 @@ void printTables(table tables[]){
 
         else{
 
-            int count = tables[i].occupiedSeats;
-
-            for(int j = 0; j < count; j++){ // for each chair print which visitor is seated
+            for(int j = 0; j < 4; j++){ // for each chair print which visitor is seated
                 
                 if(tables[i].chairs[j].visitor != 0){
                     printf("%d in chair %d | ", tables[i].chairs[j].visitor, j);
@@ -144,15 +143,20 @@ void printOrdersOrder(circularOrders ordersOrder){
     printf("Last order: %d\n", ordersOrder.last);
     printf("Total orders: %d\n\n", ordersOrder.count);
 
-    int count = ordersOrder.count;
+    int first = ordersOrder.first;
+    int last = ordersOrder.last;
     
-    for(int i = 0; i < count; i++){
+    for(int i = first; i <= last; i++){
             
         printf("Order %d of %d: ", i, ordersOrder.buffer[i].visitor_id);
         
         int numOfItems = ordersOrder.buffer[i].count;
         printf("Number of items: %d\n", numOfItems);
         for(int i = 0; i < numOfItems; i++){
+
+            if(ordersOrder.buffer[i].items[i] == -1){
+                continue;
+            }
 
             if(ordersOrder.buffer[i].items[i] == 0){
                 printf("Water | ");

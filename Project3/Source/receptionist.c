@@ -133,9 +133,12 @@ int main(int argc, char* argv[]){
             // searching for the table and chair of the visitor
             int tableNum = findTableOfVisitor(sharedData, currentOrder.visitor_id);
             int chairNum = findChairOfVisitor(sharedData, currentOrder.visitor_id);
+
+            sharedData->stats.totalVisitorsServed++; // increment the number of visitors served
             
             // write to logging file that the order is ready
-            sprintf(message, "Order for %d is served\n", currentOrder.visitor_id);
+            sprintf(message, "Order for %d was served\n", currentOrder.visitor_id);
+            write(fdLogging, message, strlen(message));
 
             // the recept wakes up the visitor when his order is ready
             sem_post(&sharedData->tables[tableNum].sems[chairNum]); // wake up the visitor

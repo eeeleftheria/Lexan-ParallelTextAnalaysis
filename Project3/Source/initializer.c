@@ -221,6 +221,10 @@ void initSharedMemory(struct sharedObjects* sharedData){
     for(int i = 0; i < MAX_ORDERS; i++){
         sharedData->ordersOrder.buffer[i].visitor_id = -1; // no visitor has placed an order yet
         sharedData->ordersOrder.buffer[i].count = 0; // no items in the order yet
+
+        for(int j = 0; j < MAX_NUM_OF_ITEMS_PER_ORDER; j++){
+            sharedData->ordersOrder.buffer[i].items[j] = -1; // no item in the order yet
+        }
     }
 
     sharedData->ordersOrder.first = 0;
@@ -234,6 +238,7 @@ void initSharedMemory(struct sharedObjects* sharedData){
     sharedData->stats.totalCheesePlates = 0;
     sharedData->stats.totalSalads = 0;
     sharedData->stats.totalVisitors = 0;
+    sharedData->stats.totalVisitorsServed = 0;
     sharedData->stats.avgWaitTime = 0;
     sharedData->stats.avgStayTime = 0;
 }
