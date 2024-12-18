@@ -226,9 +226,11 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
         
         if(drink == 0){
             newOrder.items[0] = WATER;
+            newOrder.items[1] = -1;
         }
         else{
             newOrder.items[1] = WINE;
+            newOrder.items[0] = -1;
         }
     }
     else if(numOfDrinks == 2){
@@ -253,9 +255,11 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
         
         if(food == 0){
             newOrder.items[2] = CHEESE;
+            newOrder.items[3] = -1;
         }
         else{
             newOrder.items[3] = SALAD;
+            newOrder.items[2] = -1;
         }
 
         newOrder.count++;

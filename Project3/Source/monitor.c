@@ -69,8 +69,8 @@ void printStatistics(statistics stats){
     printf("Total wine drinks served: %d\n", stats.totalWineDrinks);
     printf("Total cheese plates served: %d\n", stats.totalCheesePlates);
     printf("Total salads served: %d\n", stats.totalSalads);
-    printf("Total visitors served: %d\n", stats.totalVisitors);
     printf("Total visitors: %d\n", stats.totalVisitors);
+    printf("Total visitors served: %d\n", stats.totalVisitorsServed);
     printf("Average waiting time: %f\n", stats.avgWaitTime);
     printf("Average stay time: %f\n", stats.avgStayTime);
     printf("Average serving time: %f\n\n", stats.avgServeTime);
@@ -152,22 +152,19 @@ void printOrdersOrder(circularOrders ordersOrder){
         
         int numOfItems = ordersOrder.buffer[i].count;
         printf("Number of items: %d\n", numOfItems);
-        for(int i = 0; i < numOfItems; i++){
-
-            if(ordersOrder.buffer[i].items[i] == -1){
-                continue;
-            }
-
-            if(ordersOrder.buffer[i].items[i] == 0){
+        
+        for(int j = 0; j < MAX_NUM_OF_ITEMS_PER_ORDER; j++){
+        
+            if(ordersOrder.buffer[i].items[j] == 0){
                 printf("Water | ");
             }
-            else if(ordersOrder.buffer[i].items[i] == 1){
+            else if(ordersOrder.buffer[i].items[j] == 1){
                 printf("Wine | ");
             }
-            else if(ordersOrder.buffer[i].items[i] == 2){
+            else if(ordersOrder.buffer[i].items[j] == 2){
                 printf("Cheese | ");
             }
-            else if(ordersOrder.buffer[i].items[i] == 3){
+            else if(ordersOrder.buffer[i].items[j] == 3){
                 printf("Salad | ");
             }
       
