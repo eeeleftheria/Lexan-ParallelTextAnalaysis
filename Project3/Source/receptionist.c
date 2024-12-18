@@ -70,21 +70,22 @@ int main(int argc, char* argv[]){
     while(1){
         
         sem_wait(&sharedData->receptionist); // if no customers, suspend the receptionist -> sem = -1
-        printf("Receptionist is waiting for a customer\n");
         
         // if he is woken up, dicrement the mutex so only one process is in critical section
         sem_wait(&sharedData->mutex);
-        printf("Receptionist is in mutex\n");
+
 
         // ##### CLOSING
         // if the bar is closing, the receptionist should not take any more orders
         // wait till all customeres leave
         if(sharedData->isClosing == true){
+            printf("is closing = true\n");
 
             if(checkIfBarIsEmpty(sharedData) == true && sharedData->waitingLine.count == 0){
-                
+                printf("Bar is empty\n");
                 closeBar(sharedData, fdLogging, fd, shmid);
 
+                sem_post(&sharedData->receptionist);
                 sem_post(&sharedData->mutex);
                 break;
             }
@@ -93,7 +94,6 @@ int main(int argc, char* argv[]){
                 continue;
             }
 
-            sem_post(&sharedData->mutex);
             break;
         }
     
@@ -135,19 +135,20 @@ int main(int argc, char* argv[]){
             int chairNum = findChairOfVisitor(sharedData, currentOrder.visitor_id);
 
             sharedData->stats.totalVisitorsServed++; // increment the number of visitors served
-            
+
             // write to logging file that the order is ready
             sprintf(message, "Order for %d was served\n", currentOrder.visitor_id);
             write(fdLogging, message, strlen(message));
 
             // the recept wakes up the visitor when his order is ready
             sem_post(&sharedData->tables[tableNum].sems[chairNum]); // wake up the visitor
-            
+
             sem_post(&sharedData->mutex);
 
         }
 
         else{
+
           continue;
         }
 
@@ -229,9 +230,6 @@ bool checkIfBarIsEmpty(struct sharedObjects* sharedData){
 
 void closeBar(struct sharedObjects* sharedData, int fdLogging, int fdSharedMem, char* shmid){
     
-    // write to the logging file that the bar is closing
-    write(fdLogging, "Bar is closing\n", strlen("Bar is closing\n"));
-
     // write the final statistics to the logging file
     writeStats(sharedData, fdLogging);
 
@@ -299,7 +297,8 @@ void closeBar(struct sharedObjects* sharedData, int fdLogging, int fdSharedMem, 
 
 void writeStats(struct sharedObjects* sharedData, int fdLogging){
     
-    write(fdLogging, "Statistics:\n", strlen("Statistics:\n"));
+    write(fdLogging, "-------------------------------", strlen("-------------------------------"));
+    write(fdLogging, "\nFinal Statistics:\n", strlen("\nFinal Statistics:\n"));
     
     char message[100];
     sprintf(message, "Total water drinks served: %d\n", sharedData->stats.totalWaterDrinks);
@@ -314,7 +313,10 @@ void writeStats(struct sharedObjects* sharedData, int fdLogging){
     sprintf(message, "Total salads served: %d\n", sharedData->stats.totalSalads);
     write(fdLogging, message, strlen(message));
 
-    sprintf(message, "Total visitors served: %d\n", sharedData->stats.totalVisitors);
+    sprintf(message, "Total visitors that entered the bar: %d\n", sharedData->stats.totalVisitors);
+    write(fdLogging, message, strlen(message));
+
+    sprintf(message, "Total visitors served: %d\n", sharedData->stats.totalVisitorsServed);
     write(fdLogging, message, strlen(message));
 
     sprintf(message, "Average waiting time: %f\n", sharedData->stats.avgWaitTime);

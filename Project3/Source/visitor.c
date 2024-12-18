@@ -296,11 +296,13 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
     sem_post(&sharedData->receptionist); // wake up the receptionist to take the order
 
     int pos = findChairOfVisitor(sharedData, pid);
+    int posTable = findTableOfVisitor(sharedData, pid);
 
     // ???????????? !!!!!!!!!!!!!!!!!!!!!!!!
     sem_post(&sharedData->mutex); // free mutex
 
-    sem_wait(&sharedData->tables[0].sems[pos]); // wait for the order to be ready
+    sem_wait(&sharedData->tables[posTable].sems[pos]); // wait for the order to be ready
+
 }
 
 

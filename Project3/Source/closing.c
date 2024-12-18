@@ -52,27 +52,30 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    // the time the bar remains open
-    sleep(openTimeOfBar);
-
-    sem_wait(&sharedData->mutex);
-
-    // the bar is closing
-    sharedData->isClosing = true;
-
     int fdLog = open(logFile, O_RDWR | O_APPEND, 0666);
     if(fdLog == -1){
         printf("failure opening log file in closing\n");
         exit(1);
     }
 
+
+    // the time the bar remains open
+    sleep(openTimeOfBar);
+
+    sem_wait(&sharedData->mutex);
+    // the bar is closing
+    sharedData->isClosing = true;
+    sem_post(&sharedData->mutex);
+
+ 
     char message[100];
     sprintf(message, "Bar is closing\n");
     write(fdLog, message, strlen(message));
 
     close(fdLog);
+    
+    sem_post(&sharedData->receptionist);
 
-    sem_post(&sharedData->mutex);
 
     // detach the shared memory segment
     if(munmap(sharedData, sizeof(struct sharedObjects)) == -1){

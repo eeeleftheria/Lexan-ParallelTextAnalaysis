@@ -15,7 +15,7 @@
 
 
 #define SHARED_MEMORY_NAME "/sharedMemory" // name of the shared memory segment
-#define NUM_OF_VISITORS 4 // number of visitor processes to be created
+#define NUM_OF_VISITORS 12 // number of visitor processes to be created
 
 int main(int argc, char* argv[]){
     
@@ -88,6 +88,7 @@ int main(int argc, char* argv[]){
     // Initialize logging file with all the actions of the clients and the receptionist
     createLoggingFile(loggingFile);
 
+    createClosingProcess(SHARED_MEMORY_NAME, openTime, closingPid, loggingFile);
 
     //######## Creation of receptionist process
     
@@ -98,15 +99,16 @@ int main(int argc, char* argv[]){
 
     createVisitor(NUM_OF_VISITORS, restTime, SHARED_MEMORY_NAME, loggingFile, visitorPids);
 
-    // createClosingProcess(SHARED_MEMORY_NAME, openTime, closingPid, loggingFile);
 
 
     int status;
    
-    // if(waitpid(*closingPid, &status, 0) == -1){
-    //     perror("waitpid failure in closing");
-    //     exit(1);
-    // }
+    if(waitpid(*closingPid, &status, 0) == -1){
+        perror("waitpid failure in closing");
+        exit(1);
+    }
+
+    // printf("Bar is closing\n");
 
 
     // wait for the visitors
@@ -118,11 +120,15 @@ int main(int argc, char* argv[]){
         }
     }
 
+    // printf("All visitors have left the bar\n");
+
     // wait for the receptionist
     if(waitpid(*receptPid, &status, 0) == -1){
         perror("waitpid failure in receptionist");
         exit(1);
     }
+
+    printf("Receptionist has left the bar\n");
 
 
     free(receptPid);
@@ -138,13 +144,6 @@ int main(int argc, char* argv[]){
         printf("munmap failure in monitor\n");
         exit(1);
     }
-
-    // destroy the shared memory segment: ONLY ONE PROCESS DOES THIS
-    if(shm_unlink(SHARED_MEMORY_NAME) == -1){
-        printf("shm_unlink failure in monitor\n");
-        exit(1);
-    }
- 
 
 
 
