@@ -12,4 +12,5 @@ void createVisitor(int numOfVisitors, float restTime, char* shmid, char* logging
 // creates a logging file where all the actions will be written
 void createLoggingFile(char* loggingFile);
 
+// forks a closing process who is responsible for setting the closing flag to true
 void createClosingProcess(char* shmid, int openTimeOfBar, pid_t* closingPid, char* loggingFile);

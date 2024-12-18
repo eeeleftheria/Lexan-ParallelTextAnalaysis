@@ -82,24 +82,27 @@ int main(int argc, char* argv[]){
 
     printf("Shared memory segment created and mapped successfully\n");
 
-    // Initialize the shared memory segment
+
+
+    // ####### INITIALIZATION OF SHARED MEMORY #######
     initSharedMemory(sharedData);
 
-    // Initialize logging file with all the actions of the clients and the receptionist
+    // ####### INITIALIZATION OF LOGGING FILE #######
     createLoggingFile(loggingFile);
 
+    // ####### FORKING OF PROCESSES #######
+    
+    // creates and executes a closing process
     createClosingProcess(SHARED_MEMORY_NAME, openTime, closingPid, loggingFile);
 
-    //######## Creation of receptionist process
-    
+    // creation of receptionist process
     createRecept(orderTime, SHARED_MEMORY_NAME, loggingFile, receptPid);
 
-
     // Creation of visitor processes
-
     createVisitor(NUM_OF_VISITORS, restTime, SHARED_MEMORY_NAME, loggingFile, visitorPids);
 
 
+    // ######## SYNCHRONIZATION ########
 
     int status;
    
@@ -108,10 +111,6 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    // printf("Bar is closing\n");
-
-
-    // wait for the visitors
     for(int i = 0; i < NUM_OF_VISITORS; i++){
         
         if(waitpid(visitorPids[i], &status, 0) == -1){
@@ -120,17 +119,13 @@ int main(int argc, char* argv[]){
         }
     }
 
-    // printf("All visitors have left the bar\n");
-
-    // wait for the receptionist
     if(waitpid(*receptPid, &status, 0) == -1){
         perror("waitpid failure in receptionist");
         exit(1);
     }
 
-    printf("Receptionist has left the bar\n");
 
-
+    // ####### FREE DYNAMICALLY ALLOCATED MEMORY #######
     free(receptPid);
     free(visitorPids);
     free(closingPid);
@@ -139,7 +134,7 @@ int main(int argc, char* argv[]){
     sleep(10);
    
    
-    // detach the shared memory segment
+    // ####### DETAHCING SHARED MEMORY #######
     if(munmap(sharedData, sizeof(struct sharedObjects)) == -1){
         printf("munmap failure in monitor\n");
         exit(1);
@@ -161,7 +156,7 @@ void initSharedMemory(struct sharedObjects* sharedData){
     int res;
 
     // ####### Initialization of semaphores
-    res = sem_init(&sharedData->mutex, 1, 1);
+    res = sem_init(&sharedData->mutex, 1, 1); // initially unlocked so the first process can enter its critical section
     if(res == -1){
         perror("sem_init mutex failed");
         exit(1);
@@ -176,6 +171,7 @@ void initSharedMemory(struct sharedObjects* sharedData){
 
 
     // max number of waiting visitors, if it falls below 0 the visitor cannot enter the waiting queue
+    // and get suspended on the semaphore
     res = sem_init(&sharedData->maxWaiting, 1, MAX_WAITING);
     if(res == -1){
         perror("sem_init maxWaiting failed");
@@ -186,12 +182,13 @@ void initSharedMemory(struct sharedObjects* sharedData){
     // ####### Initialization of array of tables
     for(int i = 0; i < MAX_TABLES; i++){
         
-        sharedData->tables[i].is_full = false;
+        sharedData->tables[i].is_full = false; // each table is initially empty
         sharedData->tables[i].occupiedSeats = 0; // no visitor has sat on the table yet
         
         for(int j = 0; j < MAX_CHAIRS; j++){
 
-            sem_init(&sharedData->tables[i].sems[j], 1, 0); // semaphore for each chair 
+            sem_init(&sharedData->tables[i].sems[j], 1, 0); // semaphore for each chair where the visitor gets suspended
+            // while waiting for his order  
             
             sharedData->tables[i].chairs[j].visitor = -1; // no visitor has sat yet
         }
@@ -209,6 +206,7 @@ void initSharedMemory(struct sharedObjects* sharedData){
     for(int i = 0; i < MAX_WAITING; i++){
         
         res = sem_init(&sharedData->waitingLine.sems[i], 1, 0); /// each visitor in the queue is initially asleep
+        // while there is no place to sit in the bar
         
         if(res == -1){
             perror("sem_init waitingLine failed");
@@ -217,6 +215,10 @@ void initSharedMemory(struct sharedObjects* sharedData){
     }
 
     // no orders yet
+    sharedData->ordersOrder.first = 0;
+    sharedData->ordersOrder.last = 0;
+    sharedData->ordersOrder.count = 0;
+    
     for(int i = 0; i < MAX_ORDERS; i++){
         sharedData->ordersOrder.buffer[i].visitor_id = -1; // no visitor has placed an order yet
         sharedData->ordersOrder.buffer[i].count = 0; // no items in the order yet
@@ -226,10 +228,7 @@ void initSharedMemory(struct sharedObjects* sharedData){
         }
     }
 
-    sharedData->ordersOrder.first = 0;
-    sharedData->ordersOrder.last = 0;
-    sharedData->ordersOrder.count = 0;
-
+    
 
     // ####### Initialization of Statistics
     sharedData->stats.totalWaterDrinks = 0;
@@ -263,7 +262,7 @@ void createRecept(float orderTime, char* shmid, char* loggingFile, pid_t* recept
         perror("execlp receptionist failed");
     }
     else{
-        *receptPid = pid;
+        *receptPid = pid; // store the pid of the receptionist process
     }
 }
 
@@ -273,6 +272,7 @@ void createVisitor(int numOfVisitors, float restTime, char* shmid, char* logging
     
     // forking numOfVisitors processes
     for(int i = 0; i < numOfVisitors; i++){
+        
         pid_t pid = fork();
         
         if(pid == -1){
@@ -289,7 +289,7 @@ void createVisitor(int numOfVisitors, float restTime, char* shmid, char* logging
             perror("execlp visitor failed");
         }
         else{
-            visitorPids[i] = pid;
+            visitorPids[i] = pid; // store the pid of the visitor process
         }
     }
 
@@ -297,6 +297,7 @@ void createVisitor(int numOfVisitors, float restTime, char* shmid, char* logging
 
 
 void createLoggingFile(char* loggingFile){
+    
     // open the file for writing - create if it does not exist
     int fd = open(loggingFile, O_CREAT | O_RDWR | O_TRUNC, 0666);
     if(fd == -1){
@@ -340,6 +341,6 @@ void createClosingProcess(char* shmid, int openTimeOfBar, pid_t* closingPid, cha
     }
 
     else{
-        *closingPid = pid;
+        *closingPid = pid; // store the pid of the closing process
     }
 }

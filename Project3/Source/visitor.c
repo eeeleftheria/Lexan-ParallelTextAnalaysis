@@ -15,6 +15,8 @@
 
 int main(int argc, char* argv[]){
 
+    // time(NULL) returns the current time of the system 
+    // it is the same in all the processes since they are executed almost at the same time
     srand(time(NULL) + getpid());
 
     if(argc != 7){
@@ -22,9 +24,9 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    int resttime;
-    char* shmid;
-    int fdLogging;
+    int resttime; // max time the visitor will stay in the bar after getting his order
+    char* shmid; // shared memory name
+    int fdLogging; // file descriptor for the logging file
 
     for(int i = 0; i < argc; i++){
         
@@ -84,20 +86,22 @@ int main(int argc, char* argv[]){
         // detach the shared memory segment
         if(munmap(sharedData, sizeof(struct sharedObjects)) == -1){
             printf("munmap failure in monitor\n");
-            close(fdLogging);
+            close(fdLogging); // close the logging file
             exit(1);
         }
 
-        close(fd);
-        close(fdLogging);
+        close(fd); // close the shared memory segment
+        close(fdLogging); // close the logging file
 
         exit(0);
     }
     
-    // 1. check if the waiting line was empty: 2 cases
+    // 1. check if the waiting line is empty: 2 cases
+    // a) if it is empty, can have a seat at the bar if there is space
+    // b) or he remains in the waiting line and waits for a table
     if(sharedData->waitingLine.count == 0){
         
-        // the visitor is both the first & last of the queue
+        // if it is indeed empty, the visitor becomes both the first & last of the queue
         sharedData->waitingLine.first = 0;
         sharedData->waitingLine.last = 0;
         sharedData->waitingLine.buffer[0] = pid;
@@ -120,8 +124,9 @@ int main(int argc, char* argv[]){
             sprintf(message, "%d has entered the waiting line\n", pid);
             write(fdLogging, message, strlen(message));
 
+
             sem_post(&sharedData->mutex); // free the mutex
-            
+
             sem_wait(&sharedData->waitingLine.sems[0]); // wait for someone to wake him up when there is a free table
         }
     
@@ -129,9 +134,11 @@ int main(int argc, char* argv[]){
     
     // 2. if the waiting line is not empty, add visitor to it 
     else{
+        // if waiting line has 5 spots and last = 4, the new visitor should be
+        // added to (4 + 1) % 5 = 0, since 4 is the last position of the buffer
         sharedData->waitingLine.last = (sharedData->waitingLine.last + 1) % MAX_WAITING;
-        sharedData->waitingLine.buffer[sharedData->waitingLine.last] = pid;
-        sharedData->waitingLine.count++;
+        sharedData->waitingLine.buffer[sharedData->waitingLine.last] = pid; // store the visitor's pid
+        sharedData->waitingLine.count++; // increase the number of visitors in the waiting line
 
         char message[100];
         sprintf(message, "%d has entered the waiting line\n", pid);
@@ -241,8 +248,8 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
         newOrder.items[1] = WINE;
     }
 
-    int minFood = 0;
-    int maxFood = 2;
+    int minFood = 0; // least number of food items
+    int maxFood = 2; // maximum number of food items
     int numOfFood = rand() % maxFood + minFood; // number of food items the visitor will order
 
     if(numOfFood == 0){
@@ -274,12 +281,16 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
     }
 
     // add the order to the circular buffer
+
+    // if the buffer is empty, the order becomes both the first & last 
     if(sharedData->ordersOrder.count == 0){
         sharedData->ordersOrder.first = 0;
         sharedData->ordersOrder.last = 0;
         sharedData->ordersOrder.buffer[sharedData->ordersOrder.last] = newOrder;
 
     }
+
+    // else it is added to the end of the buffer
     else{
         sharedData->ordersOrder.last = (sharedData->ordersOrder.last + 1) % MAX_ORDERS;
         sharedData->ordersOrder.buffer[sharedData->ordersOrder.last] = newOrder;
@@ -343,6 +354,7 @@ void stayInBar(struct sharedObjects* sharedData, int fdLogging, pid_t pid, float
     
     sem_wait(&sharedData->mutex);
 
+    // [0.7 * restTime, restTime]
     float minTime = 0.7 * restTime;
     float maxTime = restTime;
 
@@ -366,8 +378,8 @@ void stayInBar(struct sharedObjects* sharedData, int fdLogging, pid_t pid, float
     int chairNum = findChairOfVisitor(sharedData, pid);
     int tableNum = findTableOfVisitor(sharedData, pid);
 
-    sharedData->tables[tableNum].chairs[chairNum].visitor = 0;
-    sharedData->tables[tableNum].occupiedSeats--;
+    sharedData->tables[tableNum].chairs[chairNum].visitor = 0; // set the visitor to 0
+    sharedData->tables[tableNum].occupiedSeats--; // one less occupied seat
     
     // if all 4 clients left, mark the table as not full
     if(sharedData->tables[tableNum].occupiedSeats == 0){

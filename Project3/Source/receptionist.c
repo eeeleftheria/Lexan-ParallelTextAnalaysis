@@ -90,7 +90,6 @@ int main(int argc, char* argv[]){
                 break;
             }
             else{
-                sem_post(&sharedData->mutex);
                 continue;
             }
 
@@ -127,18 +126,23 @@ int main(int argc, char* argv[]){
             sharedData->ordersOrder.count--; // current order is served
 
             // % MAX_ORDERS so it is in the bounds of the buffer & it is circular
-            // for example: buffer[4], if first = 3, then (3+1) % 4 = 0
+            // for example: buffer[4], if first = 3, after it is consumed new first is (3+1) % 4 = 0
             sharedData->ordersOrder.first = (sharedData->ordersOrder.first + 1) % MAX_ORDERS; // move to the next order
 
-            // searching for the table and chair of the visitor
-            int tableNum = findTableOfVisitor(sharedData, currentOrder.visitor_id);
-            int chairNum = findChairOfVisitor(sharedData, currentOrder.visitor_id);
-
             sharedData->stats.totalVisitorsServed++; // increment the number of visitors served
+
+            // calculate the average serving time
+            float avgServeTime = sharedData->stats.avgServeTime;
+            int totalVisitorsServed = sharedData->stats.totalVisitorsServed;
+            sharedData->stats.avgServeTime = (avgServeTime + actualTime) / totalVisitorsServed;
 
             // write to logging file that the order is ready
             sprintf(message, "Order for %d was served\n", currentOrder.visitor_id);
             write(fdLogging, message, strlen(message));
+            
+            // searching for the table and chair of the visitor
+            int tableNum = findTableOfVisitor(sharedData, currentOrder.visitor_id);
+            int chairNum = findChairOfVisitor(sharedData, currentOrder.visitor_id);
 
             // the recept wakes up the visitor when his order is ready
             sem_post(&sharedData->tables[tableNum].sems[chairNum]); // wake up the visitor
@@ -147,9 +151,10 @@ int main(int argc, char* argv[]){
 
         }
 
+        // if there are no orders, continue to loop
         else{
-
-          continue;
+            sem_post(&sharedData->mutex);
+            continue;
         }
 
     } 
@@ -184,7 +189,8 @@ int findChairOfVisitor(struct sharedObjects* sharedData, pid_t pid){
     for(int i = 0; i < MAX_TABLES; i++){
         
         for(int j = 0; j < MAX_CHAIRS; j++){
-        
+            
+            // if the visitor is seated at chair j of table i
             if(sharedData->tables[i].chairs[j].visitor == pid){
                 return j;
             }
@@ -203,7 +209,7 @@ int findTableOfVisitor(struct sharedObjects* sharedData, pid_t pid){
         for(int j = 0; j < MAX_CHAIRS; j++){
         
             if(sharedData->tables[i].chairs[j].visitor == pid){
-                return i;
+                return i; // return the table number
             }
         }
     }
@@ -233,7 +239,7 @@ void closeBar(struct sharedObjects* sharedData, int fdLogging, int fdSharedMem, 
     // write the final statistics to the logging file
     writeStats(sharedData, fdLogging);
 
-    // DESTROY SEMAPHORES
+    // ##### DESTROY SEMAPHORES
     if(sem_destroy(&sharedData->mutex) == -1){
         printf("destroying mutex failure in receptionist\n");
         exit(1);
@@ -273,9 +279,9 @@ void closeBar(struct sharedObjects* sharedData, int fdLogging, int fdSharedMem, 
         }
     }
 
-    // DETACH SHARED MEMORY SEGMENT
+    // #### DETACH SHARED MEMORY SEGMENT
 
-    // unmap the shared memory segment
+    // #### UNMAP SHARED MEMORY SEGMENT
     if(munmap(sharedData, sizeof(struct sharedObjects)) == -1){
         printf("munmap failure in receptionist\n");
         exit(1);
@@ -284,7 +290,8 @@ void closeBar(struct sharedObjects* sharedData, int fdLogging, int fdSharedMem, 
     // close the shared memory segment
     close(fdSharedMem);
 
-    // only the receptionist unlinks the shared memory
+    // ##### UNLINK SHARED MEMORY
+    // ONLY the receptionist unlinks the shared memory
     if(shm_unlink(shmid) == -1){
         printf("shm_unlink failure in receptionist\n");
         exit(1);
