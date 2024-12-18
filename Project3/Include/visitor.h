@@ -13,3 +13,6 @@ int findTableOfVisitor(struct sharedObjects* sharedData, pid_t pid);
 
 // the client stays in the bar for a random time and then leaves, updating all the necessary data
 void stayInBar(struct sharedObjects* sharedData, int fdLogging, pid_t pid,float restTime);
+
+// the last visitor to leave a table informs up to 4 other visitors in the waiting line that they can enter
+void wakeUpWaitingVisitors(struct sharedObjects* sharedData, int tableNum);

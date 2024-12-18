@@ -69,6 +69,7 @@ int main(int argc, char* argv[]){
 
     while(1){
         
+        
         sem_wait(&sharedData->receptionist); // if no customers, suspend the receptionist -> sem = -1
         
         // if he is woken up, dicrement the mutex so only one process is in critical section
