@@ -65,15 +65,15 @@ int main(int argc, char* argv[]){
 void printStatistics(statistics stats){
 
     printf("-----Statistics-----\n");
-    printf("Total water drinks served: %d\n", stats.totalWaterDrinks);
-    printf("Total wine drinks served: %d\n", stats.totalWineDrinks);
-    printf("Total cheese plates served: %d\n", stats.totalCheesePlates);
-    printf("Total salads served: %d\n", stats.totalSalads);
+    printf("Water: %d\n", stats.totalWaterDrinks);
+    printf("Wine: %d\n", stats.totalWineDrinks);
+    printf("Cheese: %d\n", stats.totalCheesePlates);
+    printf("Salads: %d\n", stats.totalSalads);
     printf("Total visitors: %d\n", stats.totalVisitors);
     printf("Total visitors served: %d\n", stats.totalVisitorsServed);
-    printf("Average waiting time: %f\n", stats.avgWaitTime);
-    printf("Average stay time: %f\n", stats.avgStayTime);
-    printf("Average serving time: %f\n\n", stats.avgServeTime);
+    // printf("Average waiting time: %f\n", stats.avgWaitTime);
+    // printf("Average stay time: %f\n", stats.avgStayTime);
+    // printf("Average serving time: %f\n\n", stats.avgServeTime);
 }
 
 

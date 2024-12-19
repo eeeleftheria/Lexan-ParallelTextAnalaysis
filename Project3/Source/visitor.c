@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
 
     // time(NULL) returns the current time of the system 
     // it is the same in all the processes since they are executed almost at the same time
-    srand(time(NULL) + getpid());
+    srand(time(NULL)^getpid());
 
     if(argc != 7){
         printf("Usage: ./visitor -d resttime -s shmid -l loggingFile\n");
@@ -132,6 +132,8 @@ int main(int argc, char* argv[]){
             printf("%d is in the waiting line\n", pid);
             
             sem_wait(&sharedData->waitingLine.sems[0]); // wait for someone to wake him up when there is a free table
+
+            sem_wait(&sharedData->mutex); // lock the mutex again
             
             printf("%d is woken up\n", pid);
 
@@ -166,6 +168,21 @@ int main(int argc, char* argv[]){
         stayInBar(sharedData, fdLogging, pid, resttime);
 
     }
+
+
+    sem_wait(&sharedData->mutex);
+
+    // check if bar is closing
+    if(sharedData->isClosing == true){
+        
+        // if it is the last visitor to leave the bar, the receptionist should be woken up
+        if(isLastVisitor(sharedData) == true){
+            sem_post(&sharedData->receptionist);
+        }
+    
+    }
+
+    sem_post(&sharedData->mutex);
 
 
     // detach the shared memory segment
@@ -219,6 +236,17 @@ bool checkForTable(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
             // since the buffer is now empty, we do not need to declare a new first & last
             sharedData->waitingLine.count--; 
             sharedData->waitingLine.buffer[sharedData->waitingLine.first] = 0; // removal of visitor's pid from the buffer
+            
+            // if the waiting line is empty, the first & last are set to 0
+            if(sharedData->waitingLine.count == 0){
+                sharedData->waitingLine.first = 0;
+                sharedData->waitingLine.last = 0;
+            }
+
+            // else we should update the first to be the next visitor in line
+            else{
+                sharedData->waitingLine.first = (sharedData->waitingLine.first + 1) % MAX_WAITING;
+            }
             
             sem_post(&sharedData->maxWaiting); // one less visitor in the waiting line         
             
@@ -422,12 +450,11 @@ void wakeUpWaitingVisitors(struct sharedObjects* sharedData, int tableNum){
     int totalWaiting = sharedData->waitingLine.count;
     
     if(totalWaiting == 0){
-        printf("No visitors in the waiting line\n");
         return;
     }
 
     // if the line has less than 4 visitors
-    else if(totalWaiting <= 4){
+    else if((totalWaiting <= 4) && (totalWaiting > 0)){
 
         printf("Waking up %d visitors in the waiting line\n", totalWaiting);
 
@@ -445,14 +472,17 @@ void wakeUpWaitingVisitors(struct sharedObjects* sharedData, int tableNum){
             sharedData->waitingLine.buffer[i] = 0; // set all the pids of the consumed positions to 0
         }
 
+        // THIS IS DONE IN THE CHECKFORTABLE FUNCTION
+
+
         // the line is now empty
-        sharedData->waitingLine.count = 0;
-        sharedData->waitingLine.first = 0;
-        sharedData->waitingLine.last = 0;
+        // sharedData->waitingLine.count = 0;
+        // sharedData->waitingLine.first = 0;
+        // sharedData->waitingLine.last = 0;
 
     }
 
-    else{
+    else if(totalWaiting > 4){
         // wake up the first 4 visitors
         int first = sharedData->waitingLine.first;
 
@@ -465,10 +495,27 @@ void wakeUpWaitingVisitors(struct sharedObjects* sharedData, int tableNum){
             sharedData->waitingLine.buffer[i] = 0;
         }
 
-        // update the first & last of the waiting line
-        sharedData->waitingLine.first = (first + 4) % MAX_WAITING;
-        sharedData->waitingLine.count -= 4; // 4 less visitors in the waiting line
+        // THIS IS DONE IN THE CHECKFORTABLE FUNCTION
+
+        // // update the first & last of the waiting line
+        // sharedData->waitingLine.first = (first + 4) % MAX_WAITING;
+        // sharedData->waitingLine.count -= 4; // 4 less visitors in the waiting line
 
     }
+}
+
+bool isLastVisitor(struct sharedObjects* sharedData){
+    
+    for(int i = 0; i < MAX_TABLES; i++){
+        
+        for(int j = 0; j < MAX_CHAIRS; j++){
+        
+            if(sharedData->tables[i].occupiedSeats > 0){
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 

@@ -18,7 +18,7 @@
 
 int main(int argc, char* argv[]){
 
-    srand(time(NULL) + getpid());
+    srand(time(NULL)^getpid());
 
     if(argc != 7){
         printf("Usage: ./receptionist -d ordertime -s shmid -l loggingFile\n");
@@ -69,19 +69,18 @@ int main(int argc, char* argv[]){
 
     while(1){
         
-        
         sem_wait(&sharedData->receptionist); // if no customers, suspend the receptionist -> sem = -1
         
         // if he is woken up, dicrement the mutex so only one process is in critical section
         sem_wait(&sharedData->mutex);
 
 
+
         // ##### CLOSING
         // if the bar is closing, the receptionist should not take any more orders
         // wait till all customeres leave
         if(sharedData->isClosing == true){
-            printf("is closing = true\n");
-
+     
             if(checkIfBarIsEmpty(sharedData) == true && sharedData->waitingLine.count == 0){
                 printf("Bar is empty\n");
                 closeBar(sharedData, fdLogging, fd, shmid);
@@ -90,11 +89,8 @@ int main(int argc, char* argv[]){
                 sem_post(&sharedData->mutex);
                 break;
             }
-            else{
-                continue;
-            }
 
-            break;
+            // if it is not yet empty continue with the orders
         }
     
 
@@ -307,34 +303,45 @@ void writeStats(struct sharedObjects* sharedData, int fdLogging){
     
     write(fdLogging, "-------------------------------", strlen("-------------------------------"));
     write(fdLogging, "\nFinal Statistics:\n", strlen("\nFinal Statistics:\n"));
+    printf("-------------------------------\n");
+    printf("Final Statistics:\n");
     
     char message[100];
     sprintf(message, "Total water drinks served: %d\n", sharedData->stats.totalWaterDrinks);
     write(fdLogging, message, strlen(message));
+    printf("Total water drinks served: %d\n", sharedData->stats.totalWaterDrinks);
 
     sprintf(message, "Total wine drinks served: %d\n", sharedData->stats.totalWineDrinks);
     write(fdLogging, message, strlen(message));
+    printf("Total wine drinks served: %d\n", sharedData->stats.totalWineDrinks);
 
     sprintf(message, "Total cheese plates served: %d\n", sharedData->stats.totalCheesePlates);
     write(fdLogging, message, strlen(message));
+    printf("Total cheese plates served: %d\n", sharedData->stats.totalCheesePlates);
 
     sprintf(message, "Total salads served: %d\n", sharedData->stats.totalSalads);
     write(fdLogging, message, strlen(message));
+    printf("Total salads served: %d\n", sharedData->stats.totalSalads);
 
     sprintf(message, "Total visitors that entered the bar: %d\n", sharedData->stats.totalVisitors);
     write(fdLogging, message, strlen(message));
+    printf("Total visitors that entered the bar: %d\n", sharedData->stats.totalVisitors);
 
     sprintf(message, "Total visitors served: %d\n", sharedData->stats.totalVisitorsServed);
     write(fdLogging, message, strlen(message));
+    printf("Total visitors served: %d\n", sharedData->stats.totalVisitorsServed);
 
     sprintf(message, "Average waiting time: %f\n", sharedData->stats.avgWaitTime);
     write(fdLogging, message, strlen(message));
+    printf("Average waiting time: %f\n", sharedData->stats.avgWaitTime);
 
     sprintf(message, "Average stay time: %f\n", sharedData->stats.avgStayTime);
     write(fdLogging, message, strlen(message));
+    printf("Average stay time: %f\n", sharedData->stats.avgStayTime);
 
     sprintf(message, "Average serving time: %f\n", sharedData->stats.avgServeTime);
     write(fdLogging, message, strlen(message));
+    printf("Average serving time: %f\n", sharedData->stats.avgServeTime);
 
     close(fdLogging);
 }

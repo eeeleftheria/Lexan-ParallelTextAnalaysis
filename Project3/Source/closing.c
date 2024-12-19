@@ -65,7 +65,6 @@ int main(int argc, char* argv[]){
     sem_wait(&sharedData->mutex);
     // the bar is closing
     sharedData->isClosing = true;
-    sem_post(&sharedData->mutex);
 
  
     char message[100];
@@ -76,6 +75,7 @@ int main(int argc, char* argv[]){
     
     sem_post(&sharedData->receptionist);
 
+    sem_post(&sharedData->mutex);
 
     // detach the shared memory segment
     if(munmap(sharedData, sizeof(struct sharedObjects)) == -1){
