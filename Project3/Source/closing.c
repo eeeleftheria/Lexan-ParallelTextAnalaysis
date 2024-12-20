@@ -68,7 +68,7 @@ int main(int argc, char* argv[]){
 
  
     char message[100];
-    sprintf(message, "Bar is closing\n");
+    sprintf(message, "CLOSING: Bar is closing\n\n");
     write(fdLog, message, strlen(message));
 
     close(fdLog);

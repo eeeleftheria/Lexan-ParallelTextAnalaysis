@@ -143,97 +143,97 @@ void printOrdersOrder(circularOrders ordersOrder){
     printf("Last order: %d\n", ordersOrder.last);
     printf("Total orders: %d\n\n", ordersOrder.count);
 
-    int first = ordersOrder.first;
-    int last = ordersOrder.last;
+    // int first = ordersOrder.first;
+    // int last = ordersOrder.last;
 
-    if(first <= last){ // if the buffer has not wrapped around  
+    // if(first <= last){ // if the buffer has not wrapped around  
     
-        for(int i = first; i <= last; i++){
+    //     for(int i = first; i <= last; i++){
                 
-            printf("Order %d of %d: ", i, ordersOrder.buffer[i].visitor_id);
+    //         printf("Order %d of %d: ", i, ordersOrder.buffer[i].visitor_id);
             
-            int numOfItems = ordersOrder.buffer[i].count;
-            printf("Number of items: %d\n", numOfItems);
+    //         int numOfItems = ordersOrder.buffer[i].count;
+    //         printf("Number of items: %d\n", numOfItems);
             
-            for(int j = 0; j < MAX_NUM_OF_ITEMS_PER_ORDER; j++){
+    //         for(int j = 0; j < MAX_NUM_OF_ITEMS_PER_ORDER; j++){
             
-                if(ordersOrder.buffer[i].items[j] == 0){
-                    printf("Water | ");
-                }
-                else if(ordersOrder.buffer[i].items[j] == 1){
-                    printf("Wine | ");
-                }
-                else if(ordersOrder.buffer[i].items[j] == 2){
-                    printf("Cheese | ");
-                }
-                else if(ordersOrder.buffer[i].items[j] == 3){
-                    printf("Salad | ");
-                }
+    //             if(ordersOrder.buffer[i].items[j] == 0){
+    //                 printf("Water | ");
+    //             }
+    //             else if(ordersOrder.buffer[i].items[j] == 1){
+    //                 printf("Wine | ");
+    //             }
+    //             else if(ordersOrder.buffer[i].items[j] == 2){
+    //                 printf("Cheese | ");
+    //             }
+    //             else if(ordersOrder.buffer[i].items[j] == 3){
+    //                 printf("Salad | ");
+    //             }
         
-            }
+    //         }
         
-        printf("\n\n");
-        }
-    }
+    //     printf("\n\n");
+    //     }
+    // }
 
-    // if the buffer has wrapped around
-    else{
+    // // if the buffer has wrapped around
+    // else{
 
-        // print the orders from first to the end of the buffer
-        for(int i = first; i < MAX_ORDERS; i++){
+    //     // print the orders from first to the end of the buffer
+    //     for(int i = first; i < MAX_ORDERS; i++){
                 
-            printf("Order %d of %d: ", i, ordersOrder.buffer[i].visitor_id);
+    //         printf("Order %d of %d: ", i, ordersOrder.buffer[i].visitor_id);
             
-            int numOfItems = ordersOrder.buffer[i].count;
-            printf("Number of items: %d\n", numOfItems);
+    //         int numOfItems = ordersOrder.buffer[i].count;
+    //         printf("Number of items: %d\n", numOfItems);
             
-            for(int j = 0; j < MAX_NUM_OF_ITEMS_PER_ORDER; j++){
+    //         for(int j = 0; j < MAX_NUM_OF_ITEMS_PER_ORDER; j++){
             
-                if(ordersOrder.buffer[i].items[j] == 0){
-                    printf("Water | ");
-                }
-                else if(ordersOrder.buffer[i].items[j] == 1){
-                    printf("Wine | ");
-                }
-                else if(ordersOrder.buffer[i].items[j] == 2){
-                    printf("Cheese | ");
-                }
-                else if(ordersOrder.buffer[i].items[j] == 3){
-                    printf("Salad | ");
-                }
+    //             if(ordersOrder.buffer[i].items[j] == 0){
+    //                 printf("Water | ");
+    //             }
+    //             else if(ordersOrder.buffer[i].items[j] == 1){
+    //                 printf("Wine | ");
+    //             }
+    //             else if(ordersOrder.buffer[i].items[j] == 2){
+    //                 printf("Cheese | ");
+    //             }
+    //             else if(ordersOrder.buffer[i].items[j] == 3){
+    //                 printf("Salad | ");
+    //             }
         
-            }
-            printf("\n\n");
-        }
+    //         }
+    //         printf("\n\n");
+    //     }
 
-        // print the orders from the beginning of the buffer to the last order
-        for(int i = 0; i <= last; i++){
+    //     // print the orders from the beginning of the buffer to the last order
+    //     for(int i = 0; i <= last; i++){
                 
-            printf("Order %d of %d: ", i, ordersOrder.buffer[i].visitor_id);
+    //         printf("Order %d of %d: ", i, ordersOrder.buffer[i].visitor_id);
             
-            int numOfItems = ordersOrder.buffer[i].count;
-            printf("Number of items: %d\n", numOfItems);
+    //         int numOfItems = ordersOrder.buffer[i].count;
+    //         printf("Number of items: %d\n", numOfItems);
             
-            for(int j = 0; j < MAX_NUM_OF_ITEMS_PER_ORDER; j++){
+    //         for(int j = 0; j < MAX_NUM_OF_ITEMS_PER_ORDER; j++){
             
-                if(ordersOrder.buffer[i].items[j] == 0){
-                    printf("Water | ");
-                }
-                else if(ordersOrder.buffer[i].items[j] == 1){
-                    printf("Wine | ");
-                }
-                else if(ordersOrder.buffer[i].items[j] == 2){
-                    printf("Cheese | ");
-                }
-                else if(ordersOrder.buffer[i].items[j] == 3){
-                    printf("Salad | ");
-                }
+    //             if(ordersOrder.buffer[i].items[j] == 0){
+    //                 printf("Water | ");
+    //             }
+    //             else if(ordersOrder.buffer[i].items[j] == 1){
+    //                 printf("Wine | ");
+    //             }
+    //             else if(ordersOrder.buffer[i].items[j] == 2){
+    //                 printf("Cheese | ");
+    //             }
+    //             else if(ordersOrder.buffer[i].items[j] == 3){
+    //                 printf("Salad | ");
+    //             }
         
-            }
+    //         }
         
-            printf("\n\n");
-        }
-    }
+    //         printf("\n\n");
+    //     }
+    // }
 }
 
 void printSemaphores(struct sharedObjects* sharedData){

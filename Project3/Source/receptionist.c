@@ -75,10 +75,6 @@ int main(int argc, char* argv[]){
         sem_wait(&sharedData->mutex);
 
 
-
-        // ##### CLOSING
-        // if the bar is closing, the receptionist should not take any more orders
-        // wait till all customeres leave
         if(sharedData->isClosing == true){
      
             if(checkIfBarIsEmpty(sharedData) == true && sharedData->waitingLine.count == 0){
@@ -93,6 +89,10 @@ int main(int argc, char* argv[]){
             // if it is not yet empty continue with the orders
         }
     
+
+        // ##### CLOSING
+        // if the bar is closing, the receptionist should not take any more orders
+        // wait till all customeres leave
 
         // #####  ORDERS
         // 1. check if there are any orders
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]){
             float actualTime = rand() % maxTime + minTime;
 
             char message[100];
-            sprintf(message, "Order for %d is being prepared for %f time\n", currentOrder.visitor_id, actualTime);
+            sprintf(message, "ORDER PREPARATION: Order of %d is being prepared for %f time\n\n", currentOrder.visitor_id, actualTime);
             write(fdLogging, message, strlen(message));
 
             sem_post(&sharedData->mutex); 
@@ -134,7 +134,7 @@ int main(int argc, char* argv[]){
             sharedData->stats.avgServeTime = (avgServeTime + actualTime) / totalVisitorsServed;
 
             // write to logging file that the order is ready
-            sprintf(message, "Order for %d was served\n", currentOrder.visitor_id);
+            sprintf(message, "ORDER READY: Order of %d was served\n\n", currentOrder.visitor_id);
             write(fdLogging, message, strlen(message));
             
             // searching for the table and chair of the visitor
@@ -278,7 +278,6 @@ void closeBar(struct sharedObjects* sharedData, int fdLogging, int fdSharedMem, 
 
     // #### DETACH SHARED MEMORY SEGMENT
 
-    // #### UNMAP SHARED MEMORY SEGMENT
     if(munmap(sharedData, sizeof(struct sharedObjects)) == -1){
         printf("munmap failure in receptionist\n");
         exit(1);

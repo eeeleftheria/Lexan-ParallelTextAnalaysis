@@ -11,7 +11,7 @@ typedef struct order order;
 typedef struct circularBuffer circularBuffer;
 typedef struct circularOrders circularOrders;
 
-#define MAX_WAITING 10 // max number of clients waiting
+#define MAX_WAITING 100 // max number of clients waiting
 #define MAX_NUM_OF_ITEMS_PER_ORDER 4 // at least 1 drink & salad, cheese, both or none
 #define MAX_ORDERS 12 // max number of orders
 #define MAX_TABLES 3 // number of tables

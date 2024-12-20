@@ -73,10 +73,11 @@ int main(int argc, char* argv[]){
 
     pid_t pid = getpid(); // get the pid of the visitor
 
-    sem_wait(&sharedData->mutex); 
-
     //#### VISITOR ENTERS WAITING LINE
     sem_wait(&sharedData->maxWaiting); // if it below 0, the visitor gets suspended since the waiting line is full
+    
+    sem_wait(&sharedData->mutex); 
+
 
     // if the bar is closing, the cient should leave
     if(sharedData->isClosing == true){
@@ -123,7 +124,7 @@ int main(int argc, char* argv[]){
 
             // write to logging file that a visitor has entered the waiting line
             char message[100];
-            sprintf(message, "%d has entered the waiting line\n", pid);
+            sprintf(message, "NEW CLIENT: %d has entered the waiting line\n\n", pid);
             write(fdLogging, message, strlen(message));
 
 
@@ -153,12 +154,14 @@ int main(int argc, char* argv[]){
         sharedData->waitingLine.count++; // increase the number of visitors in the waiting line
 
         char message[100];
-        sprintf(message, "%d has entered the waiting line\n", pid);
+        sprintf(message, "NEW CLIENT: %d has entered the waiting line\n\n", pid);
         write(fdLogging, message, strlen(message));
 
         sem_post(&sharedData->mutex); // free the mutex
-        
-        sem_wait(&sharedData->waitingLine.sems[0]); // wait for someone to wake him up when there is a free table
+       
+        int last = sharedData->waitingLine.last;
+
+        sem_wait(&sharedData->waitingLine.sems[last]); // wait for someone to wake him up when there is a free table
 
         sem_wait(&sharedData->mutex); // lock the mutex again
 
@@ -215,7 +218,7 @@ bool checkForTable(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
             sharedData->tables[i].occupiedSeats++;
 
             char message[100];
-            sprintf(message,"%d had a seat at table %d\n" ,pid, i);
+            sprintf(message,"CLIENT SEATED: %d had a seat at table %d\n\n" ,pid, i);
             write(fdLogging, message, strlen(message));
 
 
@@ -225,7 +228,7 @@ bool checkForTable(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
                 sharedData->tables[i].is_full = true;
 
                 char message[100];
-                sprintf(message,"Table %d is now full\n", i);
+                sprintf(message,"FULL TABLE: Table %d is now full\n\n", i);
                 write(fdLogging, message, strlen(message));
             }
 
@@ -346,7 +349,7 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
     
     // write to logging file that a visitor has placed an order
     char message[100];
-    sprintf(message, "%d ordered %d drinks and %d plates\n", pid, numOfDrinks, numOfFood);
+    sprintf(message, "NEW ORDER: %d ordered %d drinks and %d plates\n\n", pid, numOfDrinks, numOfFood);
     write(fdLogging, message, strlen(message));
 
     sem_post(&sharedData->receptionist); // wake up the receptionist to take the order
@@ -406,7 +409,7 @@ void stayInBar(struct sharedObjects* sharedData, int fdLogging, pid_t pid, float
     float actualTime = rand() % (int)maxTime + minTime;
 
     char message[100];
-    sprintf(message, "%d eats and converses for %f time\n", pid, actualTime);
+    sprintf(message, "CLIENT EATING: %d eats and converses for %f time\n\n", pid, actualTime);
     write(fdLogging, message, strlen(message));
 
     sem_post(&sharedData->mutex);
@@ -416,7 +419,7 @@ void stayInBar(struct sharedObjects* sharedData, int fdLogging, pid_t pid, float
     sem_wait(&sharedData->mutex);
 
     char message2[100];
-    sprintf(message2, "%d left the bar\n", pid);
+    sprintf(message2, "CLIENT LEAVING: %d left the bar\n\n", pid);
     write(fdLogging, message2, strlen(message2));
 
     // remove visitor from the table
