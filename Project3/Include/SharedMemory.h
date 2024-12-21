@@ -33,7 +33,6 @@ struct statistics{
     int totalVisitors; // number of visitors that entered the bar
     float avgWaitTime; // average waiting time of the visitors
     float avgStayTime; // average stay time of the visitors
-    float avgServeTime; // average serving time
 };
 
 struct chair{

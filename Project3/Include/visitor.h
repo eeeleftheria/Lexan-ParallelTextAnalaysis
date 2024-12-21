@@ -1,6 +1,7 @@
 #include "SharedMemory.h"
 
 // checks if there is a table available for the visitor and returns true if there is, else false
+// if there is a table, the visitor is added to a seat.
 bool checkForTable(struct sharedObjects* sharedData, int fdLogging, pid_t pid);
 
 // places an order for the visitor

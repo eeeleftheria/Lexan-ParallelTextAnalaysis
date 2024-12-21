@@ -128,11 +128,6 @@ int main(int argc, char* argv[]){
 
             sharedData->stats.totalVisitorsServed++; // increment the number of visitors served
 
-            // calculate the average serving time
-            float avgServeTime = sharedData->stats.avgServeTime;
-            int totalVisitorsServed = sharedData->stats.totalVisitorsServed;
-            sharedData->stats.avgServeTime = (avgServeTime + actualTime) / totalVisitorsServed;
-
             // write to logging file that the order is ready
             sprintf(message, "ORDER READY: Order of %d was served\n\n", currentOrder.visitor_id);
             write(fdLogging, message, strlen(message));
@@ -337,10 +332,6 @@ void writeStats(struct sharedObjects* sharedData, int fdLogging){
     sprintf(message, "Average stay time: %f\n", sharedData->stats.avgStayTime);
     write(fdLogging, message, strlen(message));
     printf("Average stay time: %f\n", sharedData->stats.avgStayTime);
-
-    sprintf(message, "Average serving time: %f\n", sharedData->stats.avgServeTime);
-    write(fdLogging, message, strlen(message));
-    printf("Average serving time: %f\n", sharedData->stats.avgServeTime);
 
     close(fdLogging);
 }
