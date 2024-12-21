@@ -1,1 +1,422 @@
 Logging file of the bar:
+CLIENT SEATED: 140783 had a seat at table 0
+
+NEW ORDER: 140783 ordered 2 drinks and 1 plates
+
+ORDER PREPARATION: Order of 140783 is being prepared for 4.500000 time
+
+CLIENT SEATED: 140780 had a seat at table 0
+
+NEW ORDER: 140780 ordered 1 drinks and 1 plates
+
+CLIENT SEATED: 140781 had a seat at table 0
+
+NEW ORDER: 140781 ordered 1 drinks and 0 plates
+
+CLIENT SEATED: 140797 had a seat at table 0
+
+FULL TABLE: Table 0 is now full
+
+NEW ORDER: 140797 ordered 2 drinks and 1 plates
+
+CLIENT SEATED: 140799 had a seat at table 1
+
+NEW ORDER: 140799 ordered 2 drinks and 0 plates
+
+CLIENT SEATED: 140785 had a seat at table 1
+
+NEW ORDER: 140785 ordered 2 drinks and 0 plates
+
+CLIENT SEATED: 140790 had a seat at table 1
+
+NEW ORDER: 140790 ordered 2 drinks and 0 plates
+
+CLIENT SEATED: 140788 had a seat at table 1
+
+FULL TABLE: Table 1 is now full
+
+NEW ORDER: 140788 ordered 1 drinks and 1 plates
+
+CLIENT SEATED: 140793 had a seat at table 2
+
+NEW ORDER: 140793 ordered 2 drinks and 1 plates
+
+CLIENT SEATED: 140784 had a seat at table 2
+
+NEW ORDER: 140784 ordered 2 drinks and 0 plates
+
+CLIENT SEATED: 140796 had a seat at table 2
+
+NEW ORDER: 140796 ordered 2 drinks and 1 plates
+
+CLIENT SEATED: 140792 had a seat at table 2
+
+FULL TABLE: Table 2 is now full
+
+NEW ORDER: 140792 ordered 1 drinks and 0 plates
+
+NEW CLIENT: 140794 has entered the waiting line
+
+NEW CLIENT: 140782 has entered the waiting line
+
+NEW CLIENT: 140789 has entered the waiting line
+
+NEW CLIENT: 140802 has entered the waiting line
+
+NEW CLIENT: 140801 has entered the waiting line
+
+NEW CLIENT: 140805 has entered the waiting line
+
+NEW CLIENT: 140798 has entered the waiting line
+
+NEW CLIENT: 140803 has entered the waiting line
+
+NEW CLIENT: 140807 has entered the waiting line
+
+NEW CLIENT: 140806 has entered the waiting line
+
+NEW CLIENT: 140791 has entered the waiting line
+
+NEW CLIENT: 140786 has entered the waiting line
+
+NEW CLIENT: 140795 has entered the waiting line
+
+NEW CLIENT: 140800 has entered the waiting line
+
+NEW CLIENT: 140808 has entered the waiting line
+
+NEW CLIENT: 140787 has entered the waiting line
+
+NEW CLIENT: 140804 has entered the waiting line
+
+NEW CLIENT: 140809 has entered the waiting line
+
+ORDER READY: Order of 140783 was served
+
+ORDER PREPARATION: Order of 140780 is being prepared for 3.500000 time
+
+CLIENT EATING: 140783 eats and converses for 4.500000 time
+
+ORDER READY: Order of 140780 was served
+
+ORDER PREPARATION: Order of 140781 is being prepared for 2.500000 time
+
+CLIENT EATING: 140780 eats and converses for 4.500000 time
+
+CLIENT LEAVING: 140783 left the bar
+
+ORDER READY: Order of 140781 was served
+
+ORDER PREPARATION: Order of 140797 is being prepared for 4.500000 time
+
+CLIENT EATING: 140781 eats and converses for 4.500000 time
+
+CLIENT LEAVING: 140780 left the bar
+
+CLIENT LEAVING: 140781 left the bar
+
+ORDER READY: Order of 140797 was served
+
+ORDER PREPARATION: Order of 140799 is being prepared for 3.500000 time
+
+CLIENT EATING: 140797 eats and converses for 4.500000 time
+
+ORDER READY: Order of 140799 was served
+
+ORDER PREPARATION: Order of 140785 is being prepared for 4.500000 time
+
+CLIENT EATING: 140799 eats and converses for 3.500000 time
+
+CLIENT LEAVING: 140797 left the bar
+
+CLIENT SEATED: 140789 had a seat at table 0
+
+NEW ORDER: 140789 ordered 1 drinks and 0 plates
+
+CLIENT SEATED: 140794 had a seat at table 0
+
+NEW ORDER: 140794 ordered 1 drinks and 0 plates
+
+CLIENT SEATED: 140782 had a seat at table 0
+
+NEW ORDER: 140782 ordered 2 drinks and 0 plates
+
+CLIENT SEATED: 140802 had a seat at table 0
+
+FULL TABLE: Table 0 is now full
+
+NEW ORDER: 140802 ordered 2 drinks and 1 plates
+
+CLIENT LEAVING: 140799 left the bar
+
+ORDER READY: Order of 140785 was served
+
+ORDER PREPARATION: Order of 140790 is being prepared for 4.500000 time
+
+CLIENT EATING: 140785 eats and converses for 3.500000 time
+
+CLIENT LEAVING: 140785 left the bar
+
+ORDER READY: Order of 140790 was served
+
+ORDER PREPARATION: Order of 140788 is being prepared for 3.500000 time
+
+CLIENT EATING: 140790 eats and converses for 3.500000 time
+
+ORDER READY: Order of 140788 was served
+
+ORDER PREPARATION: Order of 140793 is being prepared for 2.500000 time
+
+CLIENT LEAVING: 140790 left the bar
+
+CLIENT EATING: 140788 eats and converses for 3.500000 time
+
+ORDER READY: Order of 140793 was served
+
+ORDER PREPARATION: Order of 140784 is being prepared for 3.500000 time
+
+CLIENT EATING: 140793 eats and converses for 4.500000 time
+
+CLOSING: Bar is closing
+
+CLIENT LEAVING: 140788 left the bar
+
+CLIENT SEATED: 140798 had a seat at table 1
+
+NEW ORDER: 140798 ordered 1 drinks and 1 plates
+
+CLIENT SEATED: 140803 had a seat at table 1
+
+NEW ORDER: 140803 ordered 1 drinks and 1 plates
+
+CLIENT SEATED: 140805 had a seat at table 1
+
+NEW ORDER: 140805 ordered 1 drinks and 0 plates
+
+CLIENT SEATED: 140801 had a seat at table 1
+
+FULL TABLE: Table 1 is now full
+
+NEW ORDER: 140801 ordered 1 drinks and 0 plates
+
+ORDER READY: Order of 140784 was served
+
+ORDER PREPARATION: Order of 140796 is being prepared for 4.500000 time
+
+CLIENT EATING: 140784 eats and converses for 3.500000 time
+
+CLIENT LEAVING: 140793 left the bar
+
+CLIENT LEAVING: 140784 left the bar
+
+ORDER READY: Order of 140796 was served
+
+ORDER PREPARATION: Order of 140792 is being prepared for 4.500000 time
+
+CLIENT EATING: 140796 eats and converses for 4.500000 time
+
+ORDER READY: Order of 140792 was served
+
+ORDER PREPARATION: Order of 140789 is being prepared for 4.500000 time
+
+CLIENT LEAVING: 140796 left the bar
+
+CLIENT EATING: 140792 eats and converses for 4.500000 time
+
+ORDER READY: Order of 140789 was served
+
+ORDER PREPARATION: Order of 140794 is being prepared for 2.500000 time
+
+CLIENT EATING: 140789 eats and converses for 4.500000 time
+
+CLIENT LEAVING: 140792 left the bar
+
+CLIENT SEATED: 140791 had a seat at table 2
+
+NEW ORDER: 140791 ordered 1 drinks and 0 plates
+
+CLIENT SEATED: 140786 had a seat at table 2
+
+NEW ORDER: 140786 ordered 1 drinks and 0 plates
+
+CLIENT SEATED: 140806 had a seat at table 2
+
+NEW ORDER: 140806 ordered 1 drinks and 0 plates
+
+CLIENT SEATED: 140807 had a seat at table 2
+
+FULL TABLE: Table 2 is now full
+
+NEW ORDER: 140807 ordered 1 drinks and 1 plates
+
+ORDER READY: Order of 140794 was served
+
+ORDER PREPARATION: Order of 140782 is being prepared for 3.500000 time
+
+CLIENT EATING: 140794 eats and converses for 3.500000 time
+
+CLIENT LEAVING: 140789 left the bar
+
+ORDER READY: Order of 140782 was served
+
+ORDER PREPARATION: Order of 140802 is being prepared for 3.500000 time
+
+CLIENT EATING: 140782 eats and converses for 4.500000 time
+
+CLIENT LEAVING: 140794 left the bar
+
+ORDER READY: Order of 140802 was served
+
+ORDER PREPARATION: Order of 140798 is being prepared for 3.500000 time
+
+CLIENT EATING: 140802 eats and converses for 4.500000 time
+
+CLIENT LEAVING: 140782 left the bar
+
+ORDER READY: Order of 140798 was served
+
+ORDER PREPARATION: Order of 140803 is being prepared for 4.500000 time
+
+CLIENT EATING: 140798 eats and converses for 3.500000 time
+
+CLIENT LEAVING: 140802 left the bar
+
+CLIENT SEATED: 140787 had a seat at table 0
+
+NEW ORDER: 140787 ordered 1 drinks and 1 plates
+
+CLIENT SEATED: 140800 had a seat at table 0
+
+NEW ORDER: 140800 ordered 1 drinks and 0 plates
+
+CLIENT SEATED: 140795 had a seat at table 0
+
+NEW ORDER: 140795 ordered 1 drinks and 0 plates
+
+CLIENT SEATED: 140808 had a seat at table 0
+
+FULL TABLE: Table 0 is now full
+
+NEW ORDER: 140808 ordered 2 drinks and 1 plates
+
+CLIENT LEAVING: 140798 left the bar
+
+ORDER READY: Order of 140803 was served
+
+ORDER PREPARATION: Order of 140805 is being prepared for 2.500000 time
+
+CLIENT EATING: 140803 eats and converses for 3.500000 time
+
+ORDER READY: Order of 140805 was served
+
+ORDER PREPARATION: Order of 140801 is being prepared for 2.500000 time
+
+CLIENT EATING: 140805 eats and converses for 4.500000 time
+
+CLIENT LEAVING: 140803 left the bar
+
+ORDER READY: Order of 140801 was served
+
+ORDER PREPARATION: Order of 140791 is being prepared for 2.500000 time
+
+CLIENT EATING: 140801 eats and converses for 3.500000 time
+
+CLIENT LEAVING: 140805 left the bar
+
+ORDER READY: Order of 140791 was served
+
+ORDER PREPARATION: Order of 140786 is being prepared for 2.500000 time
+
+CLIENT EATING: 140791 eats and converses for 4.500000 time
+
+CLIENT LEAVING: 140801 left the bar
+
+CLIENT SEATED: 140804 had a seat at table 1
+
+NEW ORDER: 140804 ordered 1 drinks and 0 plates
+
+CLIENT SEATED: 140809 had a seat at table 1
+
+NEW ORDER: 140809 ordered 1 drinks and 1 plates
+
+ORDER READY: Order of 140786 was served
+
+ORDER PREPARATION: Order of 140806 is being prepared for 2.500000 time
+
+CLIENT EATING: 140786 eats and converses for 3.500000 time
+
+CLIENT LEAVING: 140791 left the bar
+
+ORDER READY: Order of 140806 was served
+
+ORDER PREPARATION: Order of 140807 is being prepared for 4.500000 time
+
+CLIENT EATING: 140806 eats and converses for 4.500000 time
+
+CLIENT LEAVING: 140786 left the bar
+
+ORDER READY: Order of 140807 was served
+
+ORDER PREPARATION: Order of 140787 is being prepared for 3.500000 time
+
+CLIENT EATING: 140807 eats and converses for 3.500000 time
+
+CLIENT LEAVING: 140806 left the bar
+
+ORDER READY: Order of 140787 was served
+
+ORDER PREPARATION: Order of 140800 is being prepared for 3.500000 time
+
+CLIENT EATING: 140787 eats and converses for 3.500000 time
+
+CLIENT LEAVING: 140807 left the bar
+
+CLIENT LEAVING: 140787 left the bar
+
+ORDER READY: Order of 140800 was served
+
+ORDER PREPARATION: Order of 140795 is being prepared for 2.500000 time
+
+CLIENT EATING: 140800 eats and converses for 3.500000 time
+
+ORDER READY: Order of 140795 was served
+
+ORDER PREPARATION: Order of 140808 is being prepared for 4.500000 time
+
+CLIENT EATING: 140795 eats and converses for 3.500000 time
+
+CLIENT LEAVING: 140800 left the bar
+
+CLIENT LEAVING: 140795 left the bar
+
+ORDER READY: Order of 140808 was served
+
+ORDER PREPARATION: Order of 140804 is being prepared for 3.500000 time
+
+CLIENT EATING: 140808 eats and converses for 3.500000 time
+
+ORDER READY: Order of 140804 was served
+
+ORDER PREPARATION: Order of 140809 is being prepared for 2.500000 time
+
+CLIENT LEAVING: 140808 left the bar
+
+CLIENT EATING: 140804 eats and converses for 3.500000 time
+
+ORDER READY: Order of 140809 was served
+
+CLIENT EATING: 140809 eats and converses for 4.500000 time
+
+CLIENT LEAVING: 140804 left the bar
+
+CLIENT LEAVING: 140809 left the bar
+
+-------------------------------
+Final Statistics:
+Total water drinks served: 28
+Total wine drinks served: 24
+Total cheese plates served: 5
+Total salads served: 8
+Total visitors served: 30
+Average waiting time: 24.007999
+Average stay time: 28.099001

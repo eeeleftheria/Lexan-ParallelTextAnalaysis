@@ -223,6 +223,8 @@ int main(int argc, char* argv[]){
     sem_post(&sharedData->mutex);
 
     // #### CALCULATION OF TIMES
+
+    // the time before the visitors exits the bar
     tstayingEnd = (double) times(NULL);
 
     // the duration the visitor stayed in the bar
@@ -230,8 +232,12 @@ int main(int argc, char* argv[]){
     double tstaying = (tstayingEnd - tstayingStart) / ticspersec;
 
     sem_wait(&sharedData->mutex);
-    sharedData->stats.avgStayTime = (sharedData->stats.avgStayTime + tstaying) / sharedData->stats.totalVisitors;
-    sharedData->stats.avgWaitTime =  (sharedData->stats.avgWaitTime + twaiting) / sharedData->stats.totalVisitors;
+    
+    // the division by the total visitors is done by the receptionist
+    // when the bar is about to close
+    sharedData->stats.avgStayTime = (sharedData->stats.avgStayTime + tstaying);
+    sharedData->stats.avgWaitTime =  (sharedData->stats.avgWaitTime + twaiting);
+    
     sem_post(&sharedData->mutex);
 
 
@@ -450,7 +456,9 @@ void stayInBar(struct sharedObjects* sharedData, int fdLogging, pid_t pid, float
     float minTime = 0.7 * restTime;
     float maxTime = restTime;
 
-    float actualTime = rand() % (int)maxTime + minTime;
+    // for example: if min = 10 and max = 15
+    // then actualTime = rand() % 6 + 10 = [0, 5] + 10 = [10, 15]
+    float actualTime = rand() % (int)(maxTime - minTime + 1) + minTime;
 
     char message[100];
     sprintf(message, "CLIENT EATING: %d eats and converses for %f time\n\n", pid, actualTime);
