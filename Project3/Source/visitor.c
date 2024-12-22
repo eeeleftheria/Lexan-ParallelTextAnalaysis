@@ -324,7 +324,7 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
     // minimum 1 item, maximum 4 items
     int minDrinks = 1; //if he only gets a drink
     int maxDrinks = 2; // if he gets the whole menu
-    int numOfDrinks = rand() % maxDrinks + minDrinks; // number of drinks the visitor will order
+    int numOfDrinks = rand() % (maxDrinks - minDrinks + 1) + minDrinks; // number of drinks the visitor will order
 
     if(numOfDrinks == 1){
         
@@ -351,7 +351,7 @@ void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
 
     int minFood = 0; // least number of food items
     int maxFood = 2; // maximum number of food items
-    int numOfFood = rand() % maxFood + minFood; // number of food items the visitor will order
+    int numOfFood = rand() % (maxFood - minFood + 1) + minFood; // number of food items the visitor will order
 
     if(numOfFood == 0){
         // no food

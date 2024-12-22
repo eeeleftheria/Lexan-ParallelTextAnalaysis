@@ -107,7 +107,7 @@ int main(int argc, char* argv[]){
             // prepare the order for a random time between [0.5 * torder, torder]
             float minTime = 0.5 * ordertime;
             int maxTime = (int)ordertime;
-            float actualTime = rand() % maxTime + minTime;
+            float actualTime = rand() % (int)(maxTime - minTime + 1)+ minTime;
 
             char message[100];
             sprintf(message, "ORDER PREPARATION: Order of %d is being prepared for %f time\n\n", currentOrder.visitor_id, actualTime);
@@ -317,18 +317,19 @@ void writeStats(struct sharedObjects* sharedData, int fdLogging){
     write(fdLogging, message, strlen(message));
     printf("Total salads served: %d\n", sharedData->stats.totalSalads);
 
-    sprintf(message, "Total visitors that entered the bar: %d\n", sharedData->stats.totalVisitors);
-    write(fdLogging, message, strlen(message));
-    printf("Total visitors that entered the bar: %d\n", sharedData->stats.totalVisitors);
-
     sprintf(message, "Total visitors served: %d\n", sharedData->stats.totalVisitorsServed);
     write(fdLogging, message, strlen(message));
     printf("Total visitors served: %d\n", sharedData->stats.totalVisitorsServed);
 
+
+    // CALCULATION OF AVERAGE TIMES
+
+    sharedData->stats.avgWaitTime = sharedData->stats.avgWaitTime / sharedData->stats.totalVisitors;
     sprintf(message, "Average waiting time: %f\n", sharedData->stats.avgWaitTime);
     write(fdLogging, message, strlen(message));
     printf("Average waiting time: %f\n", sharedData->stats.avgWaitTime);
 
+    sharedData->stats.avgStayTime = sharedData->stats.avgStayTime / sharedData->stats.totalVisitors;
     sprintf(message, "Average stay time: %f\n", sharedData->stats.avgStayTime);
     write(fdLogging, message, strlen(message));
     printf("Average stay time: %f\n", sharedData->stats.avgStayTime);
