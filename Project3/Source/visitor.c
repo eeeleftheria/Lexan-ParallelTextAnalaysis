@@ -150,8 +150,10 @@ int main(int argc, char* argv[]){
 
 
             sem_post(&sharedData->mutex); // free the mutex
+
+            int first = sharedData->waitingLine.first;
             
-            sem_wait(&sharedData->waitingLine.sems[0]); // wait for someone to wake him up when there is a free table
+            sem_wait(&sharedData->waitingLine.sems[first]); // wait for someone to wake him up when there is a free table
 
             sem_wait(&sharedData->mutex); // lock the mutex again
 
@@ -159,7 +161,7 @@ int main(int argc, char* argv[]){
             checkForTable(sharedData, fdLogging, pid);
             twaitingEnd = (double) times(NULL); // the time the visitor was sitted
             tstayingStart = (double) times(NULL); // same
-            sem_post(&sharedData->maxWaiting); // one less visitor in the waiting line 
+            // sem_post(&sharedData->maxWaiting); // one less visitor in the waiting line 
 
             // the mutex is freed inside the function & the visitor sleeps on 
             // its chair until the order is ready
@@ -196,7 +198,6 @@ int main(int argc, char* argv[]){
         checkForTable(sharedData, fdLogging, pid);
         twaitingEnd = (double) times(NULL); // the time the visitor was sitted
         tstayingStart = (double) times(NULL); // same as above
-        sem_post(&sharedData->maxWaiting); // one less visitor in the waiting line 
 
         // the mutex is freed inside the function & the visitor sleeps on 
         // its chair until the order is ready
@@ -495,40 +496,27 @@ void stayInBar(struct sharedObjects* sharedData, int fdLogging, pid_t pid, float
 void wakeUpWaitingVisitors(struct sharedObjects* sharedData, int tableNum){
 
     int totalWaiting = sharedData->waitingLine.count;
+    int current = sharedData->waitingLine.first;
     
     if(totalWaiting == 0){
         return;
     }
 
     // if the line has less than 4 visitors
-    else if((totalWaiting <= 4) && (totalWaiting > 0)){
+    else{
 
-        int first = sharedData->waitingLine.first;
-        int last = sharedData->waitingLine.last;
+        if(totalWaiting > 4){
+            totalWaiting = 4; // wake up only the first 4 visitors
+        }
 
         //wake them all up
-        for(int i = first; i <= last; i++){
+        for(int i = 0; i < totalWaiting; i++){
+            printf("waking up visitor %d\n", sharedData->waitingLine.buffer[current]);
 
-            sem_post(&sharedData->waitingLine.sems[i]);
-        }
+            sem_post(&sharedData->maxWaiting); // free the semaphore
+            sem_post(&sharedData->waitingLine.sems[current]);
 
-        // remove the visitors from the waiting line
-        for(int i = first; i <= last; i++){
-            sharedData->waitingLine.buffer[i] = 0; // set all the pids of the consumed positions to 0
-        }
-    }
-
-    else if(totalWaiting > 4){
-        // wake up the first 4 visitors
-        int first = sharedData->waitingLine.first;
-
-        for(int i = first; i < first + 4; i++){
-            sem_post(&sharedData->waitingLine.sems[i]);
-        }
-
-        // remove the first 4 visitors from the waiting line
-        for(int i = first; i < first + 4; i++){
-            sharedData->waitingLine.buffer[i] = 0;
+            current = (current + 1) % MAX_WAITING;
         }
     }
 }
