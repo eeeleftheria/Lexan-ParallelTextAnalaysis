@@ -180,6 +180,7 @@ int main(int argc, char* argv[]){
         // added to (4 + 1) % 5 = 0, since 4 is the last position of the buffer
         sharedData->waitingLine.last = (sharedData->waitingLine.last + 1) % MAX_WAITING;
         sharedData->waitingLine.buffer[sharedData->waitingLine.last] = pid; // store the visitor's pid
+
         sharedData->waitingLine.count++; // increase the number of visitors in the waiting line
 
         char message[100];
@@ -292,20 +293,10 @@ bool checkForTable(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
             // remove visitor from waiting line
             // since the buffer is now empty, we do not need to declare a new first & last
             sharedData->waitingLine.count--; 
-            sharedData->waitingLine.buffer[sharedData->waitingLine.first] = 0; // removal of visitor's pid from the buffer
-            
-            // if the waiting line is empty, the first & last are set to 0
-            if(sharedData->waitingLine.count == 0){
-                sharedData->waitingLine.first = 0;
-                sharedData->waitingLine.last = 0;
-            }
-
-            // else we should update the first to be the next visitor in line
-            else{
-                sharedData->waitingLine.first = (sharedData->waitingLine.first + 1) % MAX_WAITING;
-            }
-            
-                    
+            sharedData->waitingLine.buffer[sharedData->waitingLine.first] = -1; // removal of visitor's pid from the buffer
+       
+            // we should update the first to be the next visitor in line
+             sharedData->waitingLine.first = (sharedData->waitingLine.first + 1) % MAX_WAITING;      
             
             return true;
         }
@@ -511,7 +502,6 @@ void wakeUpWaitingVisitors(struct sharedObjects* sharedData, int tableNum){
 
         //wake them all up
         for(int i = 0; i < totalWaiting; i++){
-            printf("waking up visitor %d\n", sharedData->waitingLine.buffer[current]);
 
             sem_post(&sharedData->maxWaiting); // free the semaphore
             sem_post(&sharedData->waitingLine.sems[current]);
