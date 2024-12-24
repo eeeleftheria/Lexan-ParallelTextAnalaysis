@@ -12,4 +12,3 @@ void printWaitingLine(circularBuffer waitingLine);
 // prints the order of the orders
 void printOrdersOrder(circularOrders ordersOrder);
 
-void printSemaphores(struct sharedObjects* sharedData);

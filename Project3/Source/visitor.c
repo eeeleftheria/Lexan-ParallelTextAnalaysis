@@ -21,11 +21,12 @@ int main(int argc, char* argv[]){
     double tstayingStart = 0;
     double tstayingEnd = 0;
 
-    // how many clock ticks per second does the CPU
+    // the number of clock ticks per second the CPU has
     double ticspersec = (double) sysconf(_SC_CLK_TCK);
 
     // time(NULL) returns the current time of the system 
     // it is the same in all the processes since they are executed almost at the same time
+    // so we need a more random seed to produce different numbers
     srand(time(NULL)^getpid());
 
     if(argc != 7){
@@ -115,12 +116,14 @@ int main(int argc, char* argv[]){
     if(sharedData->waitingLine.count == 0){
         
         // if it is indeed empty, the visitor becomes both the first & last of the queue
-        sharedData->waitingLine.first = 0;
-        sharedData->waitingLine.last = 0;
-        sharedData->waitingLine.buffer[0] = pid;
-        sharedData->waitingLine.count++;
+        int first = sharedData->waitingLine.first;
+        int last = sharedData->waitingLine.last;
 
-        // the visitor checks himself wether he can have a seat at the bar
+        sharedData->waitingLine.last = first;
+        sharedData->waitingLine.buffer[last] = pid; // add the visitor to the waiting line 
+        sharedData->waitingLine.count++; 
+
+        // the visitor checks himself whether he can have a seat at the bar
         
         // 1a) if there is space, he sits and places an order
         if(checkForTable(sharedData, fdLogging, pid) == true){
@@ -132,9 +135,9 @@ int main(int argc, char* argv[]){
             
             // the mutex is freed inside the function & the visitor sleeps on 
             // its chair until the order is ready
-            placeOrder(sharedData, fdLogging, pid);
+            placeAndWaitForOrder(sharedData, fdLogging, pid);
 
-            sem_wait(&sharedData->mutex);
+            sem_wait(&sharedData->mutex); // lock the mutex again, after the order is ready
             stayInBar(sharedData, fdLogging, pid, resttime);
             sem_post(&sharedData->mutex);
         }
@@ -161,11 +164,10 @@ int main(int argc, char* argv[]){
             checkForTable(sharedData, fdLogging, pid);
             twaitingEnd = (double) times(NULL); // the time the visitor was sitted
             tstayingStart = (double) times(NULL); // same
-            // sem_post(&sharedData->maxWaiting); // one less visitor in the waiting line 
 
             // the mutex is freed inside the function & the visitor sleeps on 
             // its chair until the order is ready
-            placeOrder(sharedData, fdLogging, pid);
+            placeAndWaitForOrder(sharedData, fdLogging, pid);
 
             sem_wait(&sharedData->mutex);
             stayInBar(sharedData, fdLogging, pid, resttime);
@@ -202,7 +204,7 @@ int main(int argc, char* argv[]){
 
         // the mutex is freed inside the function & the visitor sleeps on 
         // its chair until the order is ready
-        placeOrder(sharedData, fdLogging, pid);
+        placeAndWaitForOrder(sharedData, fdLogging, pid);
 
         sem_wait(&sharedData->mutex);
         stayInBar(sharedData, fdLogging, pid, resttime);
@@ -216,6 +218,7 @@ int main(int argc, char* argv[]){
     if(sharedData->isClosing == true){
         
         // if it is the last visitor to leave the bar, the receptionist should be woken up
+        // so he knows when to close the bar
         if(isLastVisitor(sharedData) == true){
             sem_post(&sharedData->receptionist);
         }
@@ -306,12 +309,16 @@ bool checkForTable(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
 }
 
 
-void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
+void placeAndWaitForOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid){
     
     order newOrder;
     newOrder.visitor_id = pid;
 
     newOrder.count = 0;
+
+    for(int i = 0; i < MAX_NUM_OF_ITEMS_PER_ORDER; i++){
+        newOrder.items[i] = -1; // no item in the order yet
+    }
 
     // minimum 1 item, maximum 4 items
     int minDrinks = 1; //if he only gets a drink
@@ -458,6 +465,7 @@ void stayInBar(struct sharedObjects* sharedData, int fdLogging, pid_t pid, float
 
     sem_post(&sharedData->mutex);
     
+    // eat and converse for a random time
     sleep(actualTime);
 
     sem_wait(&sharedData->mutex);
@@ -489,24 +497,25 @@ void wakeUpWaitingVisitors(struct sharedObjects* sharedData, int tableNum){
     int totalWaiting = sharedData->waitingLine.count;
     int current = sharedData->waitingLine.first;
     
+    // if no people are waiting to enter, return
     if(totalWaiting == 0){
         return;
     }
 
-    // if the line has less than 4 visitors
     else{
 
+        // if they are more than 4
         if(totalWaiting > 4){
             totalWaiting = 4; // wake up only the first 4 visitors
         }
 
-        //wake them all up
+        // if they are less than 4, wake them all up
         for(int i = 0; i < totalWaiting; i++){
 
-            sem_post(&sharedData->maxWaiting); // free the semaphore
-            sem_post(&sharedData->waitingLine.sems[current]);
+            sem_post(&sharedData->maxWaiting); // one less visitor in the waiting line
+            sem_post(&sharedData->waitingLine.sems[current]); // wake up the visitor
 
-            current = (current + 1) % MAX_WAITING;
+            current = (current + 1) % MAX_WAITING; // move to the next visitor
         }
     }
 }

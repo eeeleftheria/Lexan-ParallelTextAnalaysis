@@ -4,8 +4,8 @@
 // if there is a table, the visitor is added to a seat.
 bool checkForTable(struct sharedObjects* sharedData, int fdLogging, pid_t pid);
 
-// places an order for the visitor
-void placeOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid);
+// places an order for the visitor and waits till it is ready
+void placeAndWaitForOrder(struct sharedObjects* sharedData, int fdLogging, pid_t pid);
 
 // returns the chair number of the visitor with the given pid or -1 if the visitor is not found
 int findChairOfVisitor(struct sharedObjects* sharedData, pid_t pid);

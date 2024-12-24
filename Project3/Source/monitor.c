@@ -71,9 +71,7 @@ void printStatistics(statistics stats){
     printf("Salads: %d\n", stats.totalSalads);
     printf("Total visitors: %d\n", stats.totalVisitors);
     printf("Total visitors served: %d\n", stats.totalVisitorsServed);
-    // printf("Average waiting time: %f\n", stats.avgWaitTime);
-    // printf("Average stay time: %f\n", stats.avgStayTime);
-    // printf("Average serving time: %f\n\n", stats.avgServeTime);
+
 }
 
 
@@ -143,17 +141,31 @@ void printOrdersOrder(circularOrders ordersOrder){
     printf("First order: %d\n", ordersOrder.first);
     printf("Last order: %d\n", ordersOrder.last);
     printf("Total orders: %d\n\n", ordersOrder.count);
-  
-}
 
-void printSemaphores(struct sharedObjects* sharedData){
-    printf("Semaphores' values:\n");
-    int sem_value;
-    sem_getvalue(&sharedData->mutex, &sem_value);
-    printf("Mutex: %d\n", sem_value);
-    sem_getvalue(&sharedData->receptionist, &sem_value);
-    printf("Receptionist: %d\n", sem_value);
-    sem_getvalue(&sharedData->maxWaiting, &sem_value);
-    printf("Number of available seats in waiting line: %d\n", sem_value);
-    printf("\n");
+    int curr = ordersOrder.first;
+
+    for(int i = 0; i < ordersOrder.count; i++){    
+
+        printf("Order %d: ", i);
+        printf("Visitor: %d | ", ordersOrder.buffer[curr].visitor_id);
+
+        for(int j = 0; j < MAX_NUM_OF_ITEMS_PER_ORDER; j++){
+            if(ordersOrder.buffer[curr].items[j]  == WATER){
+                printf("Water ");
+            }
+            else if(ordersOrder.buffer[curr].items[j] == WINE){
+                printf("Wine ");
+            }
+            else if(ordersOrder.buffer[curr].items[j] == CHEESE){
+                printf("Cheese ");
+            }
+            else if(ordersOrder.buffer[curr].items[j] == SALAD){
+                printf("Salad ");
+            }
+        }
+
+        curr = (curr + 1) % MAX_ORDERS;
+        printf("\n");
+    }
+  
 }

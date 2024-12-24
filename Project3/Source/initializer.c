@@ -15,7 +15,7 @@
 
 
 #define SHARED_MEMORY_NAME "/sharedMemory" // name of the shared memory segment
-#define NUM_OF_VISITORS 90 // number of visitor processes to be created
+#define NUM_OF_VISITORS 110 // number of visitor processes to be created
 
 int main(int argc, char* argv[]){
     
@@ -212,6 +212,8 @@ void initSharedMemory(struct sharedObjects* sharedData){
             perror("sem_init waitingLine failed");
             exit(1);
         }
+
+        sharedData->waitingLine.buffer[i] = -1; // no visitor has entered the bar yet
     }
 
     // no orders yet

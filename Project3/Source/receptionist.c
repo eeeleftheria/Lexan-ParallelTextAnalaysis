@@ -74,9 +74,11 @@ int main(int argc, char* argv[]){
         // if he is woken up, dicrement the mutex so only one process is in critical section
         sem_wait(&sharedData->mutex);
 
-
+        // ##### CLOSING
+        // check if the bar is closing
         if(sharedData->isClosing == true){
-     
+            
+            // if the bar is empty and there are no customers waiting, close the bar & free resources
             if(checkIfBarIsEmpty(sharedData) == true && sharedData->waitingLine.count == 0){
                 printf("Bar is empty\n");
                 closeBar(sharedData, fdLogging, fd, shmid);
@@ -90,10 +92,6 @@ int main(int argc, char* argv[]){
         }
     
 
-        // ##### CLOSING
-        // if the bar is closing, the receptionist should not take any more orders
-        // wait till all customeres leave
-
         // #####  ORDERS
         // 1. check if there are any orders
         if(sharedData->ordersOrder.count > 0){
@@ -101,23 +99,23 @@ int main(int argc, char* argv[]){
             // take the first order
             order currentOrder = sharedData->ordersOrder.buffer[sharedData->ordersOrder.first];
             
-            // update the statistics
+            // increment the quantities of the order's products
             updateStats(sharedData, currentOrder, fdLogging); 
 
             // prepare the order for a random time between [0.5 * torder, torder]
             float minTime = 0.5 * ordertime;
-            int maxTime = (int)ordertime;
-            float actualTime = rand() % (int)(maxTime - minTime + 1)+ minTime;
+            float maxTime = ordertime;
+            float actualTime = rand() % (int)(maxTime - minTime + 1) + minTime;
 
             char message[100];
             sprintf(message, "ORDER PREPARATION: Order of %d is being prepared for %f time\n\n", currentOrder.visitor_id, actualTime);
             write(fdLogging, message, strlen(message));
 
-            sem_post(&sharedData->mutex); 
+            sem_post(&sharedData->mutex); // free the mutex before sleeping
            
             sleep(actualTime); // sleep for the time it takes to prepare the order
            
-            sem_wait(&sharedData->mutex); 
+            sem_wait(&sharedData->mutex); // lock the mutex again
 
             // update the circular buffer storing the orders
             sharedData->ordersOrder.count--; // current order is served
@@ -136,10 +134,10 @@ int main(int argc, char* argv[]){
             int tableNum = findTableOfVisitor(sharedData, currentOrder.visitor_id);
             int chairNum = findChairOfVisitor(sharedData, currentOrder.visitor_id);
 
-            // the recept wakes up the visitor when his order is ready
+            // the receptionist wakes up the visitor when his order is ready
             sem_post(&sharedData->tables[tableNum].sems[chairNum]); // wake up the visitor
 
-            sem_post(&sharedData->mutex);
+            sem_post(&sharedData->mutex); // free the mutex
 
         }
 
@@ -201,7 +199,7 @@ int findTableOfVisitor(struct sharedObjects* sharedData, pid_t pid){
         for(int j = 0; j < MAX_CHAIRS; j++){
         
             if(sharedData->tables[i].chairs[j].visitor == pid){
-                return i; // return the table number
+                return i; // return the table's number
             }
         }
     }
