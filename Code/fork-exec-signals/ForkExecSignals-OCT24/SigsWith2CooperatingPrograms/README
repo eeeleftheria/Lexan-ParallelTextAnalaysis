@@ -1,7 +1,0 @@
-
-To see the effect of this:
-	./signalwaiting1
-
-To re-create files:
-	make clean
-	make
