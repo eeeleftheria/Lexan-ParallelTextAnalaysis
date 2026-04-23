@@ -6,40 +6,40 @@ typedef struct hash_node* HashNode;
 typedef struct hash_table* HashTable;
 typedef void* Pointer;
 
-//δεικτης σε συναρτηση που δεχεται δυο Pointer a, b και επιστρεφει εναν int
+// pointer to a function that takes two Pointers a, b and returns an int
 typedef int (*CompareFunc)(Pointer a, Pointer b);
 
 
-int hashFunc(int user, int M); // hush function που παιρνει ενα κλειδι και το αντιστοιχιζει σε ενα index 
+int hashFunc(int user, int M); // hash function that takes a key and maps it to an index 
 
 HashTable hashCreate(int size);
 
-//προσθετει μια κορυφη στο hash table
+// adds a vertex to the hash table
 void hashAdd(HashTable hash_table, int user, Pointer value);
 
-//αφαιρουμε εναν δεδομενο user απο το hash table
+// remove a given user from the hash table
 void hashRemove(HashTable hash_table, int user, DestroyValueFunc func);
 
-//επιστρεφει το size του hash
+// returns the size of the hash
 int hashSize(HashTable hash_table);
 
 
-//για εναν δεδομενο user θελουμε να επιστρεψουμε τα στοιχεια του
+// for a given user we want to return their information
 Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user);
 
-//για εναν δεδομενο user επιστρεφουμε το list node στο οποιο ανηκει 
+// for a given user we return the list node it belongs to
 Pointer hashFindListNodeWithKey(HashTable hash_table, int user);
 
-//για εναν δεδομενο graph node επιστρεφουμε τον list node στον οποιο ανηκει
+// for a given graph node we return the list node it belongs to
 Pointer hashFindListNodeWithValue(HashTable hash_table, Pointer value);
 
 
-//ΣΥΝΑΡΤΗΣΕΙΣ DESTROY 
+// DESTROY FUNCTIONS
 
 void hashDestroy(HashTable hash_table);
 
-//δεν κανει τιποτα, ο ορισμος της χρειαζεται για την list destroy
-//το value ειναι graph node και καταστρεφεται απο την graph destroy
+// does nothing, its definition is needed for list destroy
+// the value is a graph node and is destroyed by graph destroy
 void hashDestroyValue(Pointer value);
 
 

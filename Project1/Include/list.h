@@ -1,34 +1,35 @@
-////////////////////////////////////////////
-// ΜΙΑ ΛΙΣΤΑ ΕΧΕΙ ΤΙΣ ΙΔΙΟΤΗΤΕΣ:
-// 1) ΕΙΣΑΓΩΓΗ/ΔΙΑΓΡΑΦΗ ΟΠΟΥΔΗΠΟΤΕ
-// 2) ΣΕΙΡΙΑΚΗ ΑΝΑΖΗΤΗΣΗ 
-//
-// για την υλοποιηση του γραφου εμας μας ενδιαφερει μονο η εισαγωγη στο ΤΕΛΟΣ της λιστας και η διαγραφη οπουδηποτε
-//////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+// A LIST HAS THE PROPERTIES:                                      // 
+// 1) INSERTION/DELETION ANYWHERE                                  //
+// 2) SEQUENTIAL SEARCH                                            //
+//                                                                 //
+// for the implementation of the graph we are only interested in   //
+// insertion at the END of the list and deletion anywhere          //
+/////////////////////////////////////////////////////////////////////
 
 #pragma once
 
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef void* Pointer; //μπορουμε να αποθηκευσουμε οτι τυπο θελουμε αλλα ΟΧΙ να τον χρησιμοποιησουμε(να ορισουμε περιεχομενο)
+typedef void* Pointer; // we can store any type we want but NOT dereference it
 
-typedef struct list* List; //List δεικτης σε struct list
+typedef struct list* List; // List pointer to struct list
 typedef struct list_node* ListNode;
 
-//η DestroyFunc ειναι δεικτης σε συναρτηση που καταστρεφει το value
+// DestroyFunc is a pointer to a function that destroys the value
 typedef void (*DestroyValueFunc)(Pointer value); 
 
 
 
-List listCreate(); //δημιουργια κενης λιστας
-void listInsert(List list, Pointer value); //δημιουργια και προσθηκη κομβου σε μια λιστα με τιμη value
-void listRemove(List list, ListNode node, DestroyValueFunc func); //αφαιρεση κομβου απο μια λιστα 
-int listSize(List list); //επιστρεφει το μεγεθος της λιστας
-Pointer listNodeValue(List list, ListNode node); //επιστρεφει το value του κομβου
-ListNode listFirst(List list); //επιστρεφει το πρωτο στοιχειο της λιστας
-ListNode listGetNext(ListNode node);
-ListNode findNodeWithValue(List list, Pointer value); //επιστρεφει αν βρεθει τον κομβο με τιμη value
+List listCreate(); // create empty list
+void listInsert(List list, Pointer value); // create and add a node to a list with value
+void listRemove(List list, ListNode node, DestroyValueFunc func); // remove a node from a list
+int listSize(List list); // returns the size of the list
+Pointer listNodeValue(List list, ListNode node); // returns the value of the node
+ListNode listFirst(List list); // returns the first element of the list
+ListNode listGetNext(ListNode node); // returns node's next list node
+ListNode findNodeWithValue(List list, Pointer value); // returns the node with value if found
 
 
 void listDestroy(List list, DestroyValueFunc func);

@@ -1,7 +1,7 @@
-////////////////////////////////////////////////////////////
-// Θα υλοποιησουμε τον γραφο μεσω διπλας συνδεδεμενης λιστας.
-// Οι μονες πληροφοριες που χρειαζεται να αποθηκευσουμε σε αυτον ειναι οι κορυφες του
-////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+// We will implement the graph using a doubly linked list.      // 
+// The only information we need to store in it are the vertices //
+//////////////////////////////////////////////////////////////////
 #pragma once
 
 #include <stdio.h>
@@ -18,66 +18,66 @@ typedef struct graph* Graph;
 typedef struct graph_node* GraphNode;
 typedef struct edge* Edge;
 
-//η DestroyFunc ειναι δεικτης σε συναρτηση που καταστρεφει το value
+// DestroyFunc is a pointer to a function that destroys the value
 typedef void (*DestroyValueFunc)(Pointer value); 
 
 
 Graph graphCreate();
-void graphAdd(Graph graph, int user, HashTable hash_table); //δημιουργια και προσθηκη κομβου με ονομα user
-void graphRemove(Graph graph, int user, HashTable hash_table); //αφαιρεση κορυφης με συγκεκριμενο user
+void graphAdd(Graph graph, int user, HashTable hash_table); // create and add a node with name user
+void graphRemove(Graph graph, int user, HashTable hash_table); // remove a vertex with a specific user
 
 
-//ΣΥΝΑΡΤΗΣΕΙΣ DESTROY ΚΟΡΥΦΩΝ
+// DESTROY FUNCTIONS FOR VERTICES
 void graphDestroy(Graph graph, DestroyValueFunc func, HashTable table);
-void graphDestroyNode(Pointer graph_node); //καταστρεφει εναν κομβο του γραφου, μαζι με ο,τι αυτος περιεχει
-//δηλαδη τις δυο λιστες με τις εισερχομενες και εξερχομενες ακμες και επειτα αποδεσμευει τη μνημη του γραφου
+void graphDestroyNode(Pointer graph_node); // destroys a node of the graph, along with what it contains
+// that is the two lists with incoming and outgoing edges and then frees the graph's memory
 
 
 
-// Βοηθητικές συναρτήσεις
-int graphSize(Graph graph); //επιστρεφει το μεγεθος του γραφου
-int graphGetUser(GraphNode graph_node); //επιστρεφει τον user του συγκεκριμενου κομβου
+// Helper functions
+int graphSize(Graph graph); // returns the size of the graph
+int graphGetUser(GraphNode graph_node); // returns the user of the given node
 void graphDisplay(Graph graph, FILE* output, HashTable table);
 
 
 ///////////////////////////////////////////////
-//////// ΣΥΝΑΡΤΗΣΕΙΣ ΔΙΑΧΕΙΡΙΣΗΣ ΑΚΜΩΝ ////////
+//////// EDGE MANAGEMENT FUNCTIONS ////////
 ///////////////////////////////////////////////
 
-//προσθηκη ακμης(συναλλαγης) απο τον χρηστη source_user προς τον dest_user
+// add an edge (transaction) from user source_user to user dest_user
 void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user, HashTable hash_table);
 
-//ευρεση συναλλαγης μεταξυ source_user - dest_user
+// find a transaction between source_user - dest_user
 Edge edgeFind(Graph graph, int source_user, int dest_user, HashTable hash_table);
 
-//ευρεση ακμης με ποσο sum
+// find edge with amount of transaction equal to sum
 Edge edgeFindWithAmountAndDate(Graph graph, int source_user, int dest_user, int sum, char* date, HashTable hash_table);
 
-//aφαιρεση ακμης μεταξυ source_user - dest_user
+// remove an edge between source_user - dest_user
 void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_table);
 
 void edgesOfNodeDisplay(Graph graph, int user, HashTable table, FILE* output);
 void edgesIncomingOfNodeDisplay(Graph graph, int user, HashTable table);
 void edgesOutgoingOfNodeDisplay(Graph graph, int user, HashTable table);
 
-
-
+// find the edge with amount and date equal to old_sum and old_date 
+// respectively and set them to new_sum and new_date
 void edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum, int new_sum, char* old_date, char* new_date);
 
-//ΣΥΝΑΡΤΗΣΕΙΣ DESTROY ΑΚΜΩΝ
+// DESTROY FUNCTIONS FOR EDGES
 
-//καταστρεφει την λιστα incoming edges μιας κορυφης
+// destroys the incoming edges list of a vertex
 void incomingEdgesDestroy(GraphNode graph_node);
 
-//καταστρεφει την λιστα outgoing edges μιας κορυφης
+// destroys the outgoing edges list of a vertex
 void outgoingEdgesDestroy(GraphNode graph_node);
 
-//αποδεσμευει την μνημη της ακμης value
+// frees the memory of the edge value
 void edgeDestroyValueForOutgoing(Pointer value);
 
-//δεν κανει τιποτα, ο ορισμος της χρειαζεται για να περαστει ως παραμετρος στην list destroy
-//η ακμη πρεπει να αποδεσμευτει μονο μια φορα, αφου υπαρχει και στις δυο λιστες.
-//οποτε αυτο γινεται στην απο πανω συναρτηση για τις outgoing 
+// does nothing, its definition is needed to be passed as a parameter to list destroy
+// the edge must be freed only once, since it exists in both lists.
+// so this happens in the above function for the outgoing edges
 void edgeDestroyValueForIncoming(Pointer value);
 
 

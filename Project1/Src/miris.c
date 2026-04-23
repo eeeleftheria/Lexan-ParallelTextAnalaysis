@@ -8,9 +8,7 @@
 #include <string.h>
 
 
-//argc αριθμος παραμετρων συμπεριλαμβανομενου του ονοματος του προγραμματος
-//αν argc = 1 τοτε δεν εχουμε καμια παραμετρο
-//argv[0] = ονομα προγραμματος
+// if argc = 1 then there are no parameters
 int main(int argc, char* argv[]) {
    
     FILE* file;
@@ -19,12 +17,13 @@ int main(int argc, char* argv[]) {
     char* output_file = NULL;
 
     if(argc != 5) {
-        fprintf(stderr, "Not enough arguments\n");
+        fprintf(stderr, "Usage: %s -i <input file> -o <output file>\n", argv[0]);
+        return 1;
     }
 
     for(int i = 0; i < argc; i++){
         
-        //της μορφης ./miris -i inputfile -o outputfile
+        // of the form ./miris -i inputfile -o outputfile
         if(strcmp(argv[i], "-i") == 0 && (i == 1)){
             input_file = argv[i+1];
         }
@@ -45,22 +44,22 @@ int main(int argc, char* argv[]) {
 
     char content[200];
 
-    int count = 0;//κραταμε τον αριθμο γραμμων του αρχειου
-    //για να δημιουργησουμε ενα hash table με καταλληλο μεγεθος
+    int count = 0;// keep the number of lines in the file
+    // so we can create a hash table of the appropriate size
 
-    //αναγνωση περιεχομενου κ αποθηκευση μεσα στο content
-    //η fgets σταματαει να διαβαζει οταν συναντησει α΄΄λλαγη γραμμης ή EOF
+    // read the contents and store them in content
+    // fgets stops reading when it encounters a newline or EOF
     while(fgets(content, 200, file) != NULL) { 
         count++;
     }
 
-    //επαναφορα δεικτη στην αρχη του αρχειου
+    // reset the file pointer to the beginning of the file
     fseek(file, 0, SEEK_SET);
 
-    //μεγεθος hash table οσο 2 φορες τις γραμμες του αρχειου
+    // hash table size is twice the number of lines in the file
     HashTable table = hashCreate(2*count);
     
-    while(fgets(content, 200, file) != NULL){ //αναγνωση γραμμης
+    while(fgets(content, 200, file) != NULL){ // read line
         sscanf(content, "%d %d %d %s", &user1, &user2, &amount, date);
         
         edgeAdd(graph, amount, date, user1, user2, table);
@@ -80,44 +79,44 @@ int main(int argc, char* argv[]) {
 
     while(1) {
 
-        //διαβαζουμε ξεχωριστα την εντολη για να μην εχουμε θεμα με την αλλαγη γραμμης
+        // read the command separately so we do not have issues with the newline
         if(scanf("%s", command) == EOF){ //EOF
             break;
         }
 
-        //αναγνωση υπολοιπης γραμμης
+        // read the rest of the line
         fgets(buffer, 200, stdin);
-        token = strtok(buffer, " "); //οι λεξεις χωριζονται μεταξυ τους με κενο
+        token = strtok(buffer, " "); // words are separated by spaces
 
 
         //########### 1 ##########//
-        // i Ni [Nj Nk ...] - εισαγωγη κομβων
+        // i Ni [Nj Nk ...] - insert nodes
         if(strcmp(command, "insert") == 0 || strcmp(command, "i") == 0){
             
 
             while(token!= NULL){
                 bool succ = false;
 
-                int user = atoi(token); //string to int
+                int user = atoi(token); // string to int
                 if (hashFindGraphNodeWithKey(table, user) == NULL){
                     succ = true;
                     graphAdd(graph, user, table);
                 }
                 else{
-                    printf("Issue with: %d (already exists)\n", user);
+                    printf("Issue with: %d already exists\n", user);
                 }
                 if(succ == true){
-                    printf("Succ: ");
+                    printf("Successful insertion of: ");
                     printf("%d\n", user);
                 }
 
-                token = strtok(NULL, " "); //επομενο δεδομενο
+                token = strtok(NULL, " "); // next token
             }
             printf("\n");
         }
 
         //########### 2 ##########//
-        //n Ni Nj sum date - εισαγωγη ακμων
+        // n Ni Nj sum date - insert edges
         else if(strcmp(command, "insert2") == 0 || strcmp(command, "n") == 0){
             int source = atoi(token);
             
@@ -138,17 +137,18 @@ int main(int argc, char* argv[]) {
                 printf("Added edge from '%d' to '%d'\n", source, dest); 
             }
             
-            token = strtok(NULL, " "); //επομενο δεδομενο
+            token = strtok(NULL, " "); // next token
 
+            printf("\n");
         }
         
         //########### 3 ##########//
-        //d Ni [Nj Nk ...] - διαγραφη κομβων
+        // d Ni [Nj Nk ...] - delete nodes
         else if(strcmp(command, "delete") == 0 || strcmp(command, "d") == 0){
             
             while(token!= NULL){
 
-                int user = atoi(token); //string to int
+                int user = atoi(token); // string to int
 
                 if (hashFindGraphNodeWithKey(table, user) != NULL){
                     graphRemove(graph, user, table);
@@ -157,13 +157,13 @@ int main(int argc, char* argv[]) {
                 else{
                     printf("Non existing node(s): %d\n", user);
                 }
-                token = strtok(NULL, " "); //επομενο δεδομενο
+                token = strtok(NULL, " "); // next token
             }
 
         }
 
         //########### 4 ##########//
-        //l Ni Nj - διαγραφη ακμης
+        // l Ni Nj - delete edge
         else if(strcmp(command, "delete2") == 0 || strcmp(command, "l") == 0){
             int source = atoi(token);
             
@@ -188,12 +188,12 @@ int main(int argc, char* argv[]) {
                 printf("Non-existing edge from '%d' to '%d'\n", source, dest);
             }
 
-            token = strtok(NULL, " "); //επομενο δεδομενο
+            token = strtok(NULL, " "); // next token
 
         }
 
         //########### 5 ##########//
-        //m Ni Nj sum sum1 date date1 - τροποποιηση βαρους ακμης
+        // m Ni Nj sum sum1 date date1 - modify edge weight
         else if(strcmp(command, "modify") == 0 || strcmp(command, "m") == 0){
             int source = atoi(token);
             int dest = atoi(strtok(NULL, " "));
@@ -202,7 +202,7 @@ int main(int argc, char* argv[]) {
             char* old_date = strtok(NULL, " ");
             char* new_date = strtok(NULL, " ");
 
-            //αν τουλαχιστον ενας απο τους 2 κομβους δεν υπαρχει
+            // if at least one of the two nodes does not exist
             if((hashFindGraphNodeWithKey(table, source) == NULL) || (hashFindGraphNodeWithKey(table, dest)) == NULL){
                 printf("Non-existing node(s): ");
 
@@ -214,7 +214,7 @@ int main(int argc, char* argv[]) {
                 }
     
             }
-            //αν δεν συνδεονται με ακμη
+            // if they are not connected by an edge
             else if(edgeFind(graph, source, dest, table) == NULL){
                 printf("Non-existing edge: %d %d %d %s", source, dest, old_sum, old_date);
 
@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
 
 
         //########### 6 ##########//
-        //f Ni - ευρεση ολων των εξερχομενων ακμων του Ni
+        // f Ni - find all outgoing edges of Ni
         else if(strcmp(command, "find") == 0 || strcmp(command, "f") == 0){
             int user = atoi(token);
             
@@ -244,7 +244,7 @@ int main(int argc, char* argv[]) {
         }
 
         //########### 7 ##########//
-        //r Ni - ευρεση ολων των εισερχομενων ακμων του Ni
+        // r Ni - find all incoming edges of Ni
         else if(strcmp(command, "receiving") == 0 || strcmp(command, "r") == 0){
             int user = atoi(token);
             
@@ -259,7 +259,7 @@ int main(int argc, char* argv[]) {
         }
 
         //########### 8 ##########//
-        //c Ni - ευρεση κυκλων του Ni
+        // c Ni - find cycles of Ni
         else if((strcmp(command, "circlefind") == 0) || (strcmp(command, "c") == 0)){
             int user = atoi(token);
 
@@ -271,7 +271,7 @@ int main(int argc, char* argv[]) {
 
 
         //########### 12 ##########//
-        //αποδεσμευση μνημης και τερματισμος προγραμματος
+        // release memory and terminate the program
         else if(strcmp(command, "e") == 0 || strcmp(command, "exit") == 0){
             file = fopen(output_file, "w");
             graphDisplay(graph, file, table);

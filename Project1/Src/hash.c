@@ -1,10 +1,10 @@
-////////////////////////////////////////////
-// ΥΛΟΠΟΙΗΣΗ HASHTABLE ΜΕ SEPERATE CHAINING
-// 
-//  Για μεγεθος πινακα M και κλειδι k, η hαsh function μας θα ειναι
-// h(k) = k mod Μ οπου ο M πρεπει να ειναι πρωτος αριθμος
-//
-////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+// HASH TABLE IMPLEMENTATION WITH SEPARATE CHAINING        //
+//                                                         //
+//  For table size M and key k, our hash function will be  //
+//  h(k) = k mod M where M should be a prime number        //
+//                                                         //
+/////////////////////////////////////////////////////////////
 
 
 #include <stdio.h>
@@ -16,16 +16,16 @@
 
 
 
-// HashTable: περιεχει ολες τις πληροφοριες του hash table
+// HashTable: contains all information of the hash table
 struct hash_table {
-	HashNode* array;	//πινακας που θα εχει δεικτες σε hash_nodes τα οποια θα δειχνουν σε λιστες
-	int occupied_buckets; //ποσες θεσεις εχουμε γεμισει		
-	int size_of_array;	//ποσες θεσεις εχει ο πινακας
+	HashNode* array;	// array that will have pointers to hash_nodes which point to lists
+	int occupied_buckets; // how many positions we have filled		
+	int size_of_array;	// how many positions the array has
 };
 
 struct hash_node{
 
-    List list; //λιστα με ολα τα graphNodes που εχουν το ιδιο h(k)
+    List list; // list with all graphNodes that have the same h(k)
 };
 
 
@@ -55,9 +55,9 @@ HashTable hashCreate(int size){
 
 void hashAdd(HashTable hash_table, int key, Pointer value){
 
-    int pos = hashFunc(key, hash_table->size_of_array); //σε ποια θεση του hash table πρεπει να μπει
+    int pos = hashFunc(key, hash_table->size_of_array); // which position in the hash table it should go to
 
-    //μονο αν ειναι NULL ο κομβος τον δημιουργουμε και φτιαχνουμε τη λιστα
+    // only if the node is NULL do we create it and set up the list
     if(hash_table->array[pos] == NULL) {
  
         HashNode hash_node = malloc(sizeof(struct hash_node));
@@ -67,14 +67,14 @@ void hashAdd(HashTable hash_table, int key, Pointer value){
         }
     
         hash_table->array[pos] = hash_node;
-        hash_node->list = listCreate(); //δημιουργια της λιστας για το συγκεκριμενο hashtable node
-        listInsert(hash_node->list, value); //προσθηκη της κορυφης στη λιστα
-        hash_table->occupied_buckets++; //αυξηση μονο οταν δημιουργουμε νεο hash node
+        hash_node->list = listCreate(); // create the list for this particular hashtable node
+        listInsert(hash_node->list, value); // add the vertex to the list
+        hash_table->occupied_buckets++; // increase only when we create a new hash node
         
     }
 
-    //αν δεν ειναι NULL σημαινει οτι εχει δημιουργηθει ηδη και υπαρχει η λιστα
-    // οποτε αρκει να προσθεσουμε σε αυτην
+    // if it is not NULL it means it has already been created and the list exists
+    // so we just need to add to it
     else if(hash_table->array[pos] != NULL){
         
         listInsert(hash_table->array[pos]->list, value);
@@ -90,7 +90,7 @@ int hashSize(HashTable hash_table){
 
 
 
-//για εναν δεδομενο user θελουμε να επιστρεψουμε τα στοιχεια του
+// for a given user we want to return their information
 Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user){
     int pos = hashFunc(user, hash_table->size_of_array);
 
@@ -100,8 +100,8 @@ Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user){
     else{
 
         List list = hash_table->array[pos]->list;
-        //τα nodes της λιστας εχουν value graph node
-        //αρα πρεπει να βρουμε τον graph node του αντιστοιχου user
+        // the nodes of the list have graph node values
+        // so we need to find the graph node of the corresponding user
         for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
             GraphNode graph_node = listNodeValue(list, node);
             
@@ -114,13 +114,13 @@ Pointer hashFindGraphNodeWithKey(HashTable hash_table, int user){
 }
 
 
-//επιστροφη κομβου λιστας που περιεχει τον user
+// return the list node that contains the user
 Pointer hashFindListNodeWithKey(HashTable hash_table, int user){
     int pos = hashFunc(user, hash_table->size_of_array);
 
     List list = hash_table->array[pos]->list;
-    //τα nodes της λιστας εχουν value graph node
-    //αρα πρεπει να βρουμε τον graph node του αντιστοιχου user
+    // the nodes of the list have graph node values
+    // so we need to find the graph node of the corresponding user
     for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
         GraphNode graph_node = listNodeValue(list, node);
         
@@ -135,11 +135,11 @@ Pointer hashFindListNodeWithKey(HashTable hash_table, int user){
 
 void hashDestroyValue(Pointer value){
 
-    //δεν θελουμε να καταστρεφει το value!!!!!!!!
-    //το κανει ηδη η graph remove
+    // we do not want to destroy the value!!!!!!!!
+    // the graph remove already does it
 }
 
-//αφαιρει μια κορυφη απο το hash_table
+// remove a vertex from the hash_table
 void hashRemove(HashTable hash_table, int user, DestroyValueFunc func){
     int pos = hashFunc(user, hash_table->size_of_array);
 
@@ -153,10 +153,10 @@ void hashRemove(HashTable hash_table, int user, DestroyValueFunc func){
 
 }   
 
-//για την καταστροφη του hash table, διατρεχουμε τον πινακα και για καθε θεση του 
-//διατρεχουμε την αντιστοιχη λιστα, αφαιρωντας ολους τους pointers στα nodes
-//ΔΕΝ θελουμε να διαγραψουμε τα ιδια τα nodes, αφου αποτελουν graph nodes και
-//αυτο θα οδηγουσε σε double free
+// to destroy the hash table, we traverse the array and for each position
+// we traverse the corresponding list, removing all pointers to nodes
+// we do NOT want to delete the nodes themselves, since they are graph nodes and
+// this would lead to a double free
 void hashDestroy(HashTable hash_table){
    
     for(int i = 0; i < hash_table->size_of_array; i++) {
