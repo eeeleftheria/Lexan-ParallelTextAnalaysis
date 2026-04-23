@@ -30,7 +30,6 @@ int main(int argc, char* argv[]){
     // creates a data structure for storing words received from splitters
     HashTable table = hashCreate(1000, compareWords);
 
- 
     char* word;
 
     while((bytes_to_read = read(fd_read_end, buffer, size_buffer)) > 0){
@@ -48,7 +47,6 @@ int main(int argc, char* argv[]){
 
                 builderStoreInTable(table, word); // add word to hash table
                
-              
                 size = 0;
                 free(word);
             } 
@@ -90,7 +88,7 @@ int compareWords(Pointer a, Pointer b){
 }
 
 
-//συγκρινει δυο κομβους του HashTable με βαση το κλειδι τους
+// compare two hash nodes based on their keys
 int compareHashNodes(Pointer a, Pointer b){
     HashNode node1 = (HashNode)a;
     HashNode node2 = (HashNode)b;
@@ -103,10 +101,10 @@ int compareHashNodes(Pointer a, Pointer b){
 }
 
 
-//αποθηκευει μια λεξη που ελαβε απο splitter σε μια δομη HashTable
+// stores a word received from splitter in a HashTable data structure
 void builderStoreInTable(HashTable table, char* word){
         
-    //αν υπαρχει ηδη η λεξη αποθηκευμενη, αρκει να αυξησουμε τον μετρητη της
+    // if the word already exists stored, we just need to increment its counter
     if(hashFindListNodeWithKey(table, word) != NULL){
         
         int* value = hashFindValue(table, word);
@@ -135,7 +133,7 @@ void builderStoreInTable(HashTable table, char* word){
 }
 
 
-// after storing all words in the structure, sends them to root
+// after storing all words along with their counts, send them to root
 void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
 
     int size_of_table = hashGetSizeOfArray(table);

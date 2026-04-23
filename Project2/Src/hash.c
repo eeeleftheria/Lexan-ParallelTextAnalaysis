@@ -1,8 +1,8 @@
-////////////////////////////////////////////
-//
-// ΥΛΟΠΟΙΗΣΗ HASHTABLE ΜΕ SEPERATE CHAINING
-//
-////////////////////////////////////////////
+//////////////////////////////////////////////////////
+//                                                  //
+// HASHTABLE IMPLEMENTATION WITH SEPARATE CHAINING //
+//                                                  //
+//////////////////////////////////////////////////////
 
 
 #include <stdio.h>
@@ -12,11 +12,11 @@
 #include "hash.h"
 
 
-// HashTable: περιεχει ολες τις πληροφοριες του hash table
+// HashTable: contains all the info of the hash table
 struct hash_table {
-	List* array;	//πινακας που θα εχει δεικτες σε λιστες	
-	int size_of_array;	//ποσες θεσεις εχει ο πινακας
-    int size; //αριθμος κομβων 
+	List* array;	// array with pointers to lists
+	int size_of_array;	// size of array
+    int size; // number of nodes
     CompareFunc compare;
 };
     
@@ -28,7 +28,7 @@ struct hash_node{
 
 int hashFunc(char* word, int m){
     int key = 0;
-    //προσθετουμε τους αριθμους ascii του καθε χαρακτηρα
+    // add the ascii code of each character
     for(int i = 0; i < strlen(word); i++){
         key += word[i];
     }
@@ -41,9 +41,9 @@ int hashFunc(char* word, int m){
 HashTable hashCreate(int size, CompareFunc func){
     HashTable hash_table = malloc(sizeof(struct hash_table));
     
-    hash_table->array = malloc(size*sizeof(List)); // δεσμευουμε χωρο για size δεικτες σε λιστες List
+    hash_table->array = malloc(size*sizeof(List)); // reserve space for number of size pointers to lists
     hash_table->size_of_array = size;
-    hash_table->compare = func; //ορισμος της compare func που συγκρινει τα κλειδια
+    hash_table->compare = func; // compare func for the keys
 
     for (int i = 0; i < size; i++) {
         hash_table->array[i] = NULL; 
@@ -57,14 +57,13 @@ HashTable hashCreate(int size, CompareFunc func){
 
 void hashAdd(HashTable hash_table, Pointer key, Pointer value){
 
-    int pos = hashFunc(key, hash_table->size_of_array); //σε ποια θεση του hash table πρεπει να μπει
+    int pos = hashFunc(key, hash_table->size_of_array); 
 
-    //αν υπαρχει ηδη αυτο το κλειδι, δεν θελουμε να το ξαναβαλουμε
+    // if the key already exists, don't add it
     if(hashFindListNodeWithKey(hash_table, key) != NULL){
         return;
     }
 
-    //δημιουργια του hash node
     HashNode hash_node = malloc(sizeof(struct hash_node));
 
     if(hash_node == NULL) {
@@ -75,17 +74,17 @@ void hashAdd(HashTable hash_table, Pointer key, Pointer value){
     hash_node->key = key;
     hash_node->value = value;
 
-    //μονο αν ειναι NULL δημιουργουμε τη λιστα
+    // only if the list is NULL do we create it
     if(hash_table->array[pos] == NULL) {
         
         hash_table->array[pos] = listCreate();  
     
-        listInsert(hash_table->array[pos], hash_node); //προσθηκη του κομβου στη λιστα
+        listInsert(hash_table->array[pos], hash_node); 
         
     }
 
-    //αν δεν ειναι NULL σημαινει οτι εχει δημιουργηθει ηδη η λιστα
-    // οποτε αρκει να προσθεσουμε σε αυτην τον κομβο
+    // if it is not NULL it means the list has already been created
+    // so we just need to add the node to it
     else if(hash_table->array[pos] != NULL){
         listInsert(hash_table->array[pos], hash_node);
     }   
@@ -94,7 +93,7 @@ void hashAdd(HashTable hash_table, Pointer key, Pointer value){
 
 }
 
-//καταστρεφει το hash node
+// destroy the hash node
 void hashDestroyNode(Pointer hash_node){
     HashNode node = (HashNode)hash_node;
 
@@ -112,7 +111,7 @@ void hashDestroyNode(Pointer hash_node){
     free(node);
 }
 
-//για καθε θεση του πινακα, καταστρεφουμε τη λιστα
+// for each position of the array, destroy the list
 void hashDestroy(HashTable hash_table){
    
     for(int i = 0; i < hash_table->size_of_array; i++) {
@@ -130,7 +129,7 @@ void hashDestroy(HashTable hash_table){
 
 
 
-//αφαιρει εναν κομβο απο το hash_table
+// removes a node from the hash_table
 void hashRemove(HashTable hash_table, Pointer key){
     int pos = hashFunc(key, hash_table->size_of_array);
 
@@ -158,12 +157,12 @@ ListNode hashFindListNodeWithKey(HashTable hash_table, Pointer key){
         return NULL;
     }
     
-    //τα nodes της λιστας εχουν value hash node
+    // the nodes of the list have value hash node
     for(ListNode node = listFirst(list); node != NULL; node = listGetNext(node)){
         HashNode value = listNodeValue(list, node);
         Pointer key_to_find = value->key;
         
-        //αν βρουμε τον hash node με αυτο το key τον επιστρεφουμε
+        // if we find the hash node with this key we return it
         if(hash_table->compare(key_to_find, key) == 0){ 
             // printf("found same node \n");
             return node;

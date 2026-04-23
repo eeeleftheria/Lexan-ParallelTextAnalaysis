@@ -26,27 +26,12 @@ int main(int argc, char* argv[]){
         exit(1);
     }
     
-    for(int i = 0; i < argc; i++){
-        
-       if(i == 1){
-           input_file = argv[i];
-       }
-       if(i == 2){
-           start_line = atoi(argv[i]);
-       }
-       if(i == 3){
-           end_line = atoi(argv[i]);
-       }
-       if(i == 4){
-            offset__of_start_line = atol(argv[i]); // atol: string to long int
-       }
-       if(i == 5){
-           exclusion_list = splitterCreateExclusionList(argv[i]);
-       }
-       if(i == 6){
-           num_of_builders = atoi(argv[i]);
-       }
-    }
+    input_file = argv[1];
+    start_line = atoi(argv[2]);
+    end_line = atoi(argv[3]);
+    offset__of_start_line = atol(argv[4]); // atol: string to long int
+    exclusion_list = splitterCreateExclusionList(argv[5]);
+    num_of_builders = atoi(argv[6]);
 
     // Open input file
     int fd = open(input_file, O_RDONLY);
@@ -180,7 +165,7 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
         perror("error reading from pipe in splitter\n");
     }
     
-    //αν φτασαμε στο EOF
+    // EOF
     if(bytes_to_read == 0){
        
         word[w_index] = '\0';
@@ -199,14 +184,13 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
 }
 
 
-//συγκρινει δυο λεξεις
+// compares two words
 int compareWords(Pointer a, Pointer b){
     int res = strcmp((char*)a, (char*)b);
     return res;
 }
 
-
-//υπολογιζει τον builder που πρεπει να σταλθει η λεξη και την κανει write
+// calculates the builder that the word should be sent to and writes it 
 void splitterSendToBuilder(char* word, int num_of_builders){
     int builder = splitterHashFunc(word, num_of_builders);
 
@@ -222,7 +206,7 @@ void splitterSendToBuilder(char* word, int num_of_builders){
     memcpy(buffer, word, size); 
     memcpy(buffer + size, " ", 1);
 
-    //στελνει λεξης στη μορφη word word word ...
+    // writes the words in format: word word word ...
     int bytes_written = write(builder + 500, buffer, buffer_size);
     
     if (bytes_written == -1) {
@@ -235,8 +219,8 @@ void splitterSendToBuilder(char* word, int num_of_builders){
 }
 
 
-//Δημιουργια μιας λιστας με τις λεξεις που περιεχονται στο αρχειο Exclusion List
-//το αρχειο ειναι της μορφης: μια λεξη ανα γραμμη
+// Creation of a list containing the words of Exclusion List
+// the file is of format: one word per line
 HashTable splitterCreateExclusionList(char* exclusion_list){
     
     int fd = open(exclusion_list, O_RDONLY);
@@ -256,7 +240,7 @@ HashTable splitterCreateExclusionList(char* exclusion_list){
 
     while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
         
-        if(count >= word_size - 1){ //αν χρειαστει παραπανω χωρος για τη λεξη, δεσμευουμε τον διπλασιο
+        if(count >= word_size - 1){ // reserve double the space
             word_size = 2 * word_size;
             word = realloc(word, word_size);
         }
@@ -267,14 +251,13 @@ HashTable splitterCreateExclusionList(char* exclusion_list){
             count++;
         }
         
-        else if(c == '\n' || c == EOF){  //αρα εχουμε λεξη
+        else if(c == '\n' || c == EOF){  // we have formed a word
             word[count] = '\0';
-            char* value = malloc(strlen(word) + 1); //δεσμευση χωρου για την τιμη που ισοδυναμει με τη λεξη
-            char* key = malloc(strlen(word) + 1); //δεσμευση χωρου για τη λεξη
+            char* value = malloc(strlen(word) + 1);
+            char* key = malloc(strlen(word) + 1);
             
             strcpy(value, word);
             strcpy(key, word);
-
 
             hashAdd(table, key, value); // add word to hash table with same key and value
 

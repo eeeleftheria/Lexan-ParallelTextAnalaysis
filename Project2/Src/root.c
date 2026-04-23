@@ -65,7 +65,6 @@ int main(int argc, char* argv[]){
     }
 
 
-    
     char* input_file = NULL;
     char* output_file = NULL;
     char* exclusion_list_file = NULL;
@@ -107,13 +106,13 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    //################ CALCULATION OF FILE'S NUMBER OF LINES ###################//
-    int lines = 1;//κραταμε τον αριθμο γραμμων του αρχειου
+    //################ CALCULATION OF OFFSETS FOR EACH LINE ###################//
+    int lines = 1;
     char c = 0;
 
     // read file character by character
     int bytes_to_read;
-    while((bytes_to_read =  read(fd, &c, sizeof(c))) > 0) {  // for EOF returns 0
+    while((bytes_to_read = read(fd, &c, sizeof(c))) > 0) {  // EOF returns 0
         
         if(c == '\n'){
             lines++;
@@ -128,13 +127,14 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
+    lseek(fd, 0, SEEK_SET); // reset pointer to beginning of file
     
 
-// array with line offsets
-    long int* offset_of_line = malloc((lines + 1) * sizeof(long int)); // +1 because we don't count position 0 as a line
+    // array with line offsets: 
+    // e.g offset_of_line[50] = total # of bytes till the end of line 50
+    size_t* offset_of_line = malloc((lines + 1) * sizeof(long int)); // +1 because we don't count position 0 as a line
     int count = 1; // line counter
-    int bytes = 0; // how many bytes we have read up to a point
+    size_t bytes = 0; // number of bytes we have read up to a point
     offset_of_line[0] = 0;
     
     while(read(fd, &c, sizeof(c)) > 0) {  
@@ -155,7 +155,7 @@ int main(int argc, char* argv[]){
     close(fd); // close the file, we will reopen it through pipes
 
 
-    // CREATE PIPES FOR SPLITTERS-BUILDERS COMMUNICATION
+    //####### CREATE PIPES FOR SPLITTERS-BUILDERS COMMUNICATION ########//
 
     // we want one pipe for each builder for splitters-builders communication,
     // i.e. num_of_builder pipes with 2 positions each for the pipefd
@@ -181,7 +181,7 @@ int main(int argc, char* argv[]){
     pid_t splitter[num_of_splitter]; // array with the pid of each splitter
 
     
-    // CREATE SPLITTERS
+    //############ CREATE SPLITTERS ##########//
       
     for(int i = 0; i < num_of_splitter; i++){
     
@@ -228,14 +228,14 @@ int main(int argc, char* argv[]){
                 end_line = start_line + input_of_splitter - 1; // e.g. if start_line = 5 and input = 5, must read until line 9
             }
             // if it is the last splitter read until end of file
-            // because if it doesn't divide exactly, lines will remain.
+            // because if it is not divided exactly, the last splitter should process more lines.
             else if(i == num_of_splitter - 1){
                 start_line = i * input_of_splitter + 1;
                 end_line = lines;
             }   
 
 
-            long int offset_start_line = offset_of_line[start_line - 1]; // Bytes until before the line start_line
+            size_t offset_start_line = offset_of_line[start_line - 1]; // total bytes until the line start_line(not including it)
 
             char offset_start_line_str[10]; 
             char start_line_str[10];
@@ -259,7 +259,7 @@ int main(int argc, char* argv[]){
     }   
 
     
-    //#################################################### ΔΗΜΙΟΥΡΓΙΑ BUILDERS ######################################################//
+    //#################### CREATION OF BUILDERS #####################//
 
     pid_t builder[num_of_builders];
     
@@ -311,7 +311,7 @@ int main(int argc, char* argv[]){
 
 
 
-    // SYNCHRONIZATION
+    //############## SYNCHRONIZATION ################//
 
     close(fd_root[1]); // root should only read from the root-builders pipe
 
@@ -332,8 +332,8 @@ int main(int argc, char* argv[]){
 
 
   
-    // READ RESULTS FROM ROOT
-    
+    //############### READ RESULTS FROM ROOT #################//
+     
     // create a simple array that has pointers to struct word_with_count with words and their frequencies
     int* array_size = malloc(sizeof(int)); 
     *array_size = 1000; // initial array size
@@ -461,7 +461,7 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
                     
         }
       
-    memset(buffer, '\0', buffer_size); // clear buffer
+        memset(buffer, '\0', buffer_size); // clear buffer
     }
 
     if (bytes_to_read == 0) {
@@ -472,7 +472,7 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
     }
 
     
-
+    // set the remaining empty spots to NULL
     for(int i = array_index; i < array_size; i++){
         words[i] = malloc(sizeof(struct word_with_count));
         words[i]->word = NULL;
@@ -520,6 +520,7 @@ int compareWordStructs(const void* a, const void* b) {
         return -1;
     }
     
+    // for equal frequencies sort based on the words
     return strcmp(w1->word, w2->word);
 }
 
