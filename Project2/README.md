@@ -1,50 +1,151 @@
-# Κεντρική ιδέα
-- Root: 
-    Αρχικά θέλουμε η root process να φτιάξει l splitters μεσω fork(). Η root αναλαμβανει να υπολογισει το ευρος γραμμων του αρχειου που πρεπει να διαβασει καθε splitter, δηλαδη την πρωτη και τελευταια γραμμη που θα διαβασουν. Έτσι, μπορούμε να περάσουμε στην exec, που θα καλέσει την καθε splitter διεργασια, ως παραμετρους το input_file που πρεπει να ανοιξει, το start_line, end_line και το offset. Το τελευταιο χρησιμευει στην κληση του lseek που καλειται σε καθε splitter, ωστε να ξεκινησει το διαβασμα απο το συγκεκριμενο σημειο. Για τον υπολογισμο του offset καθε γραμμης, εχω εναν πινακα οπου σε καθε θεση κραταει το συνολικο πληθος bytes μεχρι και τη γραμμη αυτη. Με αυτόν τον τροπο καθε splitter διαβαζει το δικό του κομμάτι αρχείου ταυτόχρονα με τους υπόλοιπους. 
+# Parallel Text Analysis using Process Hierarchies `lexan`
+
+This project implements a parallel text analysis system in C using a hierarchy of processes.
+It focuses on process creation, inter-process communication (IPC), and synchronization using POSIX system calls.
+
+The program analyzes a text file and computes the top-k most frequent words, excluding a given list of words.
+
+## 🧠 Overview
+
+The input file is split into parts. Multiple processes analyze different parts concurrently and results are aggregated to produce the final output.
+
+The architecture consists of three types of processes:
+
+- Root (lexan) – creates and coordinates all other processes
+- Splitters – responsible for reading and preprocessing the input file
+- Builders –  receive processed words from splitters and count their occurrences
+ 
+## 🧩 Process Architecture
+
+```
+                  Root
+                   |
+    --------------------------------
+    |       |        |       |    |
+Splitter Splitter Splitter ... Splitter
+   |         |        |           |
+   ---------------------------------
+   |        |        |            |
+ Builder Builder Builder         ...
+                   |
+                  Root
+```
+
+This design enables parallel execution while maintaining a clear separation of responsibilities:
+
+🔹 Root Process
+- Creates l splitter processes using `fork()`
+- Divides the input file into segments
+- Passes execution parameters via `exec()`
+- Creates m builder processes
+- Manages communication between processes
+- Collects and merges final results
+- Sorts the words based on their frequencies
+- Writes to the output file
+
+🔹 Splitter Processes
+- Read the assigned file segment
+- Extract valid words
+- Ignore punctuation, symbols, and digits
+- Filter words using the exclusion list
+- Send valid words to appropriate builder through pipes
+
+🔹 Builder Processes
+- Receive words from all splitters 
+- Count word occurrences
+- Store results in a hash table with the word as key and frequency as value
+- Send results back to the root process through a pipe
 
 
-- Splitters:
-    Οι splitters πρεπει να διαβαζουν το κομματι του αρχειου που τους αναλογει και να κρατανε μονο τις εγκυρες λεξεις. Με την lseek μεταφερουμε τον δεικτη διαβασματος στη γραμμη start_line απο την οποια πρεπει να ξεκινησει να διαβαζει ο splitter εως και την endline.
-    Συναρτησεις:
+## 🔗 Communication
 
-    - splitterCreateWords: διαβάζει το κομματι του αρχειου που αναλογει στον συγκεκριμενο splitter και κραταει μονο τις λεξεις που δεν αποτελουνται απο συμβολα, σημεια στιξης κλπ. Οταν προκυψει μια λεξη, ελεγχει εαν υπαρχει στο Exclusion List. Εαν ναι, τοτε την αγνοει, αλλιως την στελνει στον καταλληλο builder
+### Splitters to Builders
 
-    - splitterSendToBuilder: δεχεται μια λεξη και τον αριθμο των builders. Υπολογιζει μεσω της splitterHashFunc τον builder στον οποιο πρεπει να σταλθει η συγκεκριμενη λεξη. Αφου δεσμευσει την απαραιτητη μνημη, την αντιγραφει μεσω της memcpy σε εναν buffer και επειτα κανει write στο write end του pipe του συγκεκριμενου builder, προσθετοντας στο τελος επισης ενα κενο " " ωστε να διαχωριζονται οι λεξεις μεταξυ τους και να μην συγχεονται οταν στελνουν διαφορετικοι splitters τα αποτελεσματα τους σε εναν builder.
+When splitters extract a word, they send it to the appropriate builder through a pipe. A hash function is used to ensure that the same word is always routed to the same builder.
 
-    - splitterHashFunc: προσθετει τις ascii τιμες των χαρακτηρων της λεξης και υπολογιζει σε ποιον builder θα σταλθει μεσω του mod του αθροισματος με το πληθος των builders.
-    
-    - splitterCreateExclusionList: δεχεται ενα αρχειο Exclusion list, το ανοιγει και δημιουργει ενα hash table με ολες τις λεξεις που συμπεριλαμβανονται στο αρχειο αυτο. Το hash table το υλοποιουμε με separate chaining οποτε καθε θεση του πινακα δειχνει σε μια λιστα με τιμες τους κομβους του hash table. Καθε hash node, εχει ενα value και ενα key που στη συγκεκριμενη περιπτωση ταυτιζονται, γιατι θελουμε μοναχα να εχουμε γρηγορη αναζητηση και δεν χρειαζεται να κρατησουμε καποια αλλη πληροφορια περα της λεξης.
-
-    - compareWords: ειναι τυπου CompareFunc, δηλαδη δεικτης σε συναρτηση που δεχεται 2 Pointer και επιστρεφει 0 αν ειναι ισες οι τιμες τους. Στη συγκεκριμενη περιπτωση, συγκρινει 2 strings με τη χρηση της strcmp. 
+`word word word ... `
 
 
+### Builders to Root
 
-- Builders: 
+Builders send their results to the root process' pipe write end in the form:
 
-    - Επικοινωνία splittes-builders: θελουμε ο καθε builder να εχει ενα pipe στο οποιο μπορει να γραψει οποιοσδηποτε splitter. Για τον σκοπό αυτό, στη root δημιουργουμε έναν δισδιάστατο πίνακα mx2 με m pipes και 2 θεσεις για κάθε pipe που αντιστοιχούν στους file descriptors: Μια για το read-end (pipes_builder[i][0]) και μια για το write-end (pipe_builder[i][1]). Για εναν συγκεκριμενο builder, πρεπει να κλεισουμε ολα τα write ends(αφου αυτος μονο διαβαζει απο εναν splitter) και επιπλεον, να κλεισουμε ολα τα αχρειαστα read ends των υπολοιπων pipes, ωστε ο καθε builder να λαμβανει μονο τα δικα του δεδομενα. Προκειμενου, να μπορουν να γραψουν στα pipes αυτα οι splitters, πρεπει να γινει 
-    dup2 (int dup2(int oldfd, int newfd)) στο write end μεσα στο splitter process, δηλαδη να ανακατευθυνθει το write end του pipe σε εναν συγκεκριμενο fd. Με τον τροπο αυτό, οι splittes δεν χρειαζεται να γνωριζουν τον fd του pipe για να γραψουν. Ενας τροπος για να γινει ειναι αμα αναθεσουμε στον builder i τον fd i + 500(μεγαλο νουμερο για να μην συμπεσει με καποιον αλλον fd). Ετσι, οταν ο splitter θα γραφει στον fd i + 500, ουσιαστικα θα γραφει στο pipe[i][1].
+`word:frequency-word:frequency-...`
 
+This format allows the root to identify:
 
-    [Παρατήρηση]: Αντιμετώπισα κάποιες δυσκολίες με την dup2, καθώς αρχικά είχα καρφιτσώσει τα file descriptors (fd) σε έναν μεγάλο αριθμό (old fd + 2000). Το συγκεκριμένο παρουσίασε πρόβλημα όταν το έτρεξα στο putty, με την dup2 να αποτυγχάνει λόγω περιορισμένου αριθμού file descriptors(sto vs code me ssh den eixe thema). Έτσι, μείωσα τον αριθμό αρκετά, ωστόσο εάν βάλουμε πάνω από περίπου 200 builders, κάποια write ends θα ταυτιστούν με ήδη υπάρχοντα read ends και θα αποτύχει η dup2.
-
-    - Διαβασμα builder απο pipe: Ο builder δεχεται μεσω τη γραμμη εντολών τον fd του read end του δικου του pipe για να διαβασει απο αυτο. Καθώς, o splitter στελνει δεδομενα στη μορφη word word word, δηλαδη οι λεξεις διαχωριζονται μεταξυ τους με κενο, καθε φορα που συναντησει ενα κενο σημαινει οτι εχει διαβασει λεξη την οποια και αποθηκευσει σε ενα hash table μεσω της συναρτησης builderStoreInTable.
-
-    - builderStoreInTable: προσθετει μια λεξη (key) στο hash table μαζι με εναν μετρητη για το πληθος εμφανισεων της ως value. Εαν υπαρχει ηδη σε αυτο, αυξανεται ο μετρητης. Αλλιώς, δεσμευεται χωρος για μια νεα λεξη και για τον μετρητη της και εισαγονται στο hash table.
-
-    Οταν ο builders διαβασουν ολα τα δεδομενα απο το αντιστοιχο pipe (των οποιων τα write end αναλαμβανουν να κλεισουν οι splitters για τον ορθο τερματισμο του read), μπορουν να στειλουν τα δεδομένα αυτα στον root.
-
-    - builderSendToRoot: Η συναρτηση αυτη διατρεχει τις θεσεις του πινακα του hash table (μεσω getter συναρτησεων του hash.h) και για καθε κομβο του, κραταει το κλειδι και τη τιμη του. Αποθηκευει σε εναν buffer δεδομενα της μορφης: word:frequency-word:frequency με σκοπο να μπορει να διαχωρισει ο root ποτε διαβαζει τη λεξη και ποτε το πληθος εμφανισεων της και επειτα τα γραφει στο pipe για την επικοινωνια builders - root.
-
-    - Επικοινωνια builders - root: 
+- the word itself
+- its frequency
+- where each record ends
 
 
-- Διαβασμα τελικων αποτελεσματων απο Root: 
-    Ο root αναλαμβανει να διαβασει ολα τα αποτελεσματα που στελνουν οι builders προκειμενου να τα συνθεσει. Για την επικοινωνια builders - root δημιουργειται ενα μοναδικο pipe στο οποιο μπορει ναγραψει ο καθε builder με ενα ατομικο write καθε φορα για να μην μπερδευονται τα δεδομενα. Ο root κλεινει το write end του pipe καθως τον ενδιαφερει μονο η αναγνωση δεδομενων. Πριν την κληση των καταλληλων συναρτησεων, δημιουργειται ενας πινακας με στοιχεια δεικτες σε structs word_with_count. Τα struct αυτα φερουν τη λεξη μαζι με τη συχνοτητα της:
+## 📡 Signals and Synchronization
 
-    - rootReadFromBuilder: Συναρτηση που διαβαζει τα αποτελεσματα που εχουν γραψει ολοι oi builders. Όπως αναφερθηκε και προηγουμενως τα δεδομενα αυτα ερχονται με τη μορφη: word:frequency-word:frequency ... οποτε οταν διαβασει : σχηματιζεται λεξη, ενω οταν διαβασει - δηλωνει το τελος της συχνοτητας. Επειδη, ειναι πιθανο το ενα read να μην διαβασει ακριβως ενα πληθος λεξεων, δηλαδη να κοψει καποια λεξη στα δυο, πρεπει να λαμβανονται υποψη οσα εχουν διαβαστει ακριβως πριν το τελος του buffer στο οποιο διαβαζει για να σχηματιστει η λεξη και η συχνοτητα της σωστα. 
-    Αυτο προσπάθησα να υο υλοποιήσω μηδενίζοντας τις μεταβλητες που δηλωνουν το index της λεξης και τη συχνοτητα της αφου διαβαστει ο χαρακτηρας '-'. Ετσι εαν ξεκινησει το επομενο sys call read χωρις να τον εχει συναντησει,θα εχει στις μεταβλητες ηδη αποθηκευμενο το περιεχομενο απο το προηγουμενο read. Καθε φορα που συνανταει '-' αποθηκευονται σε δυο μεταβλητες μεσα στο struct word_with_count, η λεξη μαζι με την συχνοτητα της, το οποιο εισαγεται στον πινακα. Η συναρτηση επιστρεφει τον πινακα.
+The system uses signals to indicate completion:
 
-    - rootPrintToOutputFile: ανοιγει το output file, ταξινομει τον πινακα με την qsort με βαση την compareWordStructs και για τις num_of_to_popular λεξεις διατρεχει τον ταξινομημενο πινακα γραφοντας το περιεχομενο του στο αρχειο.
+- SIGUSR1 → sent by splitters when they finish
+- SIGUSR2 → sent by builders when they finish
 
-    - compareWordStructs: δεχεται δυο δεικτες στα στοιχεια του πινακα (καθως η qsort λειτουργει ετσι) και συγκρινει τη συχνοτητα τους με σκοπο να ταξινομησει τον πινακα με φθινουσα σειρα ως προς αυτες.
+The root process:
 
+- counts received signals
+- keeps track of completed workers
+- ensures the entire hierarchy terminates correctly
+
+This adds an asynchronous coordination mechanism on top of the pipe-based communication.
+
+## 💡 Technical Highlights
+
+This project demonstrates:
+
+- process creation with `fork()`
+- loading a new executable with `exec()`
+- inter-process communication with pipes
+- file descriptor manipulation with dup2()
+- asynchronous signaling with SIGUSR1 and SIGUSR2
+- parallel file processing
+- hash-based workload distribution
+- dynamic memory management
+- incremental parsing of partial read() results
+
+
+## 🚀 How to Run
+
+### Compile
+
+```bash
+make
+```
+
+### Run 
+The `Testing/` directory contains sample input files:
+
+`ExclusionList1_a.txt`
+`ExclusionList2_a.txt`
+`Republic_a.txt`
+`GreatExpectations_a.txt`
+`WilliamShakespeareWorks_a.txt`
+
+You can run some sample runs through:
+
+```bash
+make run1 
+make run2
+make run3
+```
+
+To run manually:
+```bash
+./lexan -i <input file> -l <num of splitters> -m <num of builders> -t <top words> -e < exclusion list> -o <output file>
+```
+
+
+
+## 🎓 Academic Context
+
+This project was developed as part of the Operating Systems course K22 of the Department of Informatics and Telecommunications of UoA, with emphasis on:
+
+- process hierarchies
+- IPC mechanisms
+- concurrency
+- system-level programming

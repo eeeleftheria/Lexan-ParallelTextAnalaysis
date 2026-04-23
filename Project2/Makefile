@@ -36,5 +36,14 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 
+run1: 
+	./lexan -i Testing/Republic_a.txt -l 80 -m 20 -t 20 -e Testing/ExclusionList1_a.txt -o output.txt
+
+run2:
+	./lexan -i Testing/GreatExpectations_a.txt -l 80 -m 20 -t 20 -e Testing/ExclusionList1_a.txt -o output.txt
+
+run3:
+	./lexan -i Testing/WilliamShakespeareWorks_a.txt -l 80 -m 20 -t 20 -e Testing/ExclusionList2_a.txt -o output.txt
+
 clean:
 	rm -rf $(OBJ_DIR) $(EXEC_ROOT) $(EXEC_SPLIT) $(EXEC_BUILD) $(EXEC_HASH) $(EXEC_LIST)

@@ -237,10 +237,10 @@ int main(int argc, char* argv[]){
 
             size_t offset_start_line = offset_of_line[start_line - 1]; // total bytes until the line start_line(not including it)
 
-            char offset_start_line_str[10]; 
-            char start_line_str[10];
-            char end_line_str[10]; 
-            char num_of_builders_str[10];
+            char offset_start_line_str[20]; 
+            char start_line_str[20];
+            char end_line_str[20]; 
+            char num_of_builders_str[20];
             
             // convert integers to string for exec
             snprintf(start_line_str, sizeof(start_line_str), "%d", start_line);
@@ -292,9 +292,9 @@ int main(int argc, char* argv[]){
                 int fd_read = pipes_builder[i][0]; // the read end fd of the pipe
                 int fd_root_write_end = fd_root[1]; 
 
-                char fd_read_str[10];
-                char num_of_builder_str[10];
-                char fd_root_write_str[10];
+                char fd_read_str[20];
+                char num_of_builder_str[20];
+                char fd_root_write_str[20];
 
                 snprintf(fd_read_str, sizeof(fd_read_str), "%d", fd_read);
                 snprintf(num_of_builder_str, sizeof(num_of_builder_str), "%d", i);
