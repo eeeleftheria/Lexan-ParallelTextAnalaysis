@@ -44,10 +44,10 @@ int main(int argc, char* argv[]) {
 
     char content[200];
 
-    int count = 0;// keep the number of lines in the file
+    int count = 0;// count the number of lines of the file
     // so we can create a hash table of the appropriate size
 
-    // read the contents and store them in content
+    // read the contents and store them in buffer content
     // fgets stops reading when it encounters a newline or EOF
     while(fgets(content, 200, file) != NULL) { 
         count++;
@@ -93,7 +93,6 @@ int main(int argc, char* argv[]) {
         // i Ni [Nj Nk ...] - insert nodes
         if(strcmp(command, "insert") == 0 || strcmp(command, "i") == 0){
             
-
             while(token!= NULL){
                 bool succ = false;
 
@@ -103,10 +102,10 @@ int main(int argc, char* argv[]) {
                     graphAdd(graph, user, table);
                 }
                 else{
-                    printf("Issue with: %d already exists\n", user);
+                    printf("User %d already exists\n", user);
                 }
                 if(succ == true){
-                    printf("Successful insertion of: ");
+                    printf("Successful insertion of user: ");
                     printf("%d\n", user);
                 }
 
@@ -130,11 +129,11 @@ int main(int argc, char* argv[]) {
             char* date = token;
 
             if(dest == source){
-                printf("Issue with: %d %d\n", source, dest);
+                printf("Source and destination must be different: %d %d\n", source, dest);
             }
             else{
                 edgeAdd(graph, sum, date, source, dest, table);
-                printf("Added edge from '%d' to '%d'\n", source, dest); 
+                printf("Added transaction from '%d' to '%d'\n", source, dest); 
             }
             
             token = strtok(NULL, " "); // next token
@@ -152,10 +151,10 @@ int main(int argc, char* argv[]) {
 
                 if (hashFindGraphNodeWithKey(table, user) != NULL){
                     graphRemove(graph, user, table);
-                    printf("Successful deletion of node: %d\n", user);
+                    printf("Successful deletion of user: %d\n", user);
                 }
                 else{
-                    printf("Non existing node(s): %d\n", user);
+                    printf("Non existing user(s): %d\n", user);
                 }
                 token = strtok(NULL, " "); // next token
             }
@@ -171,21 +170,21 @@ int main(int argc, char* argv[]) {
             int dest = atoi(token);
             
             if(hashFindGraphNodeWithKey(table, source) == NULL){
-                printf("Non-existing node(s): %d", source);
+                printf("Non-existing user(s): %d", source);
             }
 
             if(hashFindGraphNodeWithKey(table, dest) == NULL){
-                printf("Non-existing node(s): %d", dest);
+                printf("Non-existing user(s): %d", dest);
             }
 
 
             Edge edge = edgeFind(graph, source, dest, table);
             if(edge != NULL){
                 edgeRemove(graph, source, dest, table);
-                printf("Removed edge from '%d' to '%d'\n", source, dest);
+                printf("Removed transaction from '%d' to '%d'\n", source, dest);
             }
             else{
-                printf("Non-existing edge from '%d' to '%d'\n", source, dest);
+                printf("Non-existing transaction from '%d' to '%d'\n", source, dest);
             }
 
             token = strtok(NULL, " "); // next token
@@ -204,7 +203,7 @@ int main(int argc, char* argv[]) {
 
             // if at least one of the two nodes does not exist
             if((hashFindGraphNodeWithKey(table, source) == NULL) || (hashFindGraphNodeWithKey(table, dest)) == NULL){
-                printf("Non-existing node(s): ");
+                printf("Non-existing user(s): ");
 
                 if(hashFindGraphNodeWithKey(table, source) == NULL){
                     printf("%d ", source);
@@ -216,12 +215,19 @@ int main(int argc, char* argv[]) {
             }
             // if they are not connected by an edge
             else if(edgeFind(graph, source, dest, table) == NULL){
-                printf("Non-existing edge: %d %d %d %s", source, dest, old_sum, old_date);
+                printf("Non-existing user or edge: %d %d %d %s", source, dest, old_sum, old_date);
 
             }
             else{
-                edgeModify(graph, table, source, dest, old_sum, new_sum, old_date, new_date);
-                printf("Successful modification of edge %d to %d\n", source, dest);
+                int ret = edgeModify(graph, table, source, dest, old_sum, new_sum, old_date, new_date);
+                
+                if(ret == 1){
+
+                    printf("Successful modification of transaction from %d to %d\n", source, dest);
+                }
+                else{
+                    printf("Non-existing edge\n");
+                }
             }
 
             token = strtok(NULL, " ");
@@ -234,7 +240,7 @@ int main(int argc, char* argv[]) {
             int user = atoi(token);
             
             if(hashFindGraphNodeWithKey(table, user) == NULL){
-                printf("Non-existing node: %d\n", user);
+                printf("Non-existing user: %d\n", user);
             }
             else{
                 edgesOutgoingOfNodeDisplay(graph, user, table);
@@ -249,7 +255,7 @@ int main(int argc, char* argv[]) {
             int user = atoi(token);
             
             if(hashFindGraphNodeWithKey(table, user) == NULL){
-                printf("Non-existing node: %d\n", user);
+                printf("Non-existing user: %d\n", user);
             }
             else{
                 edgesIncomingOfNodeDisplay(graph, user, table);
@@ -258,16 +264,16 @@ int main(int argc, char* argv[]) {
  
         }
 
-        //########### 8 ##########//
-        // c Ni - find cycles of Ni
-        else if((strcmp(command, "circlefind") == 0) || (strcmp(command, "c") == 0)){
-            int user = atoi(token);
+        // //########### 8 ##########//
+        // // c Ni - find cycles of Ni
+        // else if((strcmp(command, "circlefind") == 0) || (strcmp(command, "c") == 0)){
+        //     int user = atoi(token);
 
-            if(hashFindGraphNodeWithKey(table, user) == NULL){
-                printf("Non-existing node: %d\n", user);
-            }
+        //     if(hashFindGraphNodeWithKey(table, user) == NULL){
+        //         printf("Non-existing node: %d\n", user);
+        //     }
             
-        }
+        // }
 
 
         //########### 12 ##########//
@@ -285,15 +291,28 @@ int main(int argc, char* argv[]) {
             return 0;
         }
         else{
-            printf("Format error - Command options:\n");
-            printf("Insert node(s):\ni Ni [Nj Nk ...] or insert\n\n");
-            printf("Insert an edge:\nn Ni Nj sum date or insert2\n\n");
-            printf("Remove node(s):\nd Ni [Nj Nk ...] or delete\n\n");
-            printf("Remove edge:\nl Ni Nj or delete2\n\n");
-            printf("Modify edge:\nm Ni Nj sum sum1 date date1 or modify\n\n");
-            printf("Find all outgoing edges from Ni:\nf Ni or find\n\n");
-            printf("Find all incoming to Ni edges:\nr Ni or receiving\n\n");
-            printf("Exit program:\ne or exit\n\n");
+            printf("\n");
+            printf("========================================================\n");
+            printf("       COMMAND OPTIONS - TRANSACTION MANAGER\n");
+            printf("========================================================\n\n");
+            
+            printf("[USER OPERATIONS]\n");
+            printf("  Insert user(s):      i Ni [Nj Nk ...]     or insert\n");
+            printf("  Remove user(s):      d Ni [Nj Nk ...]     or delete\n\n");
+            
+            printf("[TRANSACTION OPERATIONS]\n");
+            printf("  Insert a transaction:      n Ni Nj sum date     or insert2\n");
+            printf("  Remove a transaction:      l Ni Nj              or delete2\n");
+            printf("  Modify a transaction:      m Ni Nj sum sum1     or modify\n");
+            printf("                                    date date1\n\n");
+            
+            printf("[QUERY OPERATIONS]\n");
+            printf("  Outgoing transactions:      f Ni                 or find\n");
+            printf("  Incoming transactions:      r Ni                 or receiving\n\n");
+            
+            printf("[SYSTEM]\n");
+            printf("  Exit program:        e                    or exit\n\n");
+            printf("========================================================\n\n");
         }
     }
 

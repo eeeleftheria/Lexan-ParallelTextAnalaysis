@@ -62,7 +62,7 @@ void edgesOutgoingOfNodeDisplay(Graph graph, int user, HashTable table);
 
 // find the edge with amount and date equal to old_sum and old_date 
 // respectively and set them to new_sum and new_date
-void edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum, int new_sum, char* old_date, char* new_date);
+int edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum, int new_sum, char* old_date, char* new_date);
 
 // DESTROY FUNCTIONS FOR EDGES
 

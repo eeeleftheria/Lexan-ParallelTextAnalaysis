@@ -47,9 +47,6 @@ HashTable hashCreate(int size){
     }
 
     return hash_table;
-
-    
-
 }
 
 
@@ -146,11 +143,6 @@ void hashRemove(HashTable hash_table, int user, DestroyValueFunc func){
     List list = hash_table->array[pos]->list;
 
     listRemove(list, hashFindListNodeWithKey(hash_table, user), hashDestroyValue);
-
-    hash_table->occupied_buckets--; 
-
-
-
 }   
 
 // to destroy the hash table, we traverse the array and for each position
@@ -166,7 +158,7 @@ void hashDestroy(HashTable hash_table){
 
             if (listSize(list) != 0){
 
-            ListNode node = listFirst(list);
+                ListNode node = listFirst(list);
 
                 while(node != NULL) {
                     ListNode next = listGetNext(node);

@@ -69,6 +69,56 @@ void graphRemove(Graph graph, int user, HashTable hash_table){
     // finding the graph node via hash for faster search
     GraphNode node_to_remove = hashFindGraphNodeWithKey(hash_table, user);
 
+    // Important: Before deleting the node, remove all edges that reference it from other nodes
+    // This prevents dangling pointers in edge structures
+    
+    // Step 1: Remove all outgoing edges from other nodes that point to this node
+    // We need to iterate through all nodes and check their outgoing edges
+    for(ListNode n = listFirst(list_nodes); n != NULL; n = listGetNext(n)) {
+        GraphNode current_node = listNodeValue(list_nodes, n);
+        
+        if(current_node != node_to_remove) {
+            // Check outgoing edges of current_node
+            List outgoing = current_node->outgoing_edges;
+            ListNode edge_node = listFirst(outgoing);
+            
+            while(edge_node != NULL) {
+                ListNode next_edge_node = listGetNext(edge_node);
+                Edge edge = listNodeValue(outgoing, edge_node);
+                
+                // If this edge points to the node we're removing, remove it
+                if(edge->dest_node == node_to_remove) {
+                    listRemove(outgoing, edge_node, edgeDestroyValueForOutgoing);
+               
+                    // Also remove from incoming list of the node being removed
+                    ListNode incoming_node = findNodeWithValue(node_to_remove->incoming_edges, edge);
+                    if(incoming_node != NULL) {
+                        listRemove(node_to_remove->incoming_edges, incoming_node, edgeDestroyValueForIncoming);
+                    }
+                }
+                
+                edge_node = next_edge_node;
+            }
+        }
+    }
+    
+    // Step 2: Remove all incoming edges to this node from other nodes
+    // Iterate through all remaining outgoing edges of the node being removed
+    ListNode outgoing_node = listFirst(node_to_remove->outgoing_edges);
+    while(outgoing_node != NULL) {
+        ListNode next_outgoing = listGetNext(outgoing_node);
+        Edge edge = listNodeValue(node_to_remove->outgoing_edges, outgoing_node);
+        GraphNode dest = edge->dest_node;
+        
+        // Remove this edge from destination's incoming list
+        ListNode incoming_edge = findNodeWithValue(dest->incoming_edges, edge);
+        if(incoming_edge != NULL) {
+            listRemove(dest->incoming_edges, incoming_edge, edgeDestroyValueForIncoming);
+        }
+        
+        outgoing_node = next_outgoing;
+    }
+    
     // remove first from the hash table, without freeing the graph node
     hashRemove(hash_table, user, hashDestroyValue);
 
@@ -144,7 +194,8 @@ void edgeAdd(Graph graph, int amount, char* date, int source_user, int dest_user
     Edge new_edge = malloc(sizeof(struct edge));
     
     new_edge->amount = amount;
-    new_edge->date = date;
+    new_edge->date = malloc(strlen(date) + 1);
+    strcpy(new_edge->date, date);
 
     // if the users (vertices) named source_user, dest_user respectively, 
     // do not exist they must be created
@@ -197,12 +248,12 @@ Edge edgeFindWithAmountAndDate(Graph graph, int source_user, int dest_user, int 
     ListNode node;
     for(node = listFirst(list); node != NULL; node = listGetNext(node)){
 
-        Edge edge = listNodeValue(list, node);
+            Edge edge = listNodeValue(list, node);
 
-        // if we find the edge with the given destination, return it
-        if(edge->dest_node == dest && edge->amount == sum && (strcmp(date, edge->date) == 0)) {
-            return edge;
-        }
+            // if we find the edge with the given destination, return it
+            if(edge->dest_node == dest && edge->amount == sum && (strcmp(date, edge->date) == 0)) {
+                return edge;
+            }
     }   
     return NULL;
 }
@@ -250,6 +301,8 @@ void edgeRemove(Graph graph, int source_user, int dest_user, HashTable hash_tabl
 // we should not destroy the graph nodes source, dest
 // it is enough to free the edge, since we do not allocate other memory
 void edgeDestroyValueForOutgoing(Pointer value){
+    Edge edge = value;
+    free(edge->date);
     free(value); // where value is the edge
     // it must be done only on one of the two lists!!!!
 }
@@ -360,17 +413,23 @@ void edgesIncomingOfNodeDisplay(Graph graph, int user, HashTable table){
 
 
 // modification of edge
-void edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum, int new_sum, char* old_date, char* new_date){
+int edgeModify(Graph graph, HashTable table, int source, int dest, int old_sum, int new_sum, char* old_date, char* new_date){
     
     // finding first edge with specific transaction amount
     Edge edge = edgeFindWithAmountAndDate(graph, source, dest, old_sum, old_date, table);    
 
     if(edge != NULL) {
+        free(edge->date);
+        edge->date = malloc(strlen(new_date) + 1);
+        strcpy(edge->date, new_date);
+
         edge->amount = new_sum;
-        edge->date = new_date;
+
+        return 1;
+
     }
 
-    return;
+    return 0;
     
 }
 
