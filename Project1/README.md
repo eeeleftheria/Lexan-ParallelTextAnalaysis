@@ -1,65 +1,193 @@
-###### list #######
-Στο list.c υπαρχει η υλοποιηση μιας διπλας συνδεδεμενης λιστας, ο κομβος της οποιας αποτελειται απο εναν Pointer σε ενα value ή αλλιως void*. 
-Ετσι το value μπορει να δειχνει σε οποιοδηποτε τυπο. Ο λογος για τον οποιο οριστηκε ετσι το value ειναι για να αποκτησει μια πιο generic μορφη
-η δομη και να μπορει να προσαρμοστει στις αναγκες του χρηστη χωρις να τον δεσμευει να αποθηκευσει εναν συγκεκριμενο τυπο value.
-Στο list_node κραταμε τον προηγουμενο αλλα και επομενο κομβο του συγκεκριμενου για ευκολοτερη διαγραφη σε οποιοδηποτε σημειο(αμεση συνδεση των κομβων).
-Απο την αλλη, για την εισαγωγη μας αρκει η εισαγωγη νεου κομβου στο τελος της λιστας, καθως δεν μας ενδιαφερει καποια συγκεκριμενη σειρα των κομβων 
-του γραφου παρα μονο οι ακμες τους.
-- Για την λιστα αρκουν ο βασικες λειτουργιες που ειναι η εισαγωγη, η διαγραφη και η ευρεση κομβου με βαση την τιμη του.
-- Εχω δημιουργησει και ορισμενες getter συναρτησεις που επιστρεφουν το πρωτο στοιχειο της λιστας, τον επομενο ενος κομβου, το μεγεθος και την τιμη ενος κομβου. Επιτρεπουν στον χρηστη να δει τα δεδομενα της λιστας χωρις ομως να μπορει να τα μεταβαλει[ενθυλακωση].
-- Destroy functions: μια συναρτηση που καταστρεφει την τιμη ενος κομβου λιστας και μια συναρτηση που την διατρεχει και αφου καταστρεψει εναν εναν τους κομβους, αποδεσμευει τη μνημη σταδιακα.
--Πολυπλοκοτητα:
-    * list insert O(1): εισαγωγη οπου θελουμε εφοσον εχουμε τον προηγουμενο και επομενο κομβο, οποτε απλα τους συνδεουμε
-    * list remove O(1): ομοια με την insert
-    * list size O(1): το size το κραταμε σαν χαρακτηριστικο της λιστας κ το ενημερωνουμε οποτε χρειαζεται
-    * list first, node value, list get next, ομοιως Ο(1)
-    * list find node with value O(n): εδω ειναι απαραιτητο να διατρεξουμε ολη τη λιστα για να εντοπισουμε μια συγκεκριμενη τιμη
-    * list destroy: εξαρταται απο την πολυπλοκοτητα της list destroy value, η οποια διαφερει απο value σε value στο προγραμμα.
-        Εχουμε ενα for που διατρεχει τη λιστα οποτε εχουμε σιγουρα O(n * m)
+# Dynamic Transaction Graph
+
+This project implements a dynamic transaction system using a directed graph, written in C.  
+It focuses on efficient data management, memory handling, and graph operations using custom-built data structures.
+
+The system simulates users and transactions between them, supporting real-time updates through a command-line interface.
 
 
-###### graph #######
-Ο γραφος υλοποιειται μεσω λιστας γειτνιασης. Συγκεκριμενα, διατηρουμε μια λιστα με τις κορυφες του, καθε στοιχειο (δηλαδη καθε κορυφη) της οποιας 
-θα δειχνει σε δυο λιστες. Μια που θα αντιπροσωπευει τις εξερχομενες ακμες και μια για τις εισερχομενες ακμες. Η αναγκη δυο λιστων 
-για την απεικονιση των γειτονων-ακμων καθε κορυφης προκυπτει απο το γεγονος οτι στην περιπτωση της διαγραφης μιας κορυφης απο τον γραφο,
-πρεπει να αφαιρεσουμε ολες τις εισερχομενες και εξερχομενες ακμες του. Αν ειχαμε μονο μια λιστα για τις ακμες(εξερχομενες), θα ηταν 
-χρονοβορο αφου θα επρεπε να ελεγξουμε ολους τους κομβους που εχουν ακμη με προορισμο τον κομβο προς διαγραφη. 
+## 🧠 Core Idea
 
-Περιεχει:
-- βασικες λειτουργιες οπως εισαγωγη κομβου, διαγραφη κομβου, εισαγωγη ακμης, διαγραφη ακμης, τροποποιηση ακμης.
-- βοηθητικες συναρτησεις και getters: επιστροφη user ενος κομβου, επιστροφη μεγεθους γραφου, εκτυπωση γραφου(εκτυπωση των user και των συναλλαγων τους)
+Each user is represented as a node in a directed graph, and each transaction is an edge between two users.
 
-
--Πολυπλοκοτητα:
- * graph add Ο(1): list insert O(1) + hash find graph node with key O(1)
- * graph remove O(1): list remove O(1) + hash find graph node with key 2 * O(1) + 
- * graph size, graph get user O(1): ομοια με list size
- * graph destroy node: list destroy 2 * O(n*m) 
- * graph destroy: O(n* n *m) = O(n^2 * m)
- * edge add: hash find graph node with key O(1) + list insert O(1)
- * edge remove: Ο(n), καλει την edge find
- * edge find: O(n) αφου διατρεχουμε τη λιστα με τις ακμες και ενας κομβος στη χειροτερη περιπτωση μπορει να συνδεεται με ολες τις υπολοιπες κορυφες
- * 
- 
-
-###### hash table #######
-To hash table υλοποιειται με Seperate Chaining μεσω ενος πινακα απο HashNode που εχουν ως value μια λιστα. Ο τροπος που τοποθετουνται στις θεσεις ειναι μεσω της hash function που κανει ενα απλο mod του κλειδιου με το μεγεθος του πινακα(key mod M). Το τελευταιο, προσδιοριζεται απο το μεγεθος του αρχειου εισοδου και συγκεκριμενα η τιμη που του ανατιθεται ειναι το διπλασιο του αριθμου γραμμων του αρχειου. Προκειμενου να βρεθουν τα στοιχεια ενος user γρηγορα, υπολογιζεται η θεση στην οποια ανηκει ο user με βαση το id του και διατρεχεται η λιστα που αντιστοιχει σε αυτη τη θεση. Εαν υποθεσουμε οτι η πιθανοτητα να εχουμε συγκρουση μεταξυ στοιχειων ειναι πολυ μικρη, η πολυπλοκοτητα αυτης της διαδικασιας ειναι O(1). H hashFindGraphNodeWithKey που εκτελει τη παραπανω λειτουργια, καλειται απο την graph στην πλειοψηφια των συναρτησεων της ειτε οταν χρειαζεται να βρεθει αν υπαρχει ο συγκεκριμενος user, ειτε οταν θελουμε να τον εντοπισουμε γρηγορα για να υλοποιησουμε διαφορες λειτουργιες(προσθηκη ακμων, διαγραφη κομβων κλπ)
-Η destroy του hash table οφειλει απλα να καταστρεψει τη λιστα καθε θεσης του πινακα αλλα και τον ιδιο τον πινακα. Δεν πρεπει να γινουν free τα values των κομβων της λιστας(GraphNode), αφου αυτα αποδεσμευονται κατα την καταστροφη του γραφου
+The graph supports:
+- dynamic insertion and deletion of users
+- multiple transactions between the same users (multigraph)
+- efficient lookup using a hash table
+- real-time querying via a command-line interface
 
 
+## 🧩 Data Structures
+
+### 🔹 Doubly Linked List
+
+The list is implemented in a generic way (`void*` values) since it can store any type of data throughout the project.
+
+```C
+struct list{
+    ListNode first;
+    ListNode last;
+    int size;
+};
+```
+```C
+struct list_node{
+    Pointer value;
+    ListNode next;
+    ListNode prev;
+};
+```
+
+The list:
+- Stores nodes and edges
+- Supports insertion at the end of the list and deletion in any place
+- Provides safe access through getters (encapsulation)
+
+**Complexities:**
+- Insert / Remove: `O(1)`
+- Size / Access: `O(1)`
+- Find: `O(n)`
 
 
-##### DESTROY FUNCTIONS ######
-Για την αποδεσμευση της μνημης ενος γραφου πρεπει να καλεσουμε την GraphDestroy, 
-η οποια ειναι υπευθυνη για την αποδεσμευση μνημης της λιστας nodes. Εκεινη με τη σειρα της θα καλεσει 
-την listDestroy που διατρεχει τη λιστα μας και καταστρεφει ενα ενα τα value των κομβων μεσω της listDestoryValue. 
-Στην συγκεκριμενη περιπτωση τo value καθε κομβου περιεχει εναν δεικτη σε λιστα για τις εξερχομενες ακμες του και 
-εναν δεικτη σε λιστα για τις εισερχομενες ακμες του. Οπότε, για καθε μια απο αυτες καλειται η αντιστοιχη list destroy 
-μεσα στην οποια καταστρεφεται και το περιεχομενο καθε κομβου που συνιστα μια ακμη. Ιδιαιτερη προσοχη πρεπει να δοθει 
-στο γεγονος οτι η αποδεσμευση μνημης για μια ακμη πρεπει να γινει μονο σε μια απο τις δυο λιστες και οχι και στις δυο. 
-Αυτο θα οδηγουσε σε double free, καθως pointer στην ιδια ακμη αποθηκευεται και στις δυο λιστες. Επίσης, καθε ακμή 
-συμπεριλαμβάνει τον κομβο πηγη και τον κομβο προορισμου της. Με παρομοια λογικη, δεν πρεπει να αποδεσμευτει η μνημη 
-για αυτους στο συγκεκριμενο σημειο, αφου σε αυτους δειχνουν και αλλοι δεικτες. Η αποδεσμευση για τους κομβους 
-πραγματοποιειται τελικα απο την graph destroy αφου προηγηθουν ολα τα παραπανω.
+### 🔹 Graph (Adjacency Lists)
+
+The graph is implemented using adjacency lists.
+
+```C
+struct graph{
+    List nodes; // the nodes of the graph
+    int size;
+};
+```
+
+```C
+struct graph_node{ 
+    int user;
+    List outgoing_edges; // stores the outgoing edges of the node
+    List incoming_edges; // stores the incoming edges of the node
+};
+```
+
+Each node maintains:
+- a list of outgoing edges
+- a list of incoming edges
+
+This design allows:
+- efficient edge traversal
+- fast deletion of nodes and all associated edges
+
+**Key operations:**
+- Add / Remove node
+- Add / Remove edge
+- Modify edge
+- Query incoming / outgoing edges
 
 
+### 🔹 Hash Table
+
+Used for fast lookup of users.
+
+- Implements **separate chaining**
+- Each bucket contains a list of nodes (graph nodes)
+- Hash function: `key % table_size`
+
+This enables near `O(1)` access to graph nodes.
+
+
+## ⚙️ System Design Highlights
+
+- Directed **multigraph** (multiple edges between same nodes allowed)
+- Separation of concerns:
+  - List → storage
+  - Graph → logic
+  - Hash table → fast access
+- Careful memory management:
+  - no double frees
+  - controlled destruction of shared edges
+- Explicit handling of incoming vs outgoing edges
+
+
+## 💾 Memory Management
+
+Special attention is given to proper memory handling:
+
+- Each edge is stored in both incoming and outgoing lists  
+- It must be freed **only once** to avoid double free errors  
+- When deleting a node all incoming and outgoing edges associated to that node must be freed.
+
+The destruction process:
+1. Destroy edges
+2. Destroy adjacency lists
+3. Destroy nodes
+4. Destroy hash table
+
+
+## 🚀 How to Run
+
+### Compile
+
+```bash
+make
+```
+
+### Run 
+With one of the commands below you can run with Valgrind any of the 5 inputs provided (`\Input`).
+```bash
+make run1
+make run2
+make run3
+make run4
+make run5
+```
+
+To run manually:
+```bash
+./miris -i <input file> -o <output file>
+```
+
+An output file has been provided with the name `output.txt` which captures the state of the graph as it evolves 
+and reflects its final form upon completion of the program.
+
+The program provides also an interactive command-line interface that allows users to manage and query the graph in real time.
+
+### Available commands
+```bash
+i Ni [Nj Nk ...] Insert node(s)
+n Ni Nj amount date Insert edge
+d Ni [Nj Nk ...] Delete node(s)
+l Ni Nj Delete edge
+m Ni Nj sum sum1 date date1 Modify edge
+f Ni Find outgoing edges
+r Ni Find incoming edges
+e Exit
+```
+
+### Example execution
+```bash
+$ ./miris -i Input/data8-3.txt -o output.txt
+
+i 1 15
+User 1 already exists
+Successful insertion of user: 15
+
+n 1 15 100 2024-01-01
+Added transaction from '1' to '15'
+
+n 2 3 200 2024-02-02
+Added transaction from '2' to '3'
+
+f 1
+Outgoing edges of user '1' are: 
+from   to    amount       date
+  1    15      100      2024-01-01
+
+r 3
+Incoming edges of user '3' are: 
+from   to    amount       date
+  2    3      3900      2024-04-06
+  4    3      3400      2024-06-15
+  8    3      4200      2024-08-16
+  2    3      200      2024-02-02
+
+e
+```
