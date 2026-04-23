@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
            end_line = atoi(argv[i]);
        }
        if(i == 4){
-            offset__of_start_line = atol(argv[i]); //atol: string to long int
+            offset__of_start_line = atol(argv[i]); // atol: string to long int
        }
        if(i == 5){
            exclusion_list = splitterCreateExclusionList(argv[i]);
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
        }
     }
 
-    //Ανοιγμα input file
+    // Open input file
     int fd = open(input_file, O_RDONLY);
     if(fd < 0){
         char* message = "Failure opening input file in splitter\n";
@@ -57,34 +57,34 @@ int main(int argc, char* argv[]){
     }
 
     
-    //πηγαινουμε τον δεικτη διαβασματος στη γραμμη start_line απο την οποια πρεπει να διαβασει ο splitter
+    // move the read pointer to the start_line from which the splitter should read
     lseek(fd, offset__of_start_line, SEEK_SET);
   
-    //παραγωγη λεξεων, αγνοωντας σημεια στιξης, συμβολα κλπ
+    // generate words, ignoring punctuation, symbols, etc
     splitterCreateWords(fd, end_line, start_line, exclusion_list, num_of_builders);
 
-    //αφου τελειωσαμε με το γραψιμο στους builder, κλεινουμε ολα τα write ends
+    // after we finish writing to the builders, close all write ends
     for(int i = 0; i < num_of_builders; i++){
         close(i + 500);
     }
 
 
-    pid_t root_pid = getppid(); //το process id του root
-    kill(root_pid, SIGUSR1); //ο splitter στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
+    pid_t root_pid = getppid(); // the process id of root
+    kill(root_pid, SIGUSR1); // splitter sends signal to root that it has finished its work
 
-    hashDestroy(exclusion_list); //καταστροφη του exclusion list
+    hashDestroy(exclusion_list); // destroy the exclusion list
     close(fd);
     
     exit(1);
      
 }
 
-//############## ΣΥΝΑΡΤΗΣΕΙΣ ###############//
+// ############## FUNCTIONS ###############//
 
 int splitterHashFunc(char* word, int num_of_builders){
     int key = 0;
-    //καθως οι λεξεις μας δεν περιλαμβανουν αριθμους, δεν μπορουμε να κανουμε atoi
-    //οποτε προσθετουμε τους αριθμους ascii του καθε χαρακτηρα
+    // since our words do not include numbers, we cannot do atoi
+    // so we add the ASCII numbers of each character
     for(int i = 0; i < strlen(word); i++){
         key += word[i];
     }
@@ -103,30 +103,30 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
     int b_index = 0;
     int word_size = 10;
     int buffer_size = 50;
-    char* buffer = malloc(buffer_size); //αρχικα δεσμεουμε 50 Bytes για το buffer
-    char* word = malloc(word_size); //αρχικα δεσμεουμε 10 Bytes για μια λεξη
+    char* buffer = malloc(buffer_size); // initially allocate 50 Bytes for the buffer
+    char* word = malloc(word_size); // initially allocate 10 Bytes for a word
     int lines = start_line;
 
     while((bytes_to_read = read(fd, &c, sizeof(c))) > 0){
    
-        //αν δεν χωραει αλλος χαρακτηρας στο word δεσμευουμε τον διπλασιο χωρο
-        if(w_index >= word_size - 1){ //-1 γιατι ξεκιναει απο το 0
+        // if another character doesn't fit in the word, allocate double the space
+        if(w_index >= word_size - 1){ // -1 because it starts from 0
             word_size = 2 * word_size;
             word = realloc(word, word_size);
             
         }
 
-        if(b_index >= buffer_size - 1){ //-1 γιατι ξεκιναει απο το 0
+        if(b_index >= buffer_size - 1){ // -1 because it starts from 0
             buffer_size = 2 * buffer_size;
             buffer = realloc(buffer, buffer_size);
         }
 
-        //αποθηκευση καθε χαρακτηρα στον buffer
+        // store each character in the buffer
         buffer[b_index] = c;
 
-        if(isalpha(c)){ //αν ειναι αλφαβητικος χαρακτηρας μπορει να αποτελει μερος λεξης
+        if(isalpha(c)){ // if it is an alphabetic character, it can be part of a word
 
-            //μετατροπη των κεφαλαιων σε μικρα, ωστε οι λεξεις Hello και hello να ειναι ισοδυναμες
+            // convert uppercase to lowercase, so words Hello and hello are equivalent
             if(c >= 'A' && c <= 'Z'){
                 c = tolower(c);
             }
@@ -137,43 +137,43 @@ void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusi
         else if(c == '\n' || c == ' ' || c == '!' || c == ',' || c == '.' || c == '\t' || c == '"'){
             
             if(c == '\n'){
-                lines++; //νεα γραμμη
+                lines++; // new line
             }
             
-            //αν ο προηγουμενος ειναι αλφαβητικος, εχουμε λεξη
+            // if the previous character is alphabetic, we have a word
             if(isalpha( buffer[b_index - 1] )){
                 word[w_index] = '\0';
                 
-                //αν δεν ανηκει στο exclusion list την στελνουμε στον builder
-                if(hashFindListNodeWithKey(exclusion_list, word) == NULL){  
+                // if it does not belong to the exclusion list, send it to the builder
+                if(hashFindListNodeWithKey(exclusion_list, word) == NULL){
                     splitterSendToBuilder(word, num_of_builders);
                 }
                 else{
                     // printf("Excluded: %s\n", word);
                 }
 
-                //επαναφορα του word σε κενη λεξη
+                // restore word to empty
                 for(int i = 0; i < w_index; i++){
                     word[i] = '\0';
                 }
 
-                w_index = 0; //επαναφορα του index στο 0, για ευρεση νεας λεξης
+                w_index = 0; // restore index to 0, to find next word
             }
 
-            //αν διαβασαμε και την τελευταια γραμμη που πρεπει να διαβασει ο splitter
+            // if we read the last line that the splitter should read
             if(lines > end_line){
                     break;
             }
 
         }
-        //αν δεν ειναι αλφαβητικος χαρακτηρας ή αλλαγη γραμμης ή κενο
+        // if it is not an alphabetic character or line break or space
         else{
-            //καταργουμε τη λεξη
+            // discard the word
             word[w_index] = '\0';
             w_index = 0;
         }
 
-        b_index++;  //αυξηση index του buffer
+        b_index++;  // increment buffer index
     }
 
     if(bytes_to_read < 0) {
@@ -276,13 +276,13 @@ HashTable splitterCreateExclusionList(char* exclusion_list){
             strcpy(key, word);
 
 
-            hashAdd(table, key, value); //προσθηκη λεξης στο hash table με ιδιο κλειδι και value
+            hashAdd(table, key, value); // add word to hash table with same key and value
 
-            for(int i = 0; i < count; i++){ //επαναφορα σε κενη λεξη
+            for(int i = 0; i < count; i++){ // restore to empty word
                 word[i] = '\0';
             }
 
-            count = 0; //επαναφορα word index
+            count = 0; // restore word index
         }
 
     }
@@ -301,7 +301,7 @@ HashTable splitterCreateExclusionList(char* exclusion_list){
         hashAdd(table, value, value);
     }
 
-    close(fd); //δεν χρειαζομαστε αλλο το αρχειο
+    close(fd); // we don't need the file anymore
     free(word);
     return table;
 

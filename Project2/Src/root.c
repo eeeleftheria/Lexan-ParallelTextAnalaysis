@@ -14,18 +14,18 @@
 #include <root.h>
 #include <signal.h>
 
-int num_of_usr1 = 0; //μετρητης για το ποσες φορες εχει ληφθει το σημα USR1
-int num_of_usr2 = 0; //μετρητης για το ποσες φορες εχει ληφθει το σημα USR2
+int num_of_usr1 = 0; // counter for how many times USR1 signal has been received
+int num_of_usr2 = 0; // counter for how many times USR2 signal has been received
 
 
-//handler σηματος USR1 οταν ενας splitter τελειωσει τη δουλεια του
+// signal handler for USR1 when a splitter finishes its work
 void splitterIsDone(int signum){
         num_of_usr1++;
         signal(SIGUSR1, splitterIsDone); 
 }
 
 
-//handler σηματος USR2 οταν ενας builder τελειωσει τη δουλεια του
+// signal handler for USR2 when a builder finishes its work
 void builderIsDone(int signum){
         num_of_usr2++;
         signal(SIGUSR2, builderIsDone);
@@ -40,13 +40,13 @@ struct word_with_count{
 
 int main(int argc, char* argv[]){  
 
-    //struct sigaction: περιγραφει ενα action που θα πραγματοποιηθει για ενα συγκεκριμενο σημα
-    //sigaction(): συσχετιζει το action(handler) με το σημα
+    // struct sigaction: describes an action that will be performed for a specific signal
+    // sigaction(): associates the action(handler) with the signal
 
     struct sigaction sa1;
-    sa1.sa_handler = splitterIsDone;  // ορισμος signal handler
-    sa1.sa_flags = SA_RESTART;       // SA_RESTART για να συνεχισουν πιθανον μπλοκαρισμενα sys calls 
-    sigemptyset(&sa1.sa_mask);       //να μην μπλοκαρει κανενα σημα κατα τη διαρκει της εκτελεσης του κωδικα του handler
+    sa1.sa_handler = splitterIsDone;  // signal handler definition
+    sa1.sa_flags = SA_RESTART;       // SA_RESTART so that potentially blocked system calls continue 
+    sigemptyset(&sa1.sa_mask);       // do not block any signal during handler execution
 
 
     if (sigaction(SIGUSR1, &sa1, NULL) == -1) {
@@ -55,8 +55,8 @@ int main(int argc, char* argv[]){
     }
 
     struct sigaction sa2;
-    sa2.sa_handler = builderIsDone;  // ορισμος signal handler
-    sa2.sa_flags = SA_RESTART;       // SA_RESTART για να συνεχισουν πιθανον μπλοκαρισμενα sys calls 
+    sa2.sa_handler = builderIsDone;  // signal handler definition
+    sa2.sa_flags = SA_RESTART;       // SA_RESTART so that potentially blocked system calls continue 
     sigemptyset(&sa2.sa_mask);     
 
     if (sigaction(SIGUSR2, &sa2, NULL) == -1) {
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]){
         }
     }
     
-    //ανοιγμα αρχειου για να μετρησουμε τις γραμμες
+    // open file to count its lines
     int fd = open(input_file, O_RDONLY);
     if(fd < 0){
         char* message = "Failure opening input file\n";
@@ -107,13 +107,13 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    //################################################ ΥΠΟΛΟΓΙΣΜΟΣ ΓΡΑΜΜΩΝ ΑΡΧΕΙΟΥ #################################################//
+    //################ CALCULATION OF FILE'S NUMBER OF LINES ###################//
     int lines = 1;//κραταμε τον αριθμο γραμμων του αρχειου
     char c = 0;
 
-    //διαβασμα αρχειου ανα χαρακτηρα
+    // read file character by character
     int bytes_to_read;
-    while((bytes_to_read =  read(fd, &c, sizeof(c))) > 0) {  //για EOF επιστρεφει 0
+    while((bytes_to_read =  read(fd, &c, sizeof(c))) > 0) {  // for EOF returns 0
         
         if(c == '\n'){
             lines++;
@@ -131,37 +131,35 @@ int main(int argc, char* argv[]){
     lseek(fd, 0, SEEK_SET); //επαναφορα δεικτη στην αρχη του αρχειου
     
 
-    //########################################## ΥΠΟΛΟΓΙΣΜΟΣ OFFSET ΤΗΣ ΚΑΘΕ ΓΡΑΜΜΗΣ ###############################################//
-    
-    //πινακας με τα offset των γραμμων
-    long int* offset_of_line = malloc((lines + 1) * sizeof(long int)); //+1 γιατι δεν μετραμε την θεση 0 ως γραμμη
-    int count = 1; //μετρητης γραμμων
-    int bytes = 0; //ποσα bytes εχουμε διαβασει μεχρι ενα σημειο
+// array with line offsets
+    long int* offset_of_line = malloc((lines + 1) * sizeof(long int)); // +1 because we don't count position 0 as a line
+    int count = 1; // line counter
+    int bytes = 0; // how many bytes we have read up to a point
     offset_of_line[0] = 0;
     
     while(read(fd, &c, sizeof(c)) > 0) {  
         bytes += sizeof(c);
         
-        if(c == '\n'){  //νεα γραμμη
+        if(c == '\n'){  // new line
             offset_of_line[count] = offset_of_line[count-1] + bytes;
             count++;
             bytes = 0;
         }
-        //αν ειναι η τελευταια γραμμη μπορει να μην τελειωνει με \n
+        // if it is the last line it may not end with \n
         if(count == lines){
             offset_of_line[count] = offset_of_line[count-1] + bytes;
         }
             
     }
 
-    close(fd); //κλεισιμο του αρχειου, θα το ξαναανοιξουμε μεσω των pipes
+    close(fd); // close the file, we will reopen it through pipes
 
 
-    //################################# ΔΗΜΙΟΥΡΓΙΑ PIPES ΓΙΑ ΕΠΙΚΟΙΝΩΝΙΑ SPLITTERS - BUILDERS #############################################//
+    // CREATE PIPES FOR SPLITTERS-BUILDERS COMMUNICATION
 
-    //θελουμε ενα pipe για καθε builder για επικοινωνια splitters-builders, 
-    //δηλ num_of_builder pipes με 2 θεσεις το καθενα για τον pipefd
-    int pipes_builder[num_of_builders][2]; //pipe[i][0] = read end of pipe i & pipe[i][1] = write end of pipe i
+    // we want one pipe for each builder for splitters-builders communication,
+    // i.e. num_of_builder pipes with 2 positions each for the pipefd
+    int pipes_builder[num_of_builders][2]; // pipe[i][0] = read end of pipe i & pipe[i][1] = write end of pipe i
 
     for(int i = 0; i < num_of_builders; i++){
             
@@ -171,90 +169,90 @@ int main(int argc, char* argv[]){
         }
     }
 
-    //Δημιουργια ενος pipe για επικοινωνια builders με ριζα
-    int fd_root[2]; //fd_pipe[0] read end, fd_pipe[1] write end
+    // Create a pipe for communication between builders and root
+    int fd_root[2]; // fd_pipe[0] read end, fd_pipe[1] write end
     if(pipe(fd_root) == -1){
         perror("error with creation of pipe builder\n");
         exit(1);
     }
 
 
-    int input_of_splitter = lines / num_of_splitter; //γραμμες ανα splitter
-    pid_t splitter[num_of_splitter]; //πινακας με τα pid του καθε splitter
+    int input_of_splitter = lines / num_of_splitter; // lines per splitter
+    pid_t splitter[num_of_splitter]; // array with the pid of each splitter
 
     
-    //########################################## ΔΗΜΙΟΥΡΓΙΑ SPLITTERS ############################################//
+    // CREATE SPLITTERS
       
     for(int i = 0; i < num_of_splitter; i++){
     
-        pid_t splitter_pid = fork(); //δημιουργια splitter processes
+        pid_t splitter_pid = fork(); // create splitter processes
         
         if(splitter_pid == -1){
             perror("error with fork splitter\n");
             exit(1);
         }
         
-        if(splitter_pid != 0){ //εντος parent process
+        if(splitter_pid != 0){ // inside parent process
             
-            splitter[i] = splitter_pid; //αποθηκευση του pid του splitter i   
+            splitter[i] = splitter_pid; // store the pid of splitter i   
           
         }
 
-        if(splitter_pid == 0){ //εντος child process
+        if(splitter_pid == 0){ // inside child process
 
-            //οι splitters πρεπει μονο να γραφουν στα pipes
+            // splitters should only write to the pipes
             for(int j = 0; j < num_of_builders; j++){
 
-                close(pipes_builder[j][0]); //κλεισιμο του read end
-                dup2(pipes_builder[j][1], j + 500); //ανακατευθυνση του write end, ωστε να εχουν προσβαση σε αυτο μετα την exec
-                close(pipes_builder[j][1]); //κλεινουμε το original write end
+                close(pipes_builder[j][0]); // close the read end
+                dup2(pipes_builder[j][1], j + 500); // redirect the write end so they have access after exec
+                close(pipes_builder[j][1]); // close the original write end
 
-                //κλεισιμο των fd_root αφου δεν απασχολουν τον splitter
+                // close fd_root since it doesn't concern the splitter
                 close(fd_root[0]); 
                 close(fd_root[1]);
             }
             
 
-            //για τον υπολογισμο του ευρους γραμμων καθε splitter
+            // for calculating the range of lines for each splitter
             int start_line = 0;
             int end_line = 0;
 
-            //αν ειναι ο 1ος splitter διαβαζει απο την αρχη του αρχειου μεχρι το input_of_splitter
+            // if it is the 1st splitter read from the beginning of the file to input_of_splitter
             if(i == 0){
                 start_line = 1;
                 end_line = input_of_splitter;
             }
-            //διαβαζει απο εκει που σταματησε ο προηγουμενος
+            // read from where the previous one stopped
             else if((i != 0) && (i != num_of_splitter - 1)){
                 start_line = i * input_of_splitter + 1;
-                end_line = start_line + input_of_splitter - 1; //αν πχ start_line = 5 και input = 5, πρεπει να διαβασει μεχρι και τη γραμμη 9
+                end_line = start_line + input_of_splitter - 1; // e.g. if start_line = 5 and input = 5, must read until line 9
             }
-            //αν ειναι ο τελευταιος splitter διαβαζει μεχρι το τελος του αρχειου
-            //γιατι αν δεν διαιρειται ακριβως, θα περισσεψουν γραμμες. 
+            // if it is the last splitter read until end of file
+            // because if it doesn't divide exactly, lines will remain.
             else if(i == num_of_splitter - 1){
                 start_line = i * input_of_splitter + 1;
                 end_line = lines;
             }   
 
 
-            long int offset_start_line = offset_of_line[start_line - 1]; //τα Bytes μεχρι και πριν τη γραμμη start_line
+            long int offset_start_line = offset_of_line[start_line - 1]; // Bytes until before the line start_line
 
             char offset_start_line_str[10]; 
             char start_line_str[10];
             char end_line_str[10]; 
             char num_of_builders_str[10];
             
-            //μετατροπη των ακεραιων σε string για την exec
+            // convert integers to string for exec
             snprintf(start_line_str, sizeof(start_line_str), "%d", start_line);
             snprintf(end_line_str, sizeof(end_line_str), "%d", end_line);  
             snprintf(offset_start_line_str, sizeof(offset_start_line_str), "%ld", offset_start_line);
             snprintf(num_of_builders_str, sizeof(num_of_builders_str), "%d", num_of_builders);
 
-            //εκτελεση του splitter που βρισκεται στο ιδιο directory
+            // execute the splitter located in the same directory
             execlp("./splitter", "splitter", input_file, start_line_str, end_line_str, 
                 offset_start_line_str, exclusion_list_file, num_of_builders_str, NULL); 
 		    
-            perror("exec failure\n");  //δεν θα φτασει ποτε εδω εαν ειναι επιτυχης η exec     
+            perror("exec failure\n");  // execution won't reach this point if exec is successful    
             exit(1);         
 
         }
@@ -267,23 +265,23 @@ int main(int argc, char* argv[]){
     
     for(int i = 0; i < num_of_builders; i++){
 
-            pid_t builder_pid = fork(); //δημιουργια builder processes
+            pid_t builder_pid = fork(); // create builder processes
 
             if(builder_pid == -1){
                 perror("error with fork builder\n");
                 return -1;
             }
-            if(builder_pid != 0){ //εντος parent process
+            if(builder_pid != 0){ // inside parent process
 
-                builder[i] = builder_pid; //αποθηκευση του pid του παιδιου i
+                builder[i] = builder_pid; // store the PID of child i
             }
 
-            if(builder_pid == 0){ //εντος child process
+            if(builder_pid == 0){ // inside child process
 
-                close(fd_root[0]); //μονο γραψιμο στον root
+                close(fd_root[0]); // only write to root
                 
-                //θελουμε να κλεισουμε ολα τα read end των pipes 
-                //που δεν απασχολουν τον συγκεκριμενο builder καθως και ολα τα write end
+                // we want to close all read ends of pipes
+                // that don't concern this specific builder as well as all write ends
                 for(int j = 0; j < num_of_builders; j++){
                     if(j != i){
                         close(pipes_builder[j][0]);
@@ -291,7 +289,7 @@ int main(int argc, char* argv[]){
                     close(pipes_builder[j][1]);
                 }
 
-                int fd_read = pipes_builder[i][0]; //το read end fd του pipe
+                int fd_read = pipes_builder[i][0]; // the read end fd of the pipe
                 int fd_root_write_end = fd_root[1]; 
 
                 char fd_read_str[10];
@@ -303,26 +301,27 @@ int main(int argc, char* argv[]){
                 snprintf(fd_root_write_str, sizeof(fd_root_write_str), "%d", fd_root_write_end);
 
 
-                //εκτελεση του builder που βρισκεται στο ιδιο directory
+                // execute the builder located in the same directory
                 execlp("./builder", "builder", num_of_builder_str, fd_read_str, fd_root_write_str, NULL);
-                perror("exec failure\n"); //εαν αποτυχει
+                perror("exec failure\n"); // if it fails
                 exit(1);
             } 
   
     }  
 
 
-    //############################## ΣΥΓΧΡΟΝΙΣΜΟΣ #############################################
 
-    close(fd_root[1]); //ο root πρεπει μονο να διαβαζει απο το pipe root - builders
+    // SYNCHRONIZATION
 
-    //κλεισιμο ολων των ακρων των pipes builders - splitters, αφου δεν αφορουν τον root
+    close(fd_root[1]); // root should only read from the root-builders pipe
+
+    // close all ends of builders-splitters pipes, since they don't concern root
     for(int i = 0; i < num_of_builders; i ++){
         close(pipes_builder[i][0]);
         close(pipes_builder[i][1]);
     }
 
-    //ο parent πρεπει να περιμενει αρχικα τον splitter προκειμενου να εχουν σταλθει ολες οι λεξεις στους builders
+    // the parent should initially wait for the splitter so that all words have been sent to the builders
     for(int i = 0; i < num_of_splitter; i++){
         int status;
         if (waitpid(splitter[i], &status, 0) == -1) {
@@ -333,16 +332,16 @@ int main(int argc, char* argv[]){
 
 
   
-    //############# ΔΙΑΒΑΣΜΑ ΑΠΟΤΕΛΕΣΜΑΤΩΝ ΑΠΟ ROOT #################//
+    // READ RESULTS FROM ROOT
     
-    //δημιουργια ενος απλου πινακα που εχει δεικτες σε struct word_with_count με τις λεξεις και τις συχνοτητες τους
+    // create a simple array that has pointers to struct word_with_count with words and their frequencies
     int* array_size = malloc(sizeof(int)); 
-    *array_size = 1000; //αρχικο μεγεθος πινακα
+    *array_size = 1000; // initial array size
 
-    //επιστρεφει τον πινακα με τις λεξεις και τις συχνοτητες τους
-    WordWithCount* words = rootReadFromBuilder(fd_root[0], array_size); //διαβασμα απο το pipe root - builders
+    // returns the array with words and their frequencies
+    WordWithCount* words = rootReadFromBuilder(fd_root[0], array_size); // read from the root-builders pipe
 
-    //προκειμενου να διαβαζει ο root ταυτοχρονα οσο γραφει ο builder, το wait πρεπει να γινει μετα τη συναρτηση
+    // so that root can read simultaneously as the builder writes, wait must be done after the function
     for (int i = 0; i < num_of_builders; i++) {
         int status;
         if (waitpid(builder[i], &status, 0) == -1) {
@@ -351,16 +350,16 @@ int main(int argc, char* argv[]){
     }
 
 
-    rootPrintToOutputFile(output_file, words, num_of_top_popular); //εκτυπωση των πιο δημοφιλων λεξεων στο αρχειο εξοδου
+    rootPrintToOutputFile(output_file, words, num_of_top_popular); // print the most popular words to the output file
    
 
 
     printf("\nroot received %d USR1 signal(s)\n", num_of_usr1);
     printf("root received %d USR2 signal(s)\n", num_of_usr2);
    
-    close(fd_root[0]); //κλεισιμο του read end του pipe root - builders
+    close(fd_root[0]); // close the read end of the root-builders pipe
 
-    //απελευθερωση μνημης               
+    // free memory               
     free(offset_of_line);
     
     for(int i = 0; i < *array_size; i++){
@@ -383,8 +382,8 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
 
     int array_size = *size;
 
-    WordWithCount* words = malloc(array_size * sizeof(WordWithCount)); //δεσμευση χωρου για size_of_array δεικτες σε struct word_with_count
-    //η malloc επιστρεφει δεικτη στην πρωτη θεση του πινακα
+    WordWithCount* words = malloc(array_size * sizeof(WordWithCount)); // allocate space for size_of_array pointers to struct word_with_count
+    // malloc returns a pointer to the first position of the array
 
     int buffer_size = 4096;
     int size_word = 0;
@@ -398,7 +397,7 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
 
     bool waiting_for_frequency = false;
 
-    //διαβαζει δεδομενα της μορφης word:count word:count ...
+    // read data in the form word:count word:count ...
     while(( bytes_to_read = read(fd_read, buffer, buffer_size)) > 0){
 
        for(int i = 0; i < bytes_to_read; i++){
@@ -415,7 +414,7 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
                 size_word++;
             }
             
-            //σχηματισμος λεξης
+            // word formation
             else if(buffer[i] == ':'){
                 word[size_word] = '\0';    
                 waiting_for_frequency = true;  
@@ -424,13 +423,13 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
             else if( isdigit(buffer[i]) ){
 
                 if(waiting_for_frequency == true){
-                    //καθε φορα που διαβαζουμε νεο ψηφιο η θεση του προηγουμενο 
-                    frequency = frequency * 10 + (buffer[i] - '0'); //μετατροπη απο char σε int αφαιρωντας τον ασκι κωδικο του 0 που ειναι 48
-                    //και απεχει οσο τον αριθμο απο την ασκι μορφη του
+                    // each time we read a new digit its position is the previous one
+                    frequency = frequency * 10 + (buffer[i] - '0'); // convert from char to int by subtracting ASCII code of 0 which is 48
+                    // and differs by the number from its ASCII form
                 }
             }
 
-            //μεταβαση στην επομενη λεξη
+            // move to the next word
             else if(buffer[i] == '-'){
 
                 if(array_index >= array_size){
@@ -441,8 +440,8 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
 
                 waiting_for_frequency = false;
 
-                words[array_index] = malloc(sizeof(struct word_with_count)); //δεσμευση χωρου για το ιδιο το struct
-                //η malloc επιστρεφει δεικτη σε αυτο
+                words[array_index] = malloc(sizeof(struct word_with_count)); // allocate space for the struct itself
+                // malloc returns a pointer to it
 
                 words[array_index]->word = malloc(strlen(word) + 1);
                 strcpy(words[array_index]->word, word);
@@ -452,17 +451,17 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
                 
                 array_index++;
 
-                //επαναφορα σε κενη λεξη
+                // restore to empty word
                 memset(word, '\0', strlen(word));
                 
-                //επαναφορα μεταβλητων
+                // restore variables
                 frequency = 0;
                 size_word = 0;
             }
                     
         }
       
-    memset(buffer, '\0', buffer_size); //καθαρισμος buffer
+    memset(buffer, '\0', buffer_size); // clear buffer
     }
 
     if (bytes_to_read == 0) {
@@ -485,15 +484,15 @@ WordWithCount* rootReadFromBuilder(int fd_read, int* size){
     free(word);
     free(buffer);
 
-    qsort(words, array_index, sizeof(WordWithCount), compareWordStructs); //ταξινομηση των λεξεων με βαση τη συχνοτητα τους
+    qsort(words, array_index, sizeof(WordWithCount), compareWordStructs); // sort words by their frequency
 
     return words;
 }
 
 
 
-//δεχεται δυο δεικτες σε WordWithCount και συγκρινει τις συχνοτοτητες των λεξεων αφου
-//η qsort καλειται με δυο δεικτες στα στοιχεια του πινακα και οχι με τα ιδια τα στοιχεια
+// takes two pointers to WordWithCount and compares the frequencies of words since
+// qsort is called with two pointers to array elements, not the elements themselves
 int compareWordStructs(const void* a, const void* b) {
     const WordWithCount* p1 = (const WordWithCount*)a;
     const WordWithCount* p2 = (const WordWithCount*)b;
@@ -525,11 +524,11 @@ int compareWordStructs(const void* a, const void* b) {
 }
 
 
-//εκτυπωση των num_of_top_popular πιο δημοφιλων λεξεων στο output file
+// print the num_of_top_popular most popular words to the output file
 void rootPrintToOutputFile(char* output, WordWithCount* words,  int num_of_top_popular){
 
-    //ανοιγμα αρχειου εξοδου
-                    //εγγραφη μονο, δημιουργια αν δεν υπαρχει, διαγραφη περιεχομενων αν δεν ειναι αδειο
+    // open output file
+    // write only, create if it doesn't exist, truncate contents if not empty
     int fd = open(output, O_WRONLY | O_CREAT | O_TRUNC, 0666);
     if(fd < 0){
         char* message = "Failure opening output file\n";
@@ -539,7 +538,7 @@ void rootPrintToOutputFile(char* output, WordWithCount* words,  int num_of_top_p
 
     printf("The %d most popular words are:\n", num_of_top_popular);
 
-    //εκτυπωση των num_of_top_popular πιο δημοφιλων λεξεων
+    // print the num_of_top_popular most popular words
 
 
     for(int i = 0; i < num_of_top_popular; i++){
@@ -547,7 +546,7 @@ void rootPrintToOutputFile(char* output, WordWithCount* words,  int num_of_top_p
         char* word = words[i]->word;
         int count = *(words[i]->count);
         char count_str[10];
-        snprintf(count_str, sizeof(count_str), "%d", count); //μετατροπη του count σε string
+        snprintf(count_str, sizeof(count_str), "%d", count); // convert count to string
   
         printf("%s: %d\n", word, count);
 

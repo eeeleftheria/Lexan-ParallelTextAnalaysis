@@ -17,7 +17,7 @@ struct list_node{
 
 
 List listCreate() {
-    List list = (List)malloc(sizeof(struct list)); // ή malloc(sizeof(*list))
+    List list = (List)malloc(sizeof(struct list)); // or malloc(sizeof(*list))
 
     list->first = NULL;
     list->last = NULL;
@@ -29,7 +29,7 @@ List listCreate() {
 }
 
 
-//προσθετουμε εναν κομβο στο τελος της λιστας, δεν μας ενδιαφερει να τον προσθεσουμε σε συγκεκριμενο σημειο
+// add a node to the end of the list, we don't care to add it at a specific point
 void listInsert(List list, Pointer value) {
 
     ListNode new_node = (ListNode)malloc(sizeof(struct list_node));
@@ -39,15 +39,15 @@ void listInsert(List list, Pointer value) {
         return;
     }
     
-    if(list->size == 0) { //κενη λιστα-> first και last ταυτιζονται
+    if(list->size == 0) { // empty list -> first and last are identical
         list->first = new_node;
         list->last = new_node;
         new_node->next = NULL;
         new_node->prev = NULL;
     }
 
-    else { //μη κενη λιστα: προσθετουμε στο τελος και συνδεουμε με τον προηγουμενο κομβο
-    //ο prev του node θα ειναι ο παλιος last
+    else { // non-empty list: add to end and connect with previous node
+    // the prev of the node will be the old last
         list->last->next = new_node;
         new_node->prev = list->last;
         list->last = new_node;
@@ -69,37 +69,37 @@ void listRemove(List list, ListNode node, DestroyValueFunc func){
     ListNode prev = node->prev;
     ListNode next = node->next;
 
-    //αν εχει μεινει μονο ενας κομβος, τοτε η λιστα θα μεινει κενη
+    // if only one node remains, then the list will be empty
     if(list->size == 1) {
         list->first = NULL;
         list->last = NULL;
     }
-    //αν ο node ειναι ο πρωτος της λιστας πρεπει ο επομενος του να γινει πρωτος
+    // if the node is the first of the list the next one must become first
     else if (node == list->first) {
         list->first = next;
         next->prev = NULL;
     }
-    //αν ο node ειναι ο τελευταιος της λιστας πρεπει ο προηγουμενος του να γινει τελευταιος
+    // if the node is the last of the list the previous one must become last
     else if (node == list->last){
         list->last = prev;
         prev->next = NULL;
     }
 
-    //αν ο node βρισκεται ενδιαμεσα, πρεπει να συνδεσουμε τον προηγουμενο του με τον επομενο του
+    // if the node is in between, we must connect its previous with its next
 
     else{
         prev->next = next;
         next->prev = prev;
     }
     
-    //καλουμε την destroy value -> διαφορετικη για καθε τυπο value
+    // call the destroy value -> different for each value type
     func(node->value);  
 
-    //αποδεσμευση μνημης κομβου 
+    // free memory of node
     free(node);
     node = NULL;
 
-    //ενημερωση size
+    // update size
     list->size--;
 
 }
@@ -115,14 +115,14 @@ Pointer listNodeValue(List list, ListNode node){
 }
 
 
-//τυπου DestroyFunc
+// of type DestroyFunc
 void listDestroyValue(List list, ListNode node, DestroyValueFunc func){
     
-    func(node->value); //καταστρεφει με καταλληλο τροπο το καθε value
+    func(node->value); // destroy each value in the appropriate way
 }
 
 
-//διατρεχει ολη τη λιστα και καταστρεφει ενα ενα τα στοιχεια
+// traverse the entire list and destroy each element one by one
 void listDestroy(List list, DestroyValueFunc func) {
       
     if (list->size != 0){   
@@ -136,7 +136,7 @@ void listDestroy(List list, DestroyValueFunc func) {
         }
     }
 
-    free(list); //αποδεσμευση μνημης απο λιστα
+    free(list); // free memory from list
 }
 
 void listDestroyNode(Pointer node){
@@ -154,11 +154,11 @@ ListNode listGetNext(ListNode node){
 }
 
 
-//ευρεση κομβου με τιμη value
+// find node with value
 ListNode listfindNodeWithValue(List list, Pointer value, CompareFunc compare){
     ListNode node;
 
-    //διατρεχουμε ολη τη λιστα μεχρι να βρουμε τον κομβο με αυτη την τιμη    
+    // traverse the entire list until we find the node with this value    
     for(node = listFirst(list); node != NULL; node = listGetNext(node)){
         
         if ((compare(listNodeValue(list, node), value)) == 0) {

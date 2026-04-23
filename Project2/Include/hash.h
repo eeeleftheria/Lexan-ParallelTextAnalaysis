@@ -2,33 +2,33 @@
 
 typedef struct hash_node* HashNode;
 typedef struct hash_table* HashTable;
-typedef void* Pointer; //μπορει να δειχνει σε οποιοδηποτε τυπο, χωρις να οριστει το περιεχομενο του *p
+typedef void* Pointer; // can point to any type without defining the content of *p
 
-//δεικτης σε συναρτηση που δεχεται δυο Pointer a, b και επιστρεφει εναν int
+// pointer to a function that takes two Pointers a, b and returns an int
 typedef int (*CompareFunc)(Pointer a, Pointer b);
 
-//δεικτης σε συναρτηση που καταστρεφει την τιμη value
-typedef void (*DestroyValueFunc)(Pointer value); 
+// pointer to a function that destroys the value
+typedef void (*DestroyValueFunc)(Pointer value);
 
-// hash function που παιρνει ενα κλειδι και το αντιστοιχιζει σε ενα index 
-int hashFunc(char* word, int numer_of_builders); 
+// hash function that takes a key and maps it to an index 
+int hashFunc(char* word, int numer_of_builders);
 
-//δημιουργια κενου hash table
+// creates an empty hash table
 HashTable hashCreate(int size, CompareFunc func);
 
 
-//προσθετει εναν κομβο με κλειδι key και τιμη value στο hash table
+// adds a node with key and value to the hash table
 void hashAdd(HashTable hash_table, Pointer key, Pointer value);
 
-//αφαιρουμε εναν δεδομενο κομβο με κλειδι key απο το hash table
+// removes a given node with key from the hash table
 void hashRemove(HashTable hash_table, Pointer key);
 
-//για ενα δεδομενο κομβο με κλειδι key επιστρεφουμε τον list node στον οποιο ανηκει
+// for a given node with key returns the list node to which it belongs
 ListNode hashFindListNodeWithKey(HashTable hash_table, Pointer key);
 
 Pointer hashFindValue(HashTable table, Pointer key);
 
-//ΣΥΝΑΡΤΗΣΕΙΣ DESTROY 
+//destroy functions
 void hashDestroy(HashTable hash_table);
 void hashDestroyNode(Pointer hash_node);
 
@@ -38,7 +38,7 @@ void hashDisplay(HashTable table);
 //getters
 int hashGetSizeOfArray(HashTable table);
 
-//επιστρεφει τον αριθμο κομβων του hash table
+// returns the number of nodes in the hash table
 int hashGetSize(HashTable table);
 
 int hashGetSizeOfList(HashTable table, int pos);

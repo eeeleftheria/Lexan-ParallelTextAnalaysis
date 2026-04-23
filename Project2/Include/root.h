@@ -3,12 +3,12 @@
 typedef struct word_with_count* WordWithCount;
 
 
-//διαβαζει απο το write end του pipe builder-root στο οποιο γραφει τα δεδομενα του ο καθε builder
-//και αποθηκευει τα δεδομενα σε εναν πινακα τον οποιο και επιστρεφει
+// reads from the write end of the builder-root pipe on which each builder writes its data
+// and stores the data in an array which is returned
 WordWithCount* rootReadFromBuilder(int fd_read, int* array_size);
 
-//συγκρινει δυο struct τυπου  word_with_count με την συχνοτητα των λεξεων
+// compares two word_with_count structs by the frequency of words
 int compareWordStructs( const void* a, const void* b);
 
-//εκτυπωνει τις πιο δημοφιλεις λεξεις στο αρχειο output
+// prints the most popular words to the output file
 void rootPrintToOutputFile(char* output, WordWithCount* words, int num_of_top_popular);

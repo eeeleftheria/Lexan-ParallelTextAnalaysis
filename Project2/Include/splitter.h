@@ -2,17 +2,17 @@
 #include "hash.h"
 
 
-//συγκρινει δυο λεξεις και επιστρεφει 0 αν ειναι ιδιες
+// compares two words and returns 0 if they are identical
 int compareWords(Pointer a, Pointer b);
 
-//διαβαζει το αρχειο και το χωριζει σε λεξεις που δεν περιεχουν συμβολα, σημεια στιξης κλπ
+// reads the file and splits it into words that do not contain symbols, punctuation, etc
 void splitterCreateWords(int fd, int end_line, int start_line, HashTable exclusion_list, int num_of_builders);
 
-//δημιουργει μια λιστα με τις λεξεις που πρεπει να αγνοηθουν
+// creates a list with words that should be ignored
 HashTable splitterCreateExclusionList(char* exclusion_list);
 
-//υπολογιζει τον builder στον οποιο πρεπει να σταλθει η λεξη
+// calculates the builder to which the word should be sent
 int splitterHashFunc(char* word, int num_of_builders);
 
-//υπολογιζει τον builder που πρεπει να σταλθει η λεξη και την κανει write στο pipe
+// calculates the builder to which the word should be sent and writes it to the pipe
 void splitterSendToBuilder(char* word, int num_of_builders);

@@ -27,7 +27,7 @@ int main(int argc, char* argv[]){
     int bytes_to_read = 0;
     int size = 0;
 
-    //δημιουργια δομης για αποθηκευση λεξεων που λαμβανει απο τους splitters
+    // creates a data structure for storing words received from splitters
     HashTable table = hashCreate(1000, compareWords);
 
  
@@ -43,10 +43,10 @@ int main(int argc, char* argv[]){
           
             else if(buffer[i] == ' '){
                 word = malloc(size + 1); //+1 for \0
-                memcpy(word, buffer + i - 1 - size, size); //i - 1 αφου βρισκομαστε στη θεση του κενου
+                memcpy(word, buffer + i - 1 - size, size); // i - 1 because we are at the space position
                 word[size] = '\0';
 
-                builderStoreInTable(table, word); //προσθηκη λεξης στο hash table
+                builderStoreInTable(table, word); // add word to hash table
                
               
                 size = 0;
@@ -68,15 +68,15 @@ int main(int argc, char* argv[]){
     
     close(fd_read_end);
 
-    builderSendToRoot(table, compareHashNodes, fd_write_end_root); //εγγραφη λεξεων στον root
+    builderSendToRoot(table, compareHashNodes, fd_write_end_root); // write words to root
 
     hashDestroy(table);
 
     close(fd_write_end_root);
  
   
-    pid_t root_pid = getppid(); //το process id του root
-    kill(root_pid, SIGUSR2); //ο builder στελνει το σημα στον root οτι εχει τελειωσει με τη δουλεια του
+    pid_t root_pid = getppid(); // the process id of root
+    kill(root_pid, SIGUSR2); // builder sends signal to root that it has finished its work
 
 
     exit(0);
@@ -112,7 +112,7 @@ void builderStoreInTable(HashTable table, char* word){
         int* value = hashFindValue(table, word);
         
         if(value != NULL){
-            (*value)++; //αυξηση των εμφανισεων της λεξης, αφου υπαρχει ηδη στη δομη
+            (*value)++; // increment the occurrences of the word, since it already exists in the structure
         }
 
         else{
@@ -120,41 +120,41 @@ void builderStoreInTable(HashTable table, char* word){
         }
 
     }
-    //αν δεν υπαρχει η λεξη, τη προσθετουμε
+    // if the word does not exist, we add it
     else{
 
-        char* key = malloc(strlen(word) + 1); //δεσμευση χωρου για τη λεξη
+        char* key = malloc(strlen(word) + 1); // allocate space for the word
         strcpy(key, word);
         
-        int* count = malloc(sizeof(int)); // δεσμευση χωρου για τον μετρητη εμφανισεων της λεξης
+        int* count = malloc(sizeof(int)); // allocate space for the counter of word occurrences
         *count = 1;
 
      
-        hashAdd(table, key, count); //προσθηκη στη δομη με τιμη τον μετρητη
+        hashAdd(table, key, count); // add to structure with counter value
     }
 }
 
 
-//αφου αποθηκευσει ολες τις λεξεις στην δομη, τις στελνει στον root
+// after storing all words in the structure, sends them to root
 void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
 
     int size_of_table = hashGetSizeOfArray(table);
     
     for(int i = 0; i < size_of_table; i++){
         
-        //αν καποια λιστα δεν έχει κανεναν κομβο, προχωραμε στην επομενη
+        // if some list has no nodes, move to the next one
         if(hashGetSizeOfList(table, i) == 0){
             continue;
         }
 
-        //διατρεχουμε το hash table προκειμενου να γραψουμε καθε λεξη που περιεχει στο pipe
+        // traverse the hash table to write each word it contains to the pipe
         for(HashNode node = hashGetFirst(table, i); node != NULL; node = hashGetNext(table, i, node, compare)){
        
-            char word[strlen(hashGetKey(node))]; //δεσμευση χωρου για τη λεξη
+            char word[strlen(hashGetKey(node))]; // allocate space for the word
             strcpy(word, hashGetKey(node));
 
-            char count[10];  //δεσμευση χωρου για το count
-            snprintf(count, sizeof(count), "%d", *(int*)(hashGetValue(node))); //μετατροπη σε string κ αποθηκευση στη μεταβητη count
+            char count[10];  // allocate space for the count
+            snprintf(count, sizeof(count), "%d", *(int*)(hashGetValue(node))); // convert to string and store in count variable
                     
             int size = strlen(word) + 1 + strlen(count) + 1 + 1;
             char buffer[size];
@@ -167,7 +167,7 @@ void builderSendToRoot(HashTable table, CompareFunc compare, int fd_root_write){
             buffer[size - 1] = '\0';
 
             int bytes_written = 0;
-            //ενα write της μορφης word:count-word:count-word:count ....
+            // write in the form word:count-word:count-word:count ....
             bytes_written = write(fd_root_write, buffer, sizeof(buffer));
             if(bytes_written == -1){
                  perror("Write from builder to root failed");
